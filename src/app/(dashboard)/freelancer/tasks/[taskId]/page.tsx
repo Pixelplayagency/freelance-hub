@@ -1,0 +1,97 @@
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { redirect, notFound } from 'next/navigation'
+import { TaskReferences } from '@/components/tasks/TaskReferences'
+import { FreelancerStatusUpdate } from '@/components/tasks/FreelancerStatusUpdate'
+import { Calendar, ChevronLeft, FolderKanban } from 'lucide-react'
+import Link from 'next/link'
+import { formatDate, dueDateLabel } from '@/lib/utils/date'
+import { cn } from '@/lib/utils/cn'
+import type { TaskReference, TaskStatus } from '@/lib/types/app.types'
+
+export default async function FreelancerTaskDetailPage({
+  params,
+}: {
+  params: Promise<{ taskId: string }>
+}) {
+  const { taskId } = await params
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const [{ data: task }, { data: references }] = await Promise.all([
+    supabase
+      .from('tasks')
+      .select('*, project:projects(id, name, color)')
+      .eq('id', taskId)
+      .eq('assigned_to', user.id) // RLS + explicit filter
+      .single(),
+    supabase
+      .from('task_references')
+      .select('*')
+      .eq('task_id', taskId)
+      .order('created_at'),
+  ])
+
+  if (!task) notFound()
+
+  const project = task.project as { id: string; name: string; color: string } | null
+  const dateInfo = dueDateLabel(task.due_date)
+
+  return (
+    <div className="max-w-2xl">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+        <Link href="/freelancer/tasks" className="hover:text-gray-900 flex items-center gap-1">
+          <ChevronLeft className="w-4 h-4" />
+          My Tasks
+        </Link>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            {project && (
+              <div className="flex items-center gap-1.5 mb-2">
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: project.color }} />
+                <span className="text-xs text-gray-500 font-medium">{project.name}</span>
+              </div>
+            )}
+            <h1 className="text-xl font-semibold text-gray-900">{task.title}</h1>
+          </div>
+          {/* Freelancer can update status */}
+          <FreelancerStatusUpdate
+            taskId={taskId}
+            currentStatus={task.status as TaskStatus}
+          />
+        </div>
+
+        {/* Description */}
+        {task.description && (
+          <p className="text-sm text-gray-600 leading-relaxed">{task.description}</p>
+        )}
+
+        {/* Due date */}
+        {task.due_date && (
+          <div className={cn('flex items-center gap-2 text-sm', dateInfo.className)}>
+            <Calendar className="w-4 h-4" />
+            {dateInfo.label}
+          </div>
+        )}
+
+        <hr className="border-gray-100" />
+
+        {/* References */}
+        <div>
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">References & Notes</h2>
+          <TaskReferences
+            taskId={taskId}
+            references={(references ?? []) as TaskReference[]}
+            isAdmin={false}
+            canEdit={true}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}

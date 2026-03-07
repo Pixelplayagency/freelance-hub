@@ -1,0 +1,75 @@
+import { LoginForm } from '@/components/auth/LoginForm'
+import Link from 'next/link'
+import { CheckCircle2 } from 'lucide-react'
+
+const FEATURES = [
+  'Real-time kanban boards for seamless project tracking',
+  'Instant notifications and task assignment alerts',
+  'Manage your entire freelance team in one place',
+]
+
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen flex">
+      {/* Left panel — dark */}
+      <div className="hidden lg:flex lg:w-2/5 flex-col justify-between p-12" style={{ backgroundColor: '#0F172A' }}>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-indigo-500 flex items-center justify-center shrink-0">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <span className="font-semibold text-white text-sm tracking-tight">FreelanceHub</span>
+        </div>
+
+        <div>
+          <h2 className="text-3xl font-bold text-white leading-snug mb-3">
+            Manage your freelance<br />team with clarity
+          </h2>
+          <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+            The modern project manager built for agencies and freelance teams.
+          </p>
+          <ul className="space-y-3">
+            {FEATURES.map(f => (
+              <li key={f} className="flex items-start gap-3">
+                <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                <span className="text-sm text-slate-300">{f}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="text-xs text-slate-600">&copy; {new Date().getFullYear()} FreelanceHub</p>
+      </div>
+
+      {/* Right panel — white form */}
+      <div className="flex-1 flex items-center justify-center bg-white px-8 py-12">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="flex items-center gap-2.5 mb-8 lg:hidden">
+            <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <span className="font-semibold text-slate-900 text-sm">FreelanceHub</span>
+          </div>
+
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h1>
+          <p className="text-sm text-slate-500 mb-8">Sign in to your account</p>
+
+          <LoginForm />
+
+          <p className="text-center text-sm text-slate-500 mt-6">
+            No account?{' '}
+            <Link href="/signup" className="text-indigo-600 hover:text-indigo-700 font-semibold">
+              Sign up
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
