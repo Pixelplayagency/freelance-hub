@@ -2,12 +2,17 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  try {
+    let supabaseResponse = NextResponse.next({ request })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.next({ request })
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll()
@@ -22,26 +27,28 @@ export async function middleware(request: NextRequest) {
           )
         },
       },
+    })
+
+    // Refresh session — MUST use getUser() not getSession() for security
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const path = request.nextUrl.pathname
+
+    // Redirect unauthenticated users away from protected routes (including root)
+    if (!user && (path === '/' || path.startsWith('/admin') || path.startsWith('/freelancer'))) {
+      return NextResponse.redirect(new URL('/login', request.url))
     }
-  )
 
-  // Refresh session — MUST use getUser() not getSession() for security
-  const { data: { user } } = await supabase.auth.getUser()
+    // Redirect authenticated users away from auth pages
+    if (user && (path === '/login' || path === '/signup' || path === '/')) {
+      // Role-based redirect handled in the dashboard layout
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
 
-  const path = request.nextUrl.pathname
-
-  // Redirect unauthenticated users away from protected routes (including root)
-  if (!user && (path === '/' || path.startsWith('/admin') || path.startsWith('/freelancer'))) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    return supabaseResponse
+  } catch {
+    return NextResponse.next({ request })
   }
-
-  // Redirect authenticated users away from auth pages
-  if (user && (path === '/login' || path === '/signup' || path === '/')) {
-    // Role-based redirect handled in the dashboard layout
-    return NextResponse.redirect(new URL('/admin', request.url))
-  }
-
-  return supabaseResponse
 }
 
 export const config = {
