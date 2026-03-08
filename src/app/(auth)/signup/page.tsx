@@ -3,9 +3,9 @@ import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
 
 const FEATURES = [
-  'Real-time kanban boards for seamless project tracking',
-  'Instant notifications and task assignment alerts',
-  'Manage your entire freelance team in one place',
+  'Track projects easily with real-time Kanban boards',
+  'Get instant notifications for task updates and assignments',
+  'Stay aligned with the team and manage timelines in one place',
 ]
 
 export default function SignupPage() {
@@ -20,15 +20,15 @@ export default function SignupPage() {
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
           </div>
-          <span className="font-semibold text-white text-sm tracking-tight">FreelanceHub</span>
+          <span className="font-semibold text-white text-sm tracking-tight">PixelFlow</span>
         </div>
 
         <div>
           <h2 className="text-3xl font-bold text-white leading-snug mb-3">
-            Start managing projects<br />the modern way
+            Manage your work<br />with clarity
           </h2>
           <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-            Join freelance teams who use FreelanceHub to stay on top of their work.
+            PixelFlow is our internal workspace for managing projects, tasks, and deadlines across the Pixelplay team.
           </p>
           <ul className="space-y-3">
             {FEATURES.map(f => (
@@ -40,7 +40,7 @@ export default function SignupPage() {
           </ul>
         </div>
 
-        <p className="text-xs text-slate-600">&copy; {new Date().getFullYear()} FreelanceHub</p>
+        <p className="text-xs text-slate-600">&copy;PixelPlay Agency 2026</p>
       </div>
 
       {/* Right panel — white form */}
@@ -54,11 +54,11 @@ export default function SignupPage() {
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <span className="font-semibold text-slate-900 text-sm">FreelanceHub</span>
+            <span className="font-semibold text-slate-900 text-sm">PixelFlow</span>
           </div>
 
           <h1 className="text-2xl font-bold text-slate-900 mb-1">Create account</h1>
-          <p className="text-sm text-slate-500 mb-8">Join FreelanceHub today</p>
+          <p className="text-sm text-slate-500 mb-8">Join PixelFlow today</p>
 
           <SignupForm />
 

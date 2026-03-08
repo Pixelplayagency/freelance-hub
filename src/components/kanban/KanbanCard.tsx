@@ -4,7 +4,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Calendar, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
-import { dueDateLabel, formatDateShort } from '@/lib/utils/date'
+import { dueDateLabel, formatDateTimeShort } from '@/lib/utils/date'
 import { deleteTask } from '@/lib/actions/task.actions'
 import { useKanbanStore } from './useKanbanStore'
 import type { Task } from '@/lib/types/app.types'
@@ -108,7 +108,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
           {task.due_date && (
             <div className={cn('flex items-center gap-1 text-[11px] font-medium', dateInfo.className)}>
               <Calendar className="w-3 h-3" />
-              {formatDateShort(task.due_date)}
+              {formatDateTimeShort(task.due_date)}
             </div>
           )}
         </div>

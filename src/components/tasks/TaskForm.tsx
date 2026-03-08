@@ -18,6 +18,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { ExternalLink, ImagePlus, Link2, Loader2, Plus, Trash2, X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { DeadlinePicker } from './DeadlinePicker'
 import type { Profile, Task } from '@/lib/types/app.types'
 
 interface TaskFormProps {
@@ -36,7 +37,16 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
   const [assignedTo, setAssignedTo] = useState<string>(task?.assigned_to ?? '__none__')
-  const [dueDate, setDueDate] = useState(task?.due_date ?? '')
+  // Split stored timestamp into date + time for inputs
+  const [dueDate, setDueDate] = useState(() => {
+    if (!task?.due_date) return ''
+    return task.due_date.slice(0, 10) // YYYY-MM-DD
+  })
+  const [dueTime, setDueTime] = useState(() => {
+    if (!task?.due_date) return ''
+    const t = task.due_date.slice(11, 16) // HH:MM
+    return t === '00:00' ? '' : t
+  })
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -78,21 +88,29 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
     setLoading(true)
     try {
       if (task) {
+        const deadlineValue = dueDate
+          ? dueTime ? `${dueDate}T${dueTime}:00` : `${dueDate}T00:00:00`
+          : null
+
         await updateTask(task.id, {
           title,
           description: description || undefined,
           assigned_to: assignedTo === '__none__' ? null : assignedTo,
-          due_date: dueDate || null,
+          due_date: deadlineValue,
         })
         toast.success('Task updated')
         onSuccess?.()
       } else {
+        const deadlineValue = dueDate
+          ? dueTime ? `${dueDate}T${dueTime}:00` : `${dueDate}T00:00:00`
+          : null
+
         const newTask = await createTask({
           project_id: projectId,
           title,
           description: description || undefined,
           assigned_to: assignedTo === '__none__' ? null : assignedTo,
-          due_date: dueDate || null,
+          due_date: deadlineValue,
           status: 'todo',
         })
 
@@ -183,14 +201,14 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
         </Select>
       </div>
 
-      {/* Due date */}
+      {/* Deadline */}
       <div className="space-y-1.5">
-        <Label htmlFor="dueDate">Due date</Label>
-        <Input
-          id="dueDate"
-          type="date"
-          value={dueDate}
-          onChange={e => setDueDate(e.target.value)}
+        <Label>Deadline</Label>
+        <DeadlinePicker
+          date={dueDate}
+          time={dueTime}
+          onDateChange={setDueDate}
+          onTimeChange={setDueTime}
         />
       </div>
 

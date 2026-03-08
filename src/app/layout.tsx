@@ -19,7 +19,7 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'FreelanceHub — Task Management',
+  title: 'PixelFlow — Task Management',
   description: 'Manage freelancer projects and tasks with clarity and speed.',
 }
 
