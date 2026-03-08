@@ -70,16 +70,25 @@ export async function setTaskStatus(taskId: string, status: TaskStatus) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
-  const { data, error } = await supabase
+  // Separate update from select — prevents RLS SELECT policy from blocking the operation
+  const { error: updateError } = await supabase
     .from('tasks')
     .update({ status })
     .eq('id', taskId)
+
+  if (updateError) throw new Error(updateError.message)
+
+  // Fetch project_id separately (graceful if RLS restricts the read)
+  const { data: taskData } = await supabase
+    .from('tasks')
     .select('project_id')
+    .eq('id', taskId)
     .single()
 
-  if (error) throw new Error(error.message)
-
-  revalidatePath(`/admin/projects/${data.project_id}`)
+  if (taskData?.project_id) {
+    revalidatePath(`/admin/projects/${taskData.project_id}`)
+    revalidatePath(`/admin/projects/${taskData.project_id}/tasks/${taskId}`)
+  }
   revalidatePath(`/freelancer/tasks/${taskId}`)
 }
 

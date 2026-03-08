@@ -51,14 +51,17 @@ export async function saveTaskReference(
 
   if (error) throw new Error(error.message)
 
-  // Get project_id for revalidation
+  // Revalidate — gracefully skip if task lookup fails (e.g. RLS)
   const { data: task } = await supabase
     .from('tasks')
     .select('project_id')
     .eq('id', taskId)
     .single()
 
-  if (task) revalidatePath(`/admin/projects/${task.project_id}`)
+  if (task?.project_id) {
+    revalidatePath(`/admin/projects/${task.project_id}`)
+    revalidatePath(`/admin/projects/${task.project_id}/tasks/${taskId}`)
+  }
 
   return data
 }
