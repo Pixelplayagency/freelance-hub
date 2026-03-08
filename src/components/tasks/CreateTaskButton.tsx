@@ -30,7 +30,7 @@ export function CreateTaskButton({ projectId, freelancers }: CreateTaskButtonPro
           Add task
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>New task</DialogTitle>
         </DialogHeader>
