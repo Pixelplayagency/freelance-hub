@@ -163,7 +163,11 @@ export default async function TaskDetailPage({
 
         {/* Review actions — only shown when freelancer has submitted */}
         {task.status === 'review' && (
-          <AdminReviewActions taskId={taskId} />
+          <AdminReviewActions
+            taskId={taskId}
+            assigneeName={assignee?.full_name ?? assignee?.email ?? null}
+            submittedRefs={(references ?? []).filter(r => r.title?.startsWith('[Final]')) as import('@/lib/types/app.types').TaskReference[]}
+          />
         )}
 
         {/* Separator */}

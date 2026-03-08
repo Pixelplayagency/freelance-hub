@@ -45,7 +45,7 @@ export function FreelancerStatusUpdate({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {TASK_STATUSES.map(s => (
+        {TASK_STATUSES.filter(s => s.id !== 'completed').map(s => (
           <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
         ))}
       </SelectContent>
