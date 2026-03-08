@@ -141,12 +141,14 @@ export default async function FreelancerTaskDetailPage({
 
         {/* References */}
         <div>
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">References & Notes</h2>
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">References & Chat</h2>
           <TaskReferences
             taskId={taskId}
             references={(references ?? []) as TaskReference[]}
             isAdmin={false}
             canEdit={true}
+            currentUserId={user.id}
+            otherPartyName="Admin"
           />
         </div>
       </div>

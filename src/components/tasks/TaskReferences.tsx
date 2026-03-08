@@ -4,8 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ImageUpload } from './ImageUpload'
 import { LinksList } from './LinksList'
 import { VideoReferenceAdd } from './VideoReferenceAdd'
-import { ConceptNoteEditor } from './ConceptNoteEditor'
-import { Image, Link2, Video, FileText } from 'lucide-react'
+import { TaskChat } from './TaskChat'
+import { Image, Link2, Video, MessageCircle } from 'lucide-react'
 import type { TaskReference } from '@/lib/types/app.types'
 
 interface TaskReferencesProps {
@@ -13,16 +13,25 @@ interface TaskReferencesProps {
   references: TaskReference[]
   isAdmin: boolean
   canEdit: boolean
+  currentUserId: string
+  otherPartyName?: string | null
 }
 
-export function TaskReferences({ taskId, references, isAdmin, canEdit }: TaskReferencesProps) {
+export function TaskReferences({
+  taskId,
+  references,
+  isAdmin,
+  canEdit,
+  currentUserId,
+  otherPartyName,
+}: TaskReferencesProps) {
   const images = references.filter(r => r.type === 'image')
-  const links = references.filter(r => r.type === 'link')
+  const links  = references.filter(r => r.type === 'link')
   const videos = references.filter(r => r.type === 'video')
-  const notes = references.filter(r => r.type === 'note')
+  const notes  = references.filter(r => r.type === 'note')
 
   return (
-    <Tabs defaultValue="notes" className="w-full">
+    <Tabs defaultValue="chat" className="w-full">
       <TabsList className="grid w-full grid-cols-4 h-9">
         <TabsTrigger value="images" className="text-xs gap-1.5">
           <Image className="w-3.5 h-3.5" />
@@ -36,9 +45,9 @@ export function TaskReferences({ taskId, references, isAdmin, canEdit }: TaskRef
           <Video className="w-3.5 h-3.5" />
           Video {videos.length > 0 && <span className="text-[10px] opacity-60">({videos.length})</span>}
         </TabsTrigger>
-        <TabsTrigger value="notes" className="text-xs gap-1.5">
-          <FileText className="w-3.5 h-3.5" />
-          Notes {notes.length > 0 && <span className="text-[10px] opacity-60">({notes.length})</span>}
+        <TabsTrigger value="chat" className="text-xs gap-1.5">
+          <MessageCircle className="w-3.5 h-3.5" />
+          Chat {notes.length > 0 && <span className="text-[10px] opacity-60">({notes.length})</span>}
         </TabsTrigger>
       </TabsList>
 
@@ -54,11 +63,12 @@ export function TaskReferences({ taskId, references, isAdmin, canEdit }: TaskRef
         <VideoReferenceAdd taskId={taskId} references={videos} isAdmin={isAdmin} />
       </TabsContent>
 
-      <TabsContent value="notes" className="mt-4">
-        <ConceptNoteEditor
+      <TabsContent value="chat" className="mt-4">
+        <TaskChat
           taskId={taskId}
-          references={notes}
-          isAdmin={isAdmin}
+          messages={notes}
+          currentUserId={currentUserId}
+          otherPartyName={otherPartyName}
           canEdit={canEdit}
         />
       </TabsContent>

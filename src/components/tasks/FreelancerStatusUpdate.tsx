@@ -39,14 +39,18 @@ export function FreelancerStatusUpdate({
     }
   }
 
+  const isCompleted = status === 'completed'
+
   return (
-    <Select value={status} onValueChange={handleChange} disabled={loading}>
+    <Select value={status} onValueChange={handleChange} disabled={loading || isCompleted}>
       <SelectTrigger className="w-40 h-8 text-sm">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {TASK_STATUSES.filter(s => s.id !== 'completed').map(s => (
-          <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
+        {TASK_STATUSES.filter(s => s.id !== 'completed' || isCompleted).map(s => (
+          <SelectItem key={s.id} value={s.id} disabled={s.id === 'completed'}>
+            {s.label}
+          </SelectItem>
         ))}
       </SelectContent>
     </Select>

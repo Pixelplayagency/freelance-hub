@@ -175,12 +175,14 @@ export default async function TaskDetailPage({
 
         {/* References */}
         <div>
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">References & Notes</h2>
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">References & Chat</h2>
           <TaskReferences
             taskId={taskId}
             references={(references ?? []) as TaskReference[]}
             isAdmin={true}
             canEdit={true}
+            currentUserId={user.id}
+            otherPartyName={assignee?.full_name ?? assignee?.email ?? null}
           />
         </div>
       </div>
