@@ -101,7 +101,7 @@ export function TaskChat({
                   'max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm',
                   isOwn
                     ? 'rounded-br-sm text-white'
-                    : 'rounded-bl-sm bg-gray-100 text-gray-800'
+                    : 'rounded-bl-sm bg-gray-900 text-white'
                 )}
                 style={isOwn ? { backgroundColor: '#f24a49' } : undefined}
               >
