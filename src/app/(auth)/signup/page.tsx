@@ -25,10 +25,10 @@ export default function SignupPage() {
 
         <div>
           <h2 className="text-3xl font-bold text-white leading-snug mb-3">
-            Manage your work<br />with clarity
+            Manage your work with clarity
           </h2>
           <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-            PixelFlow is our internal workspace for managing projects, tasks, and deadlines across the Pixelplay team.
+            PixelFlow is our internal workspace for managing projects, tasks, and deadlines<br />across the Pixelplay team.
           </p>
           <ul className="space-y-3">
             {FEATURES.map(f => (

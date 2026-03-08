@@ -5,9 +5,9 @@ import { TaskReferences } from '@/components/tasks/TaskReferences'
 import { EditTaskButton } from '@/components/tasks/EditTaskButton'
 import { DeleteTaskButton } from '@/components/tasks/DeleteTaskButton'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { ChevronLeft, Calendar, User } from 'lucide-react'
+import { ChevronLeft, Calendar, Clock, User } from 'lucide-react'
 import Link from 'next/link'
-import { formatDate, dueDateLabel } from '@/lib/utils/date'
+import { format, parseISO, isPast, isToday, isTomorrow } from 'date-fns'
 import { cn } from '@/lib/utils/cn'
 import type { Task, TaskReference, Profile } from '@/lib/types/app.types'
 
@@ -40,8 +40,22 @@ export default async function TaskDetailPage({
 
   if (!task) notFound()
 
-  const dateInfo = dueDateLabel(task.due_date)
   const assignee = task.assignee as Profile | null
+
+  // Parse deadline into date + time parts
+  const deadlineParsed = task.due_date ? parseISO(task.due_date) : null
+  const deadlineDate = deadlineParsed ? format(deadlineParsed, 'EEE, MMM d yyyy') : null
+  const deadlineTime = deadlineParsed
+    ? (deadlineParsed.getHours() !== 0 || deadlineParsed.getMinutes() !== 0
+        ? format(deadlineParsed, 'h:mm a')
+        : null)
+    : null
+  const deadlineStatus = deadlineParsed
+    ? isToday(deadlineParsed) ? 'today'
+      : isTomorrow(deadlineParsed) ? 'tomorrow'
+      : isPast(deadlineParsed) ? 'overdue'
+      : 'upcoming'
+    : null
 
   return (
     <div className="max-w-2xl">
@@ -79,28 +93,71 @@ export default async function TaskDetailPage({
         )}
 
         {/* Meta */}
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-gray-400" />
+        <div className="flex flex-wrap gap-3">
+          {/* Assignee */}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-sm">
+            <User className="w-3.5 h-3.5 text-gray-400" />
             {assignee ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Avatar className="h-5 w-5">
                   <AvatarFallback className="text-[10px]" style={{ backgroundColor: '#fff3f3', color: '#f24a49' }}>
                     {assignee.full_name?.[0]?.toUpperCase() ?? assignee.email[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-gray-700">{assignee.full_name ?? assignee.email}</span>
+                <span className="text-gray-700 font-medium">{assignee.full_name ?? assignee.email}</span>
               </div>
             ) : (
               <span className="text-gray-400">Unassigned</span>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <span className={cn(dateInfo.className)}>
-              {task.due_date ? dateInfo.label : 'No due date'}
-            </span>
-          </div>
+
+          {/* Deadline */}
+          {deadlineParsed ? (
+            <div className={cn(
+              'flex items-center gap-3 px-3 py-2 rounded-lg border text-sm',
+              deadlineStatus === 'overdue' ? 'bg-red-50 border-red-100' :
+              deadlineStatus === 'today' ? 'bg-amber-50 border-amber-100' :
+              deadlineStatus === 'tomorrow' ? 'bg-amber-50/50 border-amber-100/60' :
+              'bg-gray-50 border-gray-100'
+            )}>
+              <div className="flex items-center gap-1.5">
+                <Calendar className={cn('w-3.5 h-3.5',
+                  deadlineStatus === 'overdue' ? 'text-red-500' :
+                  deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-500' :
+                  'text-gray-400'
+                )} />
+                <span className={cn('font-medium',
+                  deadlineStatus === 'overdue' ? 'text-red-600' :
+                  deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-600' :
+                  'text-gray-700'
+                )}>
+                  {deadlineStatus === 'overdue' && 'Overdue · '}
+                  {deadlineStatus === 'today' && 'Due today · '}
+                  {deadlineStatus === 'tomorrow' && 'Due tomorrow · '}
+                  {deadlineDate}
+                </span>
+              </div>
+              {deadlineTime && (
+                <div className="flex items-center gap-1 pl-2 border-l border-current/20">
+                  <Clock className={cn('w-3.5 h-3.5',
+                    deadlineStatus === 'overdue' ? 'text-red-400' :
+                    deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-400' :
+                    'text-gray-400'
+                  )} />
+                  <span className={cn('font-semibold',
+                    deadlineStatus === 'overdue' ? 'text-red-600' :
+                    deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-600' :
+                    'text-gray-700'
+                  )}>{deadlineTime}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-sm text-gray-400">
+              <Calendar className="w-3.5 h-3.5" />
+              No deadline set
+            </div>
+          )}
         </div>
 
         {/* Separator */}
