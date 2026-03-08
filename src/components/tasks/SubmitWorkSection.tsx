@@ -1,7 +1,6 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { CheckCircle2, Link2, Loader2, Send, Upload, X } from 'lucide-react'
 import { getSignedUploadUrl, saveTaskReference } from '@/lib/actions/upload.actions'
 import { setTaskStatus } from '@/lib/actions/task.actions'
@@ -18,12 +17,12 @@ interface SubmitWorkSectionProps {
 }
 
 export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
-  const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const [finalLink, setFinalLink] = useState('')
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
   if (status === 'completed') {
     return (
@@ -37,7 +36,7 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
     )
   }
 
-  if (status === 'review') {
+  if (submitted || status === 'review') {
     return (
       <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-amber-50 border border-amber-100">
         <Loader2 className="w-5 h-5 text-amber-500 shrink-0 animate-spin" />
@@ -105,7 +104,7 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
       // Change status to review
       await setTaskStatus(taskId, 'review')
       toast.success('Submitted for review!')
-      router.refresh()
+      setSubmitted(true)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Submission failed')
       setSubmitting(false)
