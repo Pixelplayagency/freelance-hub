@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   CheckCircle2, ChevronDown, ChevronUp,
-  Download, ExternalLink, FileVideo, Loader2, Paperclip, RotateCcw,
+  Download, ExternalLink, Eye, FileVideo, Loader2, Paperclip, RotateCcw,
 } from 'lucide-react'
 import { setTaskStatus } from '@/lib/actions/task.actions'
 import { getTaskSubmittedFiles } from '@/lib/actions/upload.actions'
@@ -76,9 +76,8 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
     }
   }
 
-  const images = files.filter(f => f.ref.type === 'image')
-  const videos = files.filter(f => f.ref.type === 'video')
-  const links  = files.filter(f => f.ref.type === 'link')
+  const media = files.filter(f => f.ref.type === 'image' || f.ref.type === 'video')
+  const links = files.filter(f => f.ref.type === 'link')
   const displayName = assigneeName ?? 'Freelancer'
 
   return (
@@ -107,7 +106,7 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
           {loadState === 'loading' && <Loader2 className="w-3.5 h-3.5 ml-1 animate-spin" />}
           {loadState === 'loaded' && files.length > 0 && (
             <span className="ml-1 text-xs font-normal opacity-70">
-              ({files.length} {files.length === 1 ? 'file' : 'files'})
+              ({files.length} {files.length === 1 ? 'item' : 'items'})
             </span>
           )}
           {showWork
@@ -125,86 +124,90 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
             </p>
           ) : (
             <div className="p-3 space-y-4">
-              {/* Images */}
-              {images.length > 0 && (
+
+              {/* Media grid — images and videos in one grid */}
+              {media.length > 0 && (
                 <div>
                   <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
-                    Images ({images.length})
+                    Files ({media.length})
                   </p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {images.map(({ ref, signedUrl }) => (
-                      <div
-                        key={ref.id}
-                        className="relative group aspect-video rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
-                      >
-                        {signedUrl ? (
-                          <img
-                            src={signedUrl}
-                            alt={ref.title ?? 'Image'}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400 p-1 text-center">
-                            {ref.title ?? 'Image'}
+                  <div className="grid grid-cols-2 gap-2">
+                    {media.map(({ ref, signedUrl }) => {
+                      const isVideo = ref.type === 'video'
+                      const label = ref.title?.replace('[Final] ', '') ?? (isVideo ? 'Video' : 'Image')
+                      return (
+                        <div
+                          key={ref.id}
+                          className="relative group rounded-lg overflow-hidden border border-gray-200 bg-gray-900"
+                          style={{ aspectRatio: '16/9' }}
+                        >
+                          {isVideo ? (
+                            signedUrl ? (
+                              <video
+                                src={signedUrl}
+                                controls
+                                preload="metadata"
+                                className="w-full h-full object-contain"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center gap-1.5">
+                                <FileVideo className="w-6 h-6 text-gray-500" />
+                                <span className="text-[10px] text-gray-400 px-2 text-center">{label}</span>
+                              </div>
+                            )
+                          ) : (
+                            signedUrl ? (
+                              <img
+                                src={signedUrl}
+                                alt={label}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400 p-2 text-center bg-gray-100">
+                                {label}
+                              </div>
+                            )
+                          )}
+
+                          {/* Type badge */}
+                          <div className="absolute top-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-medium pointer-events-none">
+                            {isVideo ? 'VID' : 'IMG'}
                           </div>
-                        )}
-                        {/* Download overlay */}
-                        {signedUrl && (
-                          <a
-                            href={signedUrl}
-                            download={ref.title?.replace('[Final] ', '') ?? 'image'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={e => e.stopPropagation()}
-                          >
-                            <div className="flex flex-col items-center gap-1">
-                              <Download className="w-5 h-5 text-white" />
-                              <span className="text-[10px] text-white font-medium">Download</span>
+
+                          {/* View + Download buttons — appear on hover */}
+                          {signedUrl && (
+                            <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <a
+                                href={signedUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="View full size"
+                                className="flex items-center justify-center w-7 h-7 rounded bg-black/60 hover:bg-black/80 transition-colors"
+                                onClick={e => e.stopPropagation()}
+                              >
+                                <Eye className="w-3.5 h-3.5 text-white" />
+                              </a>
+                              <a
+                                href={signedUrl}
+                                download={label}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Download"
+                                className="flex items-center justify-center w-7 h-7 rounded bg-black/60 hover:bg-black/80 transition-colors"
+                                onClick={e => e.stopPropagation()}
+                              >
+                                <Download className="w-3.5 h-3.5 text-white" />
+                              </a>
                             </div>
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )}
 
-              {/* Videos */}
-              {videos.length > 0 && (
-                <div>
-                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
-                    Videos ({videos.length})
-                  </p>
-                  <div className="space-y-1.5">
-                    {videos.map(({ ref, signedUrl }) => (
-                      <div
-                        key={ref.id}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-xs text-gray-700"
-                      >
-                        <FileVideo className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                        <span className="truncate flex-1">
-                          {ref.title?.replace('[Final] ', '') ?? 'Video file'}
-                        </span>
-                        {signedUrl && (
-                          <a
-                            href={signedUrl}
-                            download={ref.title?.replace('[Final] ', '') ?? 'video'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="shrink-0 flex items-center gap-1 px-2 py-1 rounded bg-gray-900 text-white hover:bg-gray-700 transition-colors"
-                          >
-                            <Download className="w-3 h-3" />
-                            <span>Download</span>
-                          </a>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Links */}
+              {/* Delivery links */}
               {links.length > 0 && (
                 <div>
                   <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
@@ -227,6 +230,7 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
                   </div>
                 </div>
               )}
+
             </div>
           )}
         </div>

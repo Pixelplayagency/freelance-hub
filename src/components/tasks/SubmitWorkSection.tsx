@@ -7,7 +7,10 @@ import { getSignedUploadUrl, saveTaskReference } from '@/lib/actions/upload.acti
 import { setTaskStatus } from '@/lib/actions/task.actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
+import { compressImage, formatFileSize } from '@/lib/utils/compressImage'
 import type { TaskStatus } from '@/lib/types/app.types'
+
+const MAX_VIDEO_BYTES = 500 * 1024 * 1024 // 500 MB
 
 interface SubmitWorkSectionProps {
   taskId: string
@@ -46,13 +49,27 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
     )
   }
 
-  function handleFileSelect(files: FileList | null) {
+  async function handleFileSelect(files: FileList | null) {
     if (!files) return
-    const valid = Array.from(files).filter(f =>
-      f.type.startsWith('image/') || f.type.startsWith('video/')
-    )
-    if (valid.length < files.length) toast.error('Only images and videos supported')
-    setPendingFiles(prev => [...prev, ...valid])
+    const all = Array.from(files)
+    if (all.some(f => !f.type.startsWith('image/') && !f.type.startsWith('video/'))) {
+      toast.error('Only images and videos supported')
+    }
+    const valid = all.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'))
+
+    const processed: File[] = []
+    for (const f of valid) {
+      if (f.type.startsWith('video/')) {
+        if (f.size > MAX_VIDEO_BYTES) {
+          toast.error(`${f.name} exceeds 500 MB limit`)
+          continue
+        }
+        processed.push(f)
+      } else {
+        processed.push(await compressImage(f))
+      }
+    }
+    setPendingFiles(prev => [...prev, ...processed])
   }
 
   async function handleSubmit() {
@@ -114,6 +131,10 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-500 p-1 text-center leading-tight">{file.name}</div>
                 )}
+                {/* File size badge */}
+                <div className="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1 py-0.5 rounded pointer-events-none">
+                  {formatFileSize(file.size)}
+                </div>
                 <button
                   type="button"
                   onClick={() => setPendingFiles(p => p.filter((_, j) => j !== i))}

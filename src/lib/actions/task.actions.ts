@@ -89,7 +89,6 @@ export async function setTaskStatus(taskId: string, status: TaskStatus) {
     revalidatePath(`/admin/projects/${taskData.project_id}`)
     revalidatePath(`/admin/projects/${taskData.project_id}/tasks/${taskId}`)
   }
-  revalidatePath(`/freelancer/tasks/${taskId}`)
 }
 
 export async function deleteTask(taskId: string, projectId: string) {
