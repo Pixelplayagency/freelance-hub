@@ -65,7 +65,6 @@ export async function saveTaskReference(
 
   revalidatePath(`/admin/projects/${task.project_id}`)
   revalidatePath(`/admin/projects/${task.project_id}/tasks/${taskId}`)
-  revalidatePath(`/freelancer/tasks/${taskId}`)
 
   return data
 }
