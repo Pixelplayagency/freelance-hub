@@ -98,6 +98,35 @@ export async function deleteTaskReference(referenceId: string, taskId: string) {
   if (task) revalidatePath(`/admin/projects/${task.project_id}`)
 }
 
+export async function getTaskSubmittedFiles(taskId: string) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: refs, error } = await supabase
+    .from('task_references')
+    .select('*')
+    .eq('task_id', taskId)
+    .in('type', ['image', 'video', 'link'])
+    .order('created_at')
+
+  if (error) throw new Error(error.message)
+  if (!refs || refs.length === 0) return []
+
+  const result: { ref: typeof refs[number]; signedUrl: string | null }[] = []
+  for (const ref of refs) {
+    let signedUrl: string | null = null
+    if (ref.storage_path) {
+      const { data } = await supabase.storage
+        .from('task-attachments')
+        .createSignedUrl(ref.storage_path, 3600)
+      signedUrl = data?.signedUrl ?? null
+    }
+    result.push({ ref, signedUrl })
+  }
+  return result
+}
+
 export async function getStoragePublicUrl(path: string) {
   const supabase = await createSupabaseServerClient()
   const { data } = await supabase.storage

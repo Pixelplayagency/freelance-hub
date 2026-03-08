@@ -1,50 +1,56 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   CheckCircle2, ChevronDown, ChevronUp,
-  ExternalLink, FileVideo, Loader2, Paperclip, RotateCcw,
+  Download, ExternalLink, FileVideo, Loader2, Paperclip, RotateCcw,
 } from 'lucide-react'
 import { setTaskStatus } from '@/lib/actions/task.actions'
-import { getStoragePublicUrl } from '@/lib/actions/upload.actions'
+import { getTaskSubmittedFiles } from '@/lib/actions/upload.actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
-import type { TaskReference } from '@/lib/types/app.types'
+
+interface SubmittedFile {
+  ref: {
+    id: string
+    type: string
+    storage_path: string | null
+    url: string | null
+    title: string | null
+  }
+  signedUrl: string | null
+}
 
 interface AdminReviewActionsProps {
   taskId: string
   assigneeName?: string | null
-  submittedRefs?: TaskReference[]
 }
 
-export function AdminReviewActions({
-  taskId,
-  assigneeName,
-  submittedRefs = [],
-}: AdminReviewActionsProps) {
+export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<'approve' | 'revision' | null>(null)
   const [showWork, setShowWork] = useState(false)
-  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({})
+  const [loadState, setLoadState] = useState<'idle' | 'loading' | 'loaded'>('idle')
+  const [files, setFiles] = useState<SubmittedFile[]>([])
 
-  // Load signed URLs when panel is opened
-  useEffect(() => {
-    if (!showWork) return
-    const storageRefs = submittedRefs.filter(r => r.storage_path && !signedUrls[r.id])
-    if (storageRefs.length === 0) return
-
-    let cancelled = false
-    ;(async () => {
-      const entries: [string, string][] = []
-      for (const ref of storageRefs) {
-        const url = await getStoragePublicUrl(ref.storage_path!)
-        if (url) entries.push([ref.id, url])
+  async function toggleWork() {
+    if (!showWork && loadState === 'idle') {
+      setShowWork(true)
+      setLoadState('loading')
+      try {
+        const result = await getTaskSubmittedFiles(taskId)
+        setFiles(result as SubmittedFile[])
+        setLoadState('loaded')
+      } catch {
+        toast.error('Failed to load submitted files')
+        setLoadState('idle')
+        setShowWork(false)
       }
-      if (!cancelled) setSignedUrls(prev => ({ ...prev, ...Object.fromEntries(entries) }))
-    })()
-    return () => { cancelled = true }
-  }, [showWork, submittedRefs])
+    } else {
+      setShowWork(v => !v)
+    }
+  }
 
   async function handleApprove() {
     setLoading('approve')
@@ -70,10 +76,9 @@ export function AdminReviewActions({
     }
   }
 
-  const images = submittedRefs.filter(r => r.type === 'image')
-  const videos = submittedRefs.filter(r => r.type === 'video')
-  const links  = submittedRefs.filter(r => r.type === 'link')
-  const totalCount = submittedRefs.length
+  const images = files.filter(f => f.ref.type === 'image')
+  const videos = files.filter(f => f.ref.type === 'video')
+  const links  = files.filter(f => f.ref.type === 'link')
   const displayName = assigneeName ?? 'Freelancer'
 
   return (
@@ -89,7 +94,7 @@ export function AdminReviewActions({
       <div className="px-4 pt-3 pb-0">
         <button
           type="button"
-          onClick={() => setShowWork(v => !v)}
+          onClick={toggleWork}
           className={cn(
             'w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors',
             showWork
@@ -98,14 +103,13 @@ export function AdminReviewActions({
           )}
         >
           <Paperclip className="w-4 h-4 shrink-0" />
-          <span>
-            View submitted work
-            {totalCount > 0 && (
-              <span className="ml-1.5 text-xs font-normal opacity-70">
-                ({totalCount} {totalCount === 1 ? 'file' : 'files'})
-              </span>
-            )}
-          </span>
+          <span>View submitted work</span>
+          {loadState === 'loading' && <Loader2 className="w-3.5 h-3.5 ml-1 animate-spin" />}
+          {loadState === 'loaded' && files.length > 0 && (
+            <span className="ml-1 text-xs font-normal opacity-70">
+              ({files.length} {files.length === 1 ? 'file' : 'files'})
+            </span>
+          )}
           {showWork
             ? <ChevronUp className="w-4 h-4 ml-auto" />
             : <ChevronDown className="w-4 h-4 ml-auto" />}
@@ -113,14 +117,14 @@ export function AdminReviewActions({
       </div>
 
       {/* Submitted work panel */}
-      {showWork && (
-        <div className="mx-4 mt-2 mb-0 rounded-lg border border-amber-200 bg-white/80 overflow-hidden">
-          {totalCount === 0 ? (
+      {showWork && loadState === 'loaded' && (
+        <div className="mx-4 mt-2 rounded-lg border border-amber-200 bg-white/80 overflow-hidden">
+          {files.length === 0 ? (
             <p className="text-xs text-gray-400 text-center py-5">
               No files or links were submitted yet.
             </p>
           ) : (
-            <div className="p-3 space-y-3">
+            <div className="p-3 space-y-4">
               {/* Images */}
               {images.length > 0 && (
                 <div>
@@ -128,29 +132,39 @@ export function AdminReviewActions({
                     Images ({images.length})
                   </p>
                   <div className="grid grid-cols-3 gap-2">
-                    {images.map(ref => (
-                      <a
+                    {images.map(({ ref, signedUrl }) => (
+                      <div
                         key={ref.id}
-                        href={signedUrls[ref.id] ?? '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="relative group aspect-video rounded-lg overflow-hidden bg-amber-50 border border-amber-200 block"
+                        className="relative group aspect-video rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
                       >
-                        {signedUrls[ref.id] ? (
+                        {signedUrl ? (
                           <img
-                            src={signedUrls[ref.id]}
+                            src={signedUrl}
                             alt={ref.title ?? 'Image'}
-                            className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
+                            className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400 p-1 text-center">
+                            {ref.title ?? 'Image'}
                           </div>
                         )}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/20 transition-opacity">
-                          <ExternalLink className="w-4 h-4 text-white" />
-                        </div>
-                      </a>
+                        {/* Download overlay */}
+                        {signedUrl && (
+                          <a
+                            href={signedUrl}
+                            download={ref.title?.replace('[Final] ', '') ?? 'image'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <div className="flex flex-col items-center gap-1">
+                              <Download className="w-5 h-5 text-white" />
+                              <span className="text-[10px] text-white font-medium">Download</span>
+                            </div>
+                          </a>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -163,7 +177,7 @@ export function AdminReviewActions({
                     Videos ({videos.length})
                   </p>
                   <div className="space-y-1.5">
-                    {videos.map(ref => (
+                    {videos.map(({ ref, signedUrl }) => (
                       <div
                         key={ref.id}
                         className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-xs text-gray-700"
@@ -172,14 +186,16 @@ export function AdminReviewActions({
                         <span className="truncate flex-1">
                           {ref.title?.replace('[Final] ', '') ?? 'Video file'}
                         </span>
-                        {signedUrls[ref.id] && (
+                        {signedUrl && (
                           <a
-                            href={signedUrls[ref.id]}
+                            href={signedUrl}
+                            download={ref.title?.replace('[Final] ', '') ?? 'video'}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="shrink-0 text-gray-400 hover:text-gray-700"
+                            className="shrink-0 flex items-center gap-1 px-2 py-1 rounded bg-gray-900 text-white hover:bg-gray-700 transition-colors"
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <Download className="w-3 h-3" />
+                            <span>Download</span>
                           </a>
                         )}
                       </div>
@@ -192,19 +208,20 @@ export function AdminReviewActions({
               {links.length > 0 && (
                 <div>
                   <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
-                    Links ({links.length})
+                    Delivery Links ({links.length})
                   </p>
                   <div className="space-y-1.5">
-                    {links.map(ref => (
+                    {links.map(({ ref }) => (
                       <a
                         key={ref.id}
                         href={ref.url ?? '#'}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-xs text-blue-600 hover:bg-gray-100 transition-colors group"
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-xs text-blue-600 hover:bg-blue-50 hover:border-blue-100 transition-colors group"
                       >
                         <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate group-hover:underline">{ref.url}</span>
+                        <span className="truncate flex-1 group-hover:underline">{ref.url}</span>
+                        <span className="shrink-0 text-gray-400">Open →</span>
                       </a>
                     ))}
                   </div>
