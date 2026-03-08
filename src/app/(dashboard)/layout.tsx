@@ -28,7 +28,7 @@ export default async function DashboardLayout({
 
   return (
     <UserProvider user={profile as Profile}>
-      <div className="flex h-screen overflow-hidden bg-slate-100">
+      <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
         {/* Desktop sidebar */}
         <div className="hidden lg:flex">
           <Sidebar role={profile.role as 'admin' | 'freelancer'} userName={profile.full_name} />

@@ -10,7 +10,7 @@ import { createProject } from '@/lib/actions/project.actions'
 import { toast } from 'sonner'
 
 const COLOR_OPTIONS = [
-  '#6366f1', // indigo
+  '#f24a49', // primary red
   '#8b5cf6', // violet
   '#ec4899', // pink
   '#f59e0b', // amber
@@ -24,7 +24,7 @@ export function ProjectForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [color, setColor] = useState('#6366f1')
+  const [color, setColor] = useState('#f24a49')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -84,7 +84,7 @@ export function ProjectForm({ onSuccess }: { onSuccess?: () => void }) {
         </div>
       </div>
 
-      <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
+      <Button type="submit" className="w-full" style={{ backgroundColor: '#f24a49' }} disabled={loading}>
         {loading ? 'Creating…' : 'Create project'}
       </Button>
     </form>

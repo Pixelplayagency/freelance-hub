@@ -9,7 +9,7 @@ import { Bell, CheckCheck, ClipboardList, Pencil, Clock } from 'lucide-react'
 import type { Notification } from '@/lib/types/app.types'
 
 const TYPE_META: Record<Notification['type'], { icon: React.ElementType; bg: string; color: string }> = {
-  task_assigned: { icon: ClipboardList, bg: 'bg-indigo-100', color: 'text-indigo-600' },
+  task_assigned: { icon: ClipboardList, bg: 'bg-[#fff3f3]', color: 'text-[#f24a49]' },
   task_updated: { icon: Pencil, bg: 'bg-blue-100', color: 'text-blue-600' },
   task_due_soon: { icon: Clock, bg: 'bg-amber-100', color: 'text-amber-600' },
 }
@@ -51,7 +51,7 @@ export function NotificationList({
       )}
 
       {localNotifs.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200/70 shadow-sm flex flex-col items-center justify-center py-20 text-center">
+        <div className="bg-white rounded-lg border border-[#EBEBEB] flex flex-col items-center justify-center py-20 text-center">
           <Bell className="w-10 h-10 text-slate-200 mb-3" />
           <p className="text-sm font-medium text-slate-500">No notifications yet</p>
           <p className="text-xs text-slate-400 mt-1">You&apos;re all caught up</p>
@@ -69,7 +69,7 @@ export function NotificationList({
                   'flex items-start gap-3.5 p-4 rounded-xl border shadow-sm transition-all',
                   notif.read
                     ? 'bg-white border-slate-200/70 opacity-60'
-                    : 'bg-indigo-50/40 border-indigo-100 cursor-pointer hover:border-indigo-200 hover:bg-indigo-50/60 hover:shadow-md'
+                    : 'bg-[#fff3f3]/40 border-[#fdd] cursor-pointer hover:border-[#fcc] hover:bg-[#fff3f3]/60 hover:shadow-sm'
                 )}
               >
                 <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', meta.bg)}>
@@ -87,7 +87,7 @@ export function NotificationList({
                   <p className="text-xs text-slate-400 mt-1">{formatRelative(notif.created_at)}</p>
                 </div>
                 {!notif.read && (
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 shrink-0 mt-1.5" />
+                  <div className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: '#f24a49' }} />
                 )}
               </div>
             )

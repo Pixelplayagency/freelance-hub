@@ -51,10 +51,10 @@ export function Sidebar({ role, userName }: { role: UserRole; userName: string |
     : '?'
 
   return (
-    <aside className="flex flex-col h-full w-60 shrink-0" style={{ backgroundColor: '#0F172A' }}>
+    <aside className="flex flex-col h-full w-60 shrink-0" style={{ backgroundColor: '#1C1C1E' }}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-white/8">
-        <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center shrink-0">
+      <div className="flex items-center gap-3 px-5 py-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: '#f24a49' }}>
           <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -65,7 +65,7 @@ export function Sidebar({ role, userName }: { role: UserRole; userName: string |
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 px-3 mb-2">
+        <p className="text-[10px] font-semibold uppercase tracking-widest px-3 mb-2" style={{ color: 'rgba(255,255,255,0.28)' }}>
           {role === 'admin' ? 'Management' : 'Workspace'}
         </p>
         {nav.map(item => {
@@ -78,10 +78,12 @@ export function Sidebar({ role, userName }: { role: UserRole; userName: string |
               href={item.href}
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150',
-                active
-                  ? 'bg-indigo-500 text-white font-medium shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-white/8'
+                active ? 'text-white font-medium' : 'hover:text-white'
               )}
+              style={active
+                ? { backgroundColor: '#f24a49' }
+                : { color: 'rgba(255,255,255,0.48)' }
+              }
             >
               <Icon className="w-4 h-4 shrink-0" />
               {item.label}
@@ -91,19 +93,20 @@ export function Sidebar({ role, userName }: { role: UserRole; userName: string |
       </nav>
 
       {/* User */}
-      <div className="border-t border-white/8 px-3 py-4">
+      <div className="border-t px-3 py-4" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
         <div className="flex items-center gap-3 px-2 py-2 rounded-lg">
-          <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-semibold text-white shrink-0">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0" style={{ backgroundColor: '#f24a49' }}>
             {initials}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">{userName ?? 'User'}</p>
-            <p className="text-xs text-slate-500 capitalize">{role}</p>
+            <p className="text-xs capitalize" style={{ color: 'rgba(255,255,255,0.32)' }}>{role}</p>
           </div>
           <button
             onClick={handleSignOut}
             title="Sign out"
-            className="text-slate-500 hover:text-white transition-colors p-1 rounded"
+            className="hover:text-white transition-colors p-1 rounded"
+            style={{ color: 'rgba(255,255,255,0.32)' }}
           >
             <LogOut className="w-4 h-4" />
           </button>

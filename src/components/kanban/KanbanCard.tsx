@@ -64,7 +64,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
     >
       <div
         className={cn(
-          'group bg-white rounded-xl border border-slate-200 shadow-sm p-3 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-slate-300 transition-all',
+          'group bg-white rounded-lg border border-[#EBEBEB] p-3 cursor-grab active:cursor-grabbing hover:shadow-sm hover:border-[#d4d4d4] transition-all',
           isDragging && 'shadow-2xl rotate-1 scale-[1.02] opacity-90 cursor-grabbing',
           isDeleting && 'opacity-40 pointer-events-none'
         )}
@@ -74,7 +74,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
         <div className="flex items-start gap-1 mb-1.5">
           <Link
             href={taskHref}
-            className="flex-1 text-sm font-semibold text-slate-800 hover:text-indigo-600 leading-snug line-clamp-2 transition-colors"
+            className="flex-1 text-sm font-semibold text-slate-800 hover:text-[#f24a49] leading-snug line-clamp-2 transition-colors"
             onClick={e => e.stopPropagation()}
           >
             {task.title}
@@ -97,7 +97,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
         <div className="flex items-center justify-between mt-2">
           {/* Assignee avatar */}
           {task.assignee ? (
-            <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] font-semibold text-white shrink-0">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white shrink-0" style={{ backgroundColor: '#f24a49' }}>
               {initials}
             </div>
           ) : (

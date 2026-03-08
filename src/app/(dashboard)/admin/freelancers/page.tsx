@@ -36,7 +36,7 @@ export default async function FreelancersPage() {
             {freelancers?.length ?? 0} freelancer{(freelancers?.length ?? 0) !== 1 ? 's' : ''} on this platform
           </p>
         </div>
-        <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm">
+        <Button asChild className="text-white shadow-sm" style={{ backgroundColor: '#f24a49' }}>
           <Link href="/admin/freelancers/invite">
             <UserPlus className="w-4 h-4 mr-1.5" />
             Invite
@@ -45,13 +45,13 @@ export default async function FreelancersPage() {
       </div>
 
       {(freelancers?.length ?? 0) === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200/70 shadow-sm flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center mb-4">
-            <UserPlus className="w-6 h-6 text-indigo-400" />
+        <div className="bg-white rounded-lg border border-[#EBEBEB] flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4" style={{ backgroundColor: '#fff3f3' }}>
+            <UserPlus className="w-6 h-6" style={{ color: '#f24a49' }} />
           </div>
           <p className="text-sm font-medium text-slate-600 mb-1">No freelancers yet</p>
           <p className="text-xs text-slate-400 mb-5">Invite freelancers to assign tasks to them</p>
-          <Button asChild className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm">
+          <Button asChild className="text-white shadow-sm" style={{ backgroundColor: '#f24a49' }}>
             <Link href="/admin/freelancers/invite">Invite your first freelancer</Link>
           </Button>
         </div>
@@ -64,8 +64,8 @@ export default async function FreelancersPage() {
               ? profile.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
               : profile.email[0].toUpperCase()
             return (
-              <div key={profile.id} className="bg-white rounded-xl border border-slate-200/70 shadow-sm p-5 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-semibold text-white shrink-0">
+              <div key={profile.id} className="bg-white rounded-lg border border-[#EBEBEB] p-5 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-white shrink-0" style={{ backgroundColor: '#f24a49' }}>
                   {initials}
                 </div>
                 <div className="flex-1 min-w-0">

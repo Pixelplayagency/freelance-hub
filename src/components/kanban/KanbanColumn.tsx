@@ -7,16 +7,16 @@ import { cn } from '@/lib/utils/cn'
 import type { Task, TaskStatus } from '@/lib/types/app.types'
 
 const STATUS_ACCENT: Record<string, string> = {
-  todo: 'border-l-slate-300',
-  in_progress: 'border-l-blue-400',
-  review: 'border-l-amber-400',
+  todo: 'border-l-[#d4d4d4]',
+  in_progress: 'border-l-[#f24a49]',
+  review: 'border-l-[#1C1C1E]',
   completed: 'border-l-emerald-400',
 }
 
 const STATUS_DOT: Record<string, string> = {
-  todo: 'bg-slate-400',
-  in_progress: 'bg-blue-500',
-  review: 'bg-amber-500',
+  todo: 'bg-[#d4d4d4]',
+  in_progress: 'bg-[#f24a49]',
+  review: 'bg-[#1C1C1E]',
   completed: 'bg-emerald-500',
 }
 
@@ -56,9 +56,9 @@ export function KanbanColumn({ column, tasks, projectId, isAdmin }: KanbanColumn
       <div
         ref={setNodeRef}
         className={cn(
-          'flex-1 rounded-xl p-2 min-h-[120px] transition-all border border-slate-200 border-l-4 bg-slate-50/80',
+          'flex-1 rounded-lg p-2 min-h-[120px] transition-all border border-[#EBEBEB] border-l-4 bg-white/60',
           accent,
-          isOver && 'ring-2 ring-indigo-400 ring-offset-1 bg-indigo-50/30'
+          isOver && 'ring-2 ring-[#f24a49]/40 ring-offset-1 bg-[#fff5f5]'
         )}
       >
         <SortableContext

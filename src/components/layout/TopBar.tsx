@@ -38,14 +38,14 @@ export async function TopBar() {
       >
         <Bell className="w-5 h-5" />
         {(unreadCount ?? 0) > 0 && (
-          <span className="absolute top-1.5 right-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-indigo-500 text-[10px] font-semibold text-white leading-none">
+          <span className="absolute top-1.5 right-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full text-[10px] font-semibold text-white leading-none" style={{ backgroundColor: '#f24a49' }}>
             {(unreadCount ?? 0) > 9 ? '9+' : unreadCount}
           </span>
         )}
       </Link>
 
       {/* User Avatar */}
-      <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-semibold text-white select-none">
+      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white select-none" style={{ backgroundColor: '#f24a49' }}>
         {initials}
       </div>
     </div>

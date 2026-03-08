@@ -67,7 +67,7 @@ export function LoginForm() {
             autoComplete="current-password"
           />
         </div>
-        <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
+        <Button type="submit" className="w-full" style={{ backgroundColor: '#f24a49' }} disabled={loading}>
           {loading ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>

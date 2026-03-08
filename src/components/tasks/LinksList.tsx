@@ -61,7 +61,7 @@ export function LinksList({ taskId, references, isAdmin }: LinksListProps) {
               href={ref.url ?? '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-indigo-600 hover:text-indigo-700 hover:underline flex-1 truncate"
+              className="text-sm hover:underline flex-1 truncate" style={{ color: '#f24a49' }}
             >
               {ref.title ?? ref.url}
             </a>
@@ -102,7 +102,7 @@ export function LinksList({ taskId, references, isAdmin }: LinksListProps) {
                 />
               </div>
               <div className="flex gap-2">
-                <Button type="submit" size="sm" className="bg-indigo-600 hover:bg-indigo-700" disabled={adding}>
+                <Button type="submit" size="sm" style={{ backgroundColor: '#f24a49' }} disabled={adding}>
                   {adding ? 'Adding…' : 'Add link'}
                 </Button>
                 <Button type="button" size="sm" variant="ghost" onClick={() => setShowForm(false)}>

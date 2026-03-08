@@ -85,7 +85,7 @@ export default async function TaskDetailPage({
             {assignee ? (
               <div className="flex items-center gap-2">
                 <Avatar className="h-5 w-5">
-                  <AvatarFallback className="text-[10px] bg-indigo-100 text-indigo-700">
+                  <AvatarFallback className="text-[10px]" style={{ backgroundColor: '#fff3f3', color: '#f24a49' }}>
                     {assignee.full_name?.[0]?.toUpperCase() ?? assignee.email[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>

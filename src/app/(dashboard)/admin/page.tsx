@@ -44,28 +44,28 @@ export default async function AdminDashboardPage() {
       label: 'Active Projects',
       value: projects?.length ?? 0,
       icon: FolderKanban,
-      gradient: 'from-indigo-500 to-violet-500',
+      iconBg: '#f24a49',
       href: '/admin/projects',
     },
     {
       label: 'Active Tasks',
       value: totalActive,
       icon: Clock,
-      gradient: 'from-blue-500 to-cyan-500',
+      iconBg: '#1C1C1E',
       href: '/admin/projects',
     },
     {
       label: 'In Review',
       value: inReview,
       icon: AlertCircle,
-      gradient: 'from-amber-500 to-orange-500',
+      iconBg: '#f24a49',
       href: '/admin/projects',
     },
     {
       label: 'Completed',
       value: completedCount,
       icon: CheckCircle2,
-      gradient: 'from-emerald-500 to-teal-500',
+      iconBg: '#1C1C1E',
       href: '/admin/projects',
     },
   ]
@@ -89,9 +89,9 @@ export default async function AdminDashboardPage() {
             <Link
               key={s.label}
               href={s.href}
-              className="bg-white rounded-xl border border-slate-200/70 shadow-sm p-5 hover:shadow-md transition-shadow flex flex-col gap-3"
+              className="bg-white rounded-lg border border-[#EBEBEB] p-5 hover:shadow-sm transition-shadow flex flex-col gap-3"
             >
-              <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.gradient} flex items-center justify-center`}>
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: s.iconBg }}>
                 <Icon className="w-4 h-4 text-white" />
               </div>
               <div>
@@ -105,7 +105,7 @@ export default async function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Due today */}
-        <div className="bg-white rounded-xl border border-slate-200/70 shadow-sm p-5">
+        <div className="bg-white rounded-lg border border-[#EBEBEB] p-5">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-sm font-semibold text-slate-700">Due Today</h2>
             {(tasksDueToday?.length ?? 0) > 0 && (
@@ -140,7 +140,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Recent tasks */}
-        <div className="bg-white rounded-xl border border-slate-200/70 shadow-sm p-5">
+        <div className="bg-white rounded-lg border border-[#EBEBEB] p-5">
           <h2 className="text-sm font-semibold text-slate-700 mb-4">Recent Tasks</h2>
           {(recentTasks?.length ?? 0) === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -160,7 +160,7 @@ export default async function AdminDashboardPage() {
                     {project && (
                       <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
                     )}
-                    <span className="text-sm text-slate-700 group-hover:text-indigo-600 flex-1 truncate transition-colors">
+                    <span className="text-sm text-slate-700 group-hover:text-[#f24a49] flex-1 truncate transition-colors">
                       {task.title}
                     </span>
                     <TaskStatusBadge status={task.status as TaskStatus} />

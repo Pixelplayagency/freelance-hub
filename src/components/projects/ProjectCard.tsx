@@ -11,7 +11,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <Link href={`/admin/projects/${project.id}`} className="group block">
-      <div className="bg-white rounded-xl border border-slate-200/70 shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+      <div className="bg-white rounded-lg border border-[#EBEBEB] overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
         {/* Colored header */}
         <div
           className="h-20 flex items-center justify-center"
@@ -46,7 +46,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           ) : (
             <span />
           )}
-          <span className="text-xs font-semibold text-indigo-600 flex items-center gap-1 group-hover:gap-2 transition-all">
+          <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all" style={{ color: '#f24a49' }}>
             Open <ArrowRight className="w-3 h-3" />
           </span>
         </div>

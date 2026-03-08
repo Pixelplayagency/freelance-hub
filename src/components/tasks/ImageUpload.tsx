@@ -115,7 +115,7 @@ export function ImageUpload({ taskId, references, isAdmin }: ImageUploadProps) {
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
             className={cn(
-              'w-full border-2 border-dashed border-gray-200 rounded-lg p-6 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/30',
+              'w-full border-2 border-dashed border-gray-200 rounded-lg p-6 text-center transition-colors hover:border-[#f24a49]/40 hover:bg-[#fff3f3]/30',
               uploading && 'opacity-60 cursor-not-allowed'
             )}
           >

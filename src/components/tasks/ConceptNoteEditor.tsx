@@ -114,7 +114,8 @@ export function ConceptNoteEditor({ taskId, references, isAdmin, canEdit }: Conc
                     key={btn.label}
                     type="button"
                     onClick={btn.action}
-                    className={`w-7 h-7 text-sm rounded font-medium transition-colors ${btn.active ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:bg-gray-100'}`}
+                    className={`w-7 h-7 text-sm rounded font-medium transition-colors ${btn.active ? 'text-[#f24a49]' : 'text-gray-500 hover:bg-gray-100'}`}
+                    style={btn.active ? { backgroundColor: '#fff3f3' } : undefined}
                   >
                     {btn.label}
                   </button>
@@ -122,7 +123,7 @@ export function ConceptNoteEditor({ taskId, references, isAdmin, canEdit }: Conc
               </div>
               <EditorContent editor={editor} />
               <div className="flex gap-2 p-2 border-t border-gray-100">
-                <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700" onClick={handleSave} disabled={saving}>
+                <Button size="sm" style={{ backgroundColor: '#f24a49' }} onClick={handleSave} disabled={saving}>
                   {saving ? 'Saving…' : 'Save note'}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setShowEditor(false)}>Cancel</Button>

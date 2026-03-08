@@ -64,7 +64,7 @@ export function InviteFreelancerForm() {
           required
         />
       </div>
-      <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
+      <Button type="submit" className="w-full" style={{ backgroundColor: '#f24a49' }} disabled={loading}>
         {loading ? 'Sending…' : 'Send invitation'}
       </Button>
     </form>

@@ -100,7 +100,7 @@ export default async function FreelancerDashboardPage() {
                     <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-indigo-600 transition-colors">{task.title}</p>
+                    <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-[#f24a49] transition-colors">{task.title}</p>
                     {project && <p className="text-xs text-slate-400 mt-0.5">{project.name}</p>}
                   </div>
                   <TaskStatusBadge status={task.status} />
