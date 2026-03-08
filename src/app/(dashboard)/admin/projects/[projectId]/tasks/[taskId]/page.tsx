@@ -4,6 +4,7 @@ import { TaskStatusBadge } from '@/components/tasks/TaskStatusBadge'
 import { TaskReferences } from '@/components/tasks/TaskReferences'
 import { EditTaskButton } from '@/components/tasks/EditTaskButton'
 import { DeleteTaskButton } from '@/components/tasks/DeleteTaskButton'
+import { AdminReviewActions } from '@/components/tasks/AdminReviewActions'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ChevronLeft, Calendar, Clock, User } from 'lucide-react'
 import Link from 'next/link'
@@ -159,6 +160,11 @@ export default async function TaskDetailPage({
             </div>
           )}
         </div>
+
+        {/* Review actions — only shown when freelancer has submitted */}
+        {task.status === 'review' && (
+          <AdminReviewActions taskId={taskId} />
+        )}
 
         {/* Separator */}
         <hr className="border-gray-100" />

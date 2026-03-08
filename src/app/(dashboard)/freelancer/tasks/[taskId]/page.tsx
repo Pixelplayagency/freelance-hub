@@ -2,6 +2,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { TaskReferences } from '@/components/tasks/TaskReferences'
 import { FreelancerStatusUpdate } from '@/components/tasks/FreelancerStatusUpdate'
+import { DeadlineProgress } from '@/components/tasks/DeadlineProgress'
+import { SubmitWorkSection } from '@/components/tasks/SubmitWorkSection'
 import { Calendar, ChevronLeft, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { format, parseISO, isPast, isToday, isTomorrow } from 'date-fns'
@@ -126,6 +128,14 @@ export default async function FreelancerTaskDetailPage({
             )}
           </div>
         ) : null}
+
+        {/* Timeline progress bar */}
+        {task.due_date && task.created_at && (
+          <DeadlineProgress createdAt={task.created_at} dueDate={task.due_date} />
+        )}
+
+        {/* Submit work */}
+        <SubmitWorkSection taskId={taskId} status={task.status as TaskStatus} />
 
         <hr className="border-gray-100" />
 

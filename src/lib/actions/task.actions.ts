@@ -65,6 +65,24 @@ export async function updateTaskStatus(
   // No revalidatePath — Realtime handles live updates
 }
 
+export async function setTaskStatus(taskId: string, status: TaskStatus) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data, error } = await supabase
+    .from('tasks')
+    .update({ status })
+    .eq('id', taskId)
+    .select('project_id')
+    .single()
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath(`/admin/projects/${data.project_id}`)
+  revalidatePath(`/freelancer/tasks/${taskId}`)
+}
+
 export async function deleteTask(taskId: string, projectId: string) {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
