@@ -1,6 +1,6 @@
 'use server'
 
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient, createSupabaseServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { ReferenceType } from '@/lib/types/app.types'
 
@@ -39,11 +39,23 @@ export async function saveTaskReference(
     title?: string
   }
 ) {
+  // Auth check via user session (respects RLS for the task lookup)
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
-  const { data, error } = await supabase
+  // Verify the user can access this task (RLS-enforced: admin sees all, freelancer sees assigned)
+  const { data: task } = await supabase
+    .from('tasks')
+    .select('id, project_id')
+    .eq('id', taskId)
+    .single()
+  if (!task) throw new Error('Task not found or access denied')
+
+  // Use service client for the INSERT so the RLS "notes-only" policy doesn't block
+  // image / video / link submissions from freelancers
+  const serviceClient = createSupabaseServiceClient()
+  const { data, error } = await serviceClient
     .from('task_references')
     .insert({ task_id: taskId, ...ref, created_by: user.id })
     .select()
@@ -51,17 +63,9 @@ export async function saveTaskReference(
 
   if (error) throw new Error(error.message)
 
-  // Revalidate — gracefully skip if task lookup fails (e.g. RLS)
-  const { data: task } = await supabase
-    .from('tasks')
-    .select('project_id')
-    .eq('id', taskId)
-    .single()
-
-  if (task?.project_id) {
-    revalidatePath(`/admin/projects/${task.project_id}`)
-    revalidatePath(`/admin/projects/${task.project_id}/tasks/${taskId}`)
-  }
+  revalidatePath(`/admin/projects/${task.project_id}`)
+  revalidatePath(`/admin/projects/${task.project_id}/tasks/${taskId}`)
+  revalidatePath(`/freelancer/tasks/${taskId}`)
 
   return data
 }
