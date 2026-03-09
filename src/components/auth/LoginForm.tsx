@@ -21,36 +21,41 @@ export function LoginForm() {
     e.preventDefault()
     setLoading(true)
 
-    // Step 1: resolve username → email (server-side, bypasses RLS)
-    const res = await fetch('/api/auth/resolve-username', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username }),
-    })
-    const json = await res.json()
-    if (!res.ok) {
-      toast.error(json.error ?? 'Username not found')
-      setLoading(false)
-      return
-    }
+    try {
+      // Step 1: resolve username → email (server-side, bypasses RLS)
+      const res = await fetch('/api/auth/resolve-username', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error ?? 'Username not found')
+        setLoading(false)
+        return
+      }
 
-    // Step 2: sign in with resolved email
-    const { data, error } = await supabase.auth.signInWithPassword({ email: json.email, password })
-    if (error) {
-      toast.error(error.message)
-      setLoading(false)
-      return
-    }
+      // Step 2: sign in with resolved email
+      const { data, error } = await supabase.auth.signInWithPassword({ email: json.email, password })
+      if (error) {
+        toast.error(error.message)
+        setLoading(false)
+        return
+      }
 
-    // Step 3: redirect based on role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.user.id)
-      .single()
-    const destination = profile?.role === 'freelancer' ? '/freelancer' : '/admin'
-    router.push(destination)
-    router.refresh()
+      // Step 3: redirect based on role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+      const destination = profile?.role === 'freelancer' ? '/freelancer' : '/admin'
+      router.push(destination)
+      router.refresh()
+    } catch {
+      toast.error('Login failed. Please try again.')
+      setLoading(false)
+    }
   }
 
   return (
