@@ -21,27 +21,34 @@ export function LoginForm() {
     e.preventDefault()
     setLoading(true)
 
-    // Resolve username → email
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('email, role')
-      .eq('username', username.toLowerCase())
-      .single()
-
-    if (profileError || !profile) {
-      toast.error('Username not found')
+    // Step 1: resolve username → email (server-side, bypasses RLS)
+    const res = await fetch('/api/auth/resolve-username', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username }),
+    })
+    const json = await res.json()
+    if (!res.ok) {
+      toast.error(json.error ?? 'Username not found')
       setLoading(false)
       return
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ email: profile.email, password })
+    // Step 2: sign in with resolved email
+    const { data, error } = await supabase.auth.signInWithPassword({ email: json.email, password })
     if (error) {
       toast.error(error.message)
       setLoading(false)
       return
     }
 
-    const destination = profile.role === 'freelancer' ? '/freelancer' : '/admin'
+    // Step 3: redirect based on role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single()
+    const destination = profile?.role === 'freelancer' ? '/freelancer' : '/admin'
     router.push(destination)
     router.refresh()
   }
