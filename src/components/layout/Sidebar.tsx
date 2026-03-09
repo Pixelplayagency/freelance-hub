@@ -11,6 +11,7 @@ import {
   Bell,
   CheckSquare,
   LogOut,
+  UserCircle,
 } from 'lucide-react'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useRouter } from 'next/navigation'
@@ -32,6 +33,7 @@ const FREELANCER_NAV: NavItem[] = [
   { href: '/freelancer', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/freelancer/tasks', label: 'My Tasks', icon: CheckSquare },
   { href: '/freelancer/notifications', label: 'Notifications', icon: Bell },
+  { href: '/freelancer/profile', label: 'Profile', icon: UserCircle },
 ]
 
 export function Sidebar({ role, userName }: { role: UserRole; userName: string | null }) {
