@@ -14,9 +14,10 @@ const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
 
 interface JoinFormProps {
   token: string
+  role: 'admin' | 'freelancer'
 }
 
-export function JoinForm({ token }: JoinFormProps) {
+export function JoinForm({ token, role }: JoinFormProps) {
   const supabase = useSupabase()
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -94,7 +95,7 @@ export function JoinForm({ token }: JoinFormProps) {
       if (signInError) throw new Error(signInError.message)
 
       toast.success('Account created! Welcome to PixelFlow.')
-      router.push('/freelancer')
+      router.push(json.role === 'admin' ? '/admin' : '/freelancer')
       router.refresh()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Something went wrong')
@@ -195,7 +196,7 @@ export function JoinForm({ token }: JoinFormProps) {
         <Label>Role</Label>
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: '#f24a49' }}>
-            Freelancer
+            {role === 'admin' ? 'Admin' : 'Freelancer'}
           </span>
           <span className="text-xs text-slate-400 ml-1">assigned by admin</span>
         </div>

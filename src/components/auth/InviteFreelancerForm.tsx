@@ -6,7 +6,11 @@ import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { Check, Copy, Loader2 } from 'lucide-react'
 
-export function InviteFreelancerForm() {
+interface Props {
+  role?: 'freelancer' | 'admin'
+}
+
+export function InviteFreelancerForm({ role = 'freelancer' }: Props) {
   const [loading, setLoading] = useState(false)
   const [inviteLink, setInviteLink] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -17,7 +21,7 @@ export function InviteFreelancerForm() {
       const res = await fetch('/api/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ role }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to generate link')
@@ -45,7 +49,7 @@ export function InviteFreelancerForm() {
           <span className="text-sm font-medium">Invite link generated</span>
         </div>
         <div>
-          <p className="text-sm text-gray-500 mb-2">Share this link with the freelancer:</p>
+          <p className="text-sm text-gray-500 mb-2">Share this link with the {role}:</p>
           <div className="flex gap-2">
             <Input
               readOnly
@@ -77,7 +81,7 @@ export function InviteFreelancerForm() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-500">
-        Generate a unique invite link and share it with the freelancer. They will create their own account using the link.
+        Generate a unique invite link and share it with the {role}. They will create their own account using the link.
       </p>
       <Button
         onClick={handleGenerate}

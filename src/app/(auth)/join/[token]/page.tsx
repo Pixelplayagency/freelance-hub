@@ -19,7 +19,7 @@ export default async function JoinPage({ params }: Props) {
 
   const { data: invite } = await serviceClient
     .from('invite_tokens')
-    .select('id, used_at, expires_at')
+    .select('id, used_at, expires_at, role')
     .eq('token', token)
     .single()
 
@@ -86,7 +86,7 @@ export default async function JoinPage({ params }: Props) {
           <h1 className="text-2xl font-bold text-foreground mb-1">Set up your account</h1>
           <p className="text-sm text-muted-foreground mb-8">Complete your profile to access the platform</p>
 
-          <JoinForm token={token} />
+          <JoinForm token={token} role={invite.role ?? 'freelancer'} />
         </div>
       </div>
     </div>

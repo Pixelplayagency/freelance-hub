@@ -18,12 +18,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Admin only' }, { status: 403 })
     }
 
+    const body = await request.json().catch(() => ({}))
+    const role = body.role === 'admin' ? 'admin' : 'freelancer'
+
     // Use service client to insert token (bypasses RLS)
     const serviceClient = createSupabaseServiceClient()
 
     const { data, error } = await serviceClient
       .from('invite_tokens')
-      .insert({ created_by: user.id })
+      .insert({ created_by: user.id, role })
       .select('token')
       .single()
 

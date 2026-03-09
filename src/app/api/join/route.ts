@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     // Validate token
     const { data: invite, error: tokenError } = await serviceClient
       .from('invite_tokens')
-      .select('id, used_at, expires_at')
+      .select('id, used_at, expires_at, role')
       .eq('token', token)
       .single()
 
@@ -39,12 +39,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Username is already taken' }, { status: 400 })
     }
 
+    const role = invite.role ?? 'freelancer'
+
     // Create auth user
     const { data: authData, error: authError } = await serviceClient.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: { role: 'freelancer', status: 'active' },
+      user_metadata: { role, status: 'active' },
     })
 
     if (authError) return NextResponse.json({ error: authError.message }, { status: 400 })
@@ -56,6 +58,7 @@ export async function POST(request: Request) {
         full_name: fullName,
         username: username.toLowerCase(),
         avatar_url: avatarUrl ?? null,
+        role,
         status: 'active',
       })
       .eq('id', authData.user.id)
@@ -72,7 +75,7 @@ export async function POST(request: Request) {
       .update({ used_at: new Date().toISOString(), used_by: authData.user.id })
       .eq('id', invite.id)
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, role })
   } catch (err) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
