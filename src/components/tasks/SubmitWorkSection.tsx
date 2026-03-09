@@ -2,8 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { CheckCircle2, Link2, Loader2, Send, Upload, X } from 'lucide-react'
-import { getSignedUploadUrl, saveTaskReference } from '@/lib/actions/upload.actions'
-import { setTaskStatus } from '@/lib/actions/task.actions'
+import { getSignedUploadUrl } from '@/lib/actions/upload.actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
 import { compressImage, formatFileSize } from '@/lib/utils/compressImage'
@@ -78,7 +77,8 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
     }
     setSubmitting(true)
     try {
-      // Upload files
+      // Upload each file directly to Supabase storage via signed URL
+      const uploads: { type: 'image' | 'video'; path: string; name: string }[] = []
       for (const file of pendingFiles) {
         const { signedUrl, path } = await getSignedUploadUrl(taskId, file.name)
         const res = await fetch(signedUrl, {
@@ -87,22 +87,26 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
           headers: { 'Content-Type': file.type },
         })
         if (!res.ok) throw new Error(`Failed to upload ${file.name}`)
-        await saveTaskReference(taskId, {
+        uploads.push({
           type: file.type.startsWith('image/') ? 'image' : 'video',
-          storage_path: path,
-          title: `[Final] ${file.name}`,
+          path,
+          name: file.name,
         })
       }
-      // Save link
-      if (finalLink.trim()) {
-        await saveTaskReference(taskId, {
-          type: 'link',
-          url: finalLink.trim(),
-          title: '[Final] Delivery link',
-        })
-      }
-      // Change status to review
-      await setTaskStatus(taskId, 'review')
+
+      // Single API call — saves all DB records + changes status to review
+      const res = await fetch('/api/submit-work', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          taskId,
+          uploads,
+          link: finalLink.trim() || null,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Submission failed')
+
       toast.success('Submitted for review!')
       setSubmitted(true)
     } catch (err) {
