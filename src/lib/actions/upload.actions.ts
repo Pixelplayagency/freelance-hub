@@ -1,6 +1,6 @@
 'use server'
 
-import { createSupabaseServerClient, createSupabaseServiceClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { ReferenceType } from '@/lib/types/app.types'
 
@@ -52,10 +52,7 @@ export async function saveTaskReference(
     .single()
   if (!task) throw new Error('Task not found or access denied')
 
-  // Use service client for the INSERT so the RLS "notes-only" policy doesn't block
-  // image / video / link submissions from freelancers
-  const serviceClient = await createSupabaseServiceClient()
-  const { data, error } = await serviceClient
+  const { data, error } = await supabase
     .from('task_references')
     .insert({ task_id: taskId, ...ref, created_by: user.id })
     .select()
