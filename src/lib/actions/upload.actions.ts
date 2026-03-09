@@ -130,6 +130,34 @@ export async function getTaskSubmittedFiles(taskId: string) {
   return result
 }
 
+export async function clearSubmittedFiles(taskId: string) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  // Fetch all submitted file references
+  const { data: refs } = await supabase
+    .from('task_references')
+    .select('id, storage_path')
+    .eq('task_id', taskId)
+    .in('type', ['image', 'video', 'link'])
+
+  if (!refs || refs.length === 0) return
+
+  // Delete from Supabase storage where applicable
+  const storagePaths = refs.map(r => r.storage_path).filter(Boolean) as string[]
+  if (storagePaths.length > 0) {
+    await supabase.storage.from('task-attachments').remove(storagePaths)
+  }
+
+  // Delete the DB rows
+  await supabase
+    .from('task_references')
+    .delete()
+    .eq('task_id', taskId)
+    .in('type', ['image', 'video', 'link'])
+}
+
 export async function getStoragePublicUrl(path: string) {
   const supabase = await createSupabaseServerClient()
   const { data } = await supabase.storage

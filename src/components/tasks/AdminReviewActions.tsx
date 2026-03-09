@@ -6,7 +6,7 @@ import {
   CheckCircle2, Download, ExternalLink, Eye, FileVideo, Loader2, RotateCcw,
 } from 'lucide-react'
 import { setTaskStatus } from '@/lib/actions/task.actions'
-import { getTaskSubmittedFiles } from '@/lib/actions/upload.actions'
+import { clearSubmittedFiles, getTaskSubmittedFiles } from '@/lib/actions/upload.actions'
 import { toast } from 'sonner'
 
 interface SubmittedFile {
@@ -74,6 +74,7 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
   async function handleRevision() {
     setLoading('revision')
     try {
+      await clearSubmittedFiles(taskId)
       await setTaskStatus(taskId, 'in_progress')
       toast.success('Sent back for revision')
       router.refresh()
