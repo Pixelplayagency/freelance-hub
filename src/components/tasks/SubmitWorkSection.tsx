@@ -156,33 +156,33 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
   const hasContent = pendingFiles.length > 0 || finalLink.trim().length > 0
 
   return (
-    <div className="rounded-xl border border-gray-100 overflow-hidden">
+    <div className="rounded-xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
+      <div className="px-4 py-3 bg-muted border-b border-border flex items-center gap-2">
         <Send className="w-4 h-4" style={{ color: '#f24a49' }} />
-        <span className="text-sm font-semibold text-gray-800">
+        <span className="text-sm font-semibold text-foreground">
           Submit your work
           {pendingFiles.length > 0 && (
-            <span className="ml-1.5 text-xs font-normal text-gray-400">
+            <span className="ml-1.5 text-xs font-normal text-muted-foreground">
               ({pendingFiles.length} {pendingFiles.length === 1 ? 'file' : 'files'})
             </span>
           )}
         </span>
       </div>
 
-      <div className="p-4 space-y-3 bg-white">
+      <div className="p-4 space-y-3 bg-card">
         {/* Pending file previews */}
         {pendingFiles.length > 0 && (
           <div className="grid grid-cols-3 gap-2">
             {pendingFiles.map((file, i) => (
               <div key={i} className="relative group">
-                <div className="aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-100 relative">
+                <div className="aspect-video rounded-lg overflow-hidden border border-border bg-muted relative">
                   {file.type.startsWith('image/') ? (
                     <img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-gray-400 p-2">
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-muted-foreground p-2">
                       <FileVideo className="w-5 h-5" />
-                      <span className="text-[9px] text-center leading-tight text-gray-500 line-clamp-2">{file.name}</span>
+                      <span className="text-[9px] text-center leading-tight text-muted-foreground line-clamp-2">{file.name}</span>
                     </div>
                   )}
                   {/* File size badge */}
@@ -202,7 +202,7 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
                 </div>
                 {/* Upload progress bar */}
                 {submitting && (
-                  <div className="mt-1 h-1 rounded-full bg-gray-200 overflow-hidden">
+                  <div className="mt-1 h-1 rounded-full bg-muted overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-150"
                       style={{ width: `${uploadProgress[i] ?? 0}%`, backgroundColor: '#f24a49' }}
@@ -210,7 +210,7 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
                   </div>
                 )}
                 {submitting && uploadProgress[i] !== undefined && (
-                  <p className="text-[9px] text-gray-400 text-center mt-0.5">{uploadProgress[i]}%</p>
+                  <p className="text-[9px] text-muted-foreground text-center mt-0.5">{uploadProgress[i]}%</p>
                 )}
               </div>
             ))}
@@ -236,11 +236,11 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
           className={cn(
             'w-full border-2 border-dashed rounded-lg py-4 transition-colors disabled:opacity-50',
             dragOver
-              ? 'border-[#f24a49] bg-[#fff3f3]/60'
-              : 'border-gray-200 hover:border-[#f24a49]/40 hover:bg-[#fff3f3]/30'
+              ? 'border-[#f24a49] bg-[#f24a49]/10'
+              : 'border-border hover:border-[#f24a49]/40 hover:bg-[#f24a49]/5'
           )}
         >
-          <div className="flex flex-col items-center gap-1.5 text-gray-400">
+          <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
             <Upload className={cn('w-5 h-5', dragOver && 'text-[#f24a49]')} />
             <span className="text-xs font-medium">{dragOver ? 'Drop to add' : 'Upload final file'}</span>
             <span className="text-[10px]">Image or video · drag & drop or click</span>
@@ -249,17 +249,17 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
 
         {/* Delivery link — always visible */}
         <div className="flex items-center gap-2">
-          <Link2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+          <Link2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
           <input
             type="url"
             placeholder="Delivery link (Drive, Dropbox…) optional"
             value={finalLink}
             onChange={e => setFinalLink(e.target.value)}
             disabled={submitting}
-            className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#f24a49]/20 focus:border-[#f24a49] placeholder:text-gray-300 disabled:opacity-50"
+            className="flex-1 text-sm border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#f24a49]/20 focus:border-[#f24a49] placeholder:text-muted-foreground bg-background text-foreground disabled:opacity-50"
           />
           {finalLink && (
-            <button type="button" onClick={() => setFinalLink('')} className="text-gray-400 hover:text-gray-600">
+            <button type="button" onClick={() => setFinalLink('')} className="text-muted-foreground hover:text-foreground">
               <X className="w-4 h-4" />
             </button>
           )}

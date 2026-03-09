@@ -26,8 +26,8 @@ export default async function ProjectsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Projects</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{projectsWithCount.length} active project{projectsWithCount.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-2xl font-bold text-foreground">Projects</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{projectsWithCount.length} active project{projectsWithCount.length !== 1 ? 's' : ''}</p>
         </div>
         <Button asChild className="text-white shadow-sm" style={{ backgroundColor: '#f24a49' }}>
           <Link href="/admin/projects/new">
@@ -38,12 +38,12 @@ export default async function ProjectsPage() {
       </div>
 
       {projectsWithCount.length === 0 ? (
-        <div className="bg-white rounded-lg border border-[#EBEBEB] flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4" style={{ backgroundColor: '#fff3f3' }}>
+        <div className="bg-card rounded-lg border border-border flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 accent-tint">
             <Plus className="w-6 h-6" style={{ color: '#f24a49' }} />
           </div>
-          <p className="text-sm font-medium text-slate-600 mb-1">No projects yet</p>
-          <p className="text-xs text-slate-400 mb-5">Create your first project to get started</p>
+          <p className="text-sm font-medium text-muted-foreground mb-1">No projects yet</p>
+          <p className="text-xs text-muted-foreground mb-5">Create your first project to get started</p>
           <Button asChild className="text-white shadow-sm" style={{ backgroundColor: '#f24a49' }}>
             <Link href="/admin/projects/new">Create your first project</Link>
           </Button>

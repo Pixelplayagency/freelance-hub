@@ -14,8 +14,8 @@ export default function NewProjectPage() {
           Projects
         </Link>
       </div>
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">New project</h1>
-      <div className="bg-white rounded-xl border border-gray-100 p-6">
+      <h1 className="text-xl font-semibold text-foreground mb-6">New project</h1>
+      <div className="bg-card rounded-xl border border-border p-6">
         <ProjectForm />
       </div>
     </div>

@@ -73,8 +73,8 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-0.5">
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
           {overdueCount > 0
             ? `${overdueCount} overdue task${overdueCount !== 1 ? 's' : ''} need attention`
             : 'Everything looks good — all tasks on track'}
@@ -89,14 +89,14 @@ export default async function AdminDashboardPage() {
             <Link
               key={s.label}
               href={s.href}
-              className="bg-white rounded-lg border border-[#EBEBEB] p-5 hover:shadow-sm transition-shadow flex flex-col gap-3"
+              className="bg-card rounded-lg border border-border p-5 hover:shadow-sm transition-shadow flex flex-col gap-3"
             >
               <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: s.iconBg }}>
                 <Icon className="w-4 h-4 text-white" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-slate-900">{s.value}</div>
-                <div className="text-sm text-slate-500 mt-0.5">{s.label}</div>
+                <div className="text-3xl font-bold text-foreground">{s.value}</div>
+                <div className="text-sm text-muted-foreground mt-0.5">{s.label}</div>
               </div>
             </Link>
           )
@@ -105,9 +105,9 @@ export default async function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Due today */}
-        <div className="bg-white rounded-lg border border-[#EBEBEB] p-5">
+        <div className="bg-card rounded-lg border border-border p-5">
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-sm font-semibold text-slate-700">Due Today</h2>
+            <h2 className="text-sm font-semibold text-foreground">Due Today</h2>
             {(tasksDueToday?.length ?? 0) > 0 && (
               <span className="text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full">
                 {tasksDueToday?.length}
@@ -126,9 +126,9 @@ export default async function AdminDashboardPage() {
                 return (
                   <div key={task.id} className="flex items-center gap-2 py-1">
                     <TaskStatusBadge status={task.status as TaskStatus} />
-                    <span className="text-sm text-slate-700 flex-1 truncate">{task.title}</span>
+                    <span className="text-sm text-foreground flex-1 truncate">{task.title}</span>
                     {assignee && (
-                      <span className="text-xs text-slate-400 shrink-0">
+                      <span className="text-xs text-muted-foreground shrink-0">
                         {assignee.full_name ?? assignee.email}
                       </span>
                     )}
@@ -140,8 +140,8 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Recent tasks */}
-        <div className="bg-white rounded-lg border border-[#EBEBEB] p-5">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">Recent Tasks</h2>
+        <div className="bg-card rounded-lg border border-border p-5">
+          <h2 className="text-sm font-semibold text-foreground mb-4">Recent Tasks</h2>
           {(recentTasks?.length ?? 0) === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Clock className="w-8 h-8 text-slate-200 mb-2" />
@@ -155,12 +155,12 @@ export default async function AdminDashboardPage() {
                   <Link
                     key={task.id}
                     href={project ? `/admin/projects/${project.id}/tasks/${task.id}` : '#'}
-                    className="flex items-center gap-2.5 py-1.5 hover:bg-slate-50 rounded-lg px-1.5 -mx-1.5 group transition-colors"
+                    className="flex items-center gap-2.5 py-1.5 hover:bg-muted rounded-lg px-1.5 -mx-1.5 group transition-colors"
                   >
                     {project && (
                       <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
                     )}
-                    <span className="text-sm text-slate-700 group-hover:text-[#f24a49] flex-1 truncate transition-colors">
+                    <span className="text-sm text-foreground group-hover:text-[#f24a49] flex-1 truncate transition-colors">
                       {task.title}
                     </span>
                     <TaskStatusBadge status={task.status as TaskStatus} />

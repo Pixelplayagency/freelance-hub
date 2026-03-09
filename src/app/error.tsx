@@ -15,16 +15,16 @@ export default function RootError({
   }, [error])
 
   return (
-    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: '#F5F5F5' }}>
+    <div className="flex items-center justify-center min-h-screen bg-background">
       <div className="text-center space-y-4 max-w-sm">
         <div className="flex justify-center">
-          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
             <AlertCircle className="w-6 h-6 text-red-400" />
           </div>
         </div>
         <div>
-          <h2 className="text-base font-semibold text-gray-900">Something went wrong</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <h2 className="text-base font-semibold text-foreground">Something went wrong</h2>
+          <p className="text-sm text-muted-foreground mt-1">
             An unexpected error occurred. Please try again.
           </p>
         </div>

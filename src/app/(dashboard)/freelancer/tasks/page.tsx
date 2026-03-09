@@ -21,7 +21,7 @@ export default async function FreelancerTasksPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">My Tasks</h1>
+      <h1 className="text-xl font-semibold text-foreground mb-6">My Tasks</h1>
 
       {TASK_STATUSES.map(status => {
         const statusTasks = allTasks.filter(t => t.status === status.id)
@@ -35,8 +35,8 @@ export default async function FreelancerTasksPage() {
                 'bg-amber-500': status.id === 'review',
                 'bg-green-500': status.id === 'completed',
               })} />
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{status.label}</h2>
-              <span className="text-xs text-gray-400">({statusTasks.length})</span>
+              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{status.label}</h2>
+              <span className="text-xs text-muted-foreground">({statusTasks.length})</span>
             </div>
             <div className="space-y-2">
               {statusTasks.map(task => {
@@ -45,14 +45,14 @@ export default async function FreelancerTasksPage() {
                   <Link
                     key={task.id}
                     href={`/freelancer/tasks/${task.id}`}
-                    className="flex items-center gap-3 p-3.5 bg-white rounded-xl border border-gray-100 hover:shadow-sm transition-shadow"
+                    className="flex items-center gap-3 p-3.5 bg-card rounded-xl border border-border hover:shadow-sm transition-shadow"
                   >
                     {project && (
                       <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{task.title}</p>
-                      {project && <p className="text-xs text-gray-400 mt-0.5">{project.name}</p>}
+                      <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
+                      {project && <p className="text-xs text-muted-foreground mt-0.5">{project.name}</p>}
                     </div>
                     {task.due_date && (
                       <span className={cn(
@@ -72,7 +72,7 @@ export default async function FreelancerTasksPage() {
       })}
 
       {allTasks.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-muted-foreground">
           <p className="text-sm">No tasks assigned to you yet.</p>
         </div>
       )}

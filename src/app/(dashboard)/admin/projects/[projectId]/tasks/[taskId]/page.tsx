@@ -61,22 +61,22 @@ export default async function TaskDetailPage({
   return (
     <div className="max-w-2xl">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <Link href="/admin/projects" className="hover:text-gray-900">Projects</Link>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+        <Link href="/admin/projects" className="hover:text-foreground">Projects</Link>
         <span>/</span>
-        <Link href={`/admin/projects/${projectId}`} className="hover:text-gray-900">Board</Link>
+        <Link href={`/admin/projects/${projectId}`} className="hover:text-foreground">Board</Link>
         <span>/</span>
-        <span className="text-gray-900 truncate">{task.title}</span>
+        <span className="text-foreground truncate">{task.title}</span>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
+      <div className="bg-card rounded-xl border border-border p-6 space-y-6">
         {/* Header */}
         <div className="flex items-start gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <TaskStatusBadge status={task.status} />
             </div>
-            <h1 className="text-xl font-semibold text-gray-900">{task.title}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{task.title}</h1>
           </div>
           <div className="flex items-center gap-1">
             <EditTaskButton
@@ -90,25 +90,25 @@ export default async function TaskDetailPage({
 
         {/* Description */}
         {task.description && (
-          <p className="text-sm text-gray-600 leading-relaxed">{task.description}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">{task.description}</p>
         )}
 
         {/* Meta */}
         <div className="flex flex-wrap gap-3">
           {/* Assignee */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-sm">
-            <User className="w-3.5 h-3.5 text-gray-400" />
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border text-sm">
+            <User className="w-3.5 h-3.5 text-muted-foreground" />
             {assignee ? (
               <div className="flex items-center gap-1.5">
                 <Avatar className="h-5 w-5">
-                  <AvatarFallback className="text-[10px]" style={{ backgroundColor: '#fff3f3', color: '#f24a49' }}>
+                  <AvatarFallback className="text-[10px] accent-tint" style={{ color: '#f24a49' }}>
                     {assignee.full_name?.[0]?.toUpperCase() ?? assignee.email[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-gray-700 font-medium">{assignee.full_name ?? assignee.email}</span>
+                <span className="text-foreground font-medium">{assignee.full_name ?? assignee.email}</span>
               </div>
             ) : (
-              <span className="text-gray-400">Unassigned</span>
+              <span className="text-muted-foreground">Unassigned</span>
             )}
           </div>
 
@@ -119,18 +119,18 @@ export default async function TaskDetailPage({
               deadlineStatus === 'overdue' ? 'bg-red-50 border-red-100' :
               deadlineStatus === 'today' ? 'bg-amber-50 border-amber-100' :
               deadlineStatus === 'tomorrow' ? 'bg-amber-50/50 border-amber-100/60' :
-              'bg-gray-50 border-gray-100'
+              'bg-muted border-border'
             )}>
               <div className="flex items-center gap-1.5">
                 <Calendar className={cn('w-3.5 h-3.5',
                   deadlineStatus === 'overdue' ? 'text-red-500' :
                   deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-500' :
-                  'text-gray-400'
+                  'text-muted-foreground'
                 )} />
                 <span className={cn('font-medium',
                   deadlineStatus === 'overdue' ? 'text-red-600' :
                   deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-600' :
-                  'text-gray-700'
+                  'text-foreground'
                 )}>
                   {deadlineStatus === 'overdue' && 'Overdue · '}
                   {deadlineStatus === 'today' && 'Due today · '}
@@ -143,18 +143,18 @@ export default async function TaskDetailPage({
                   <Clock className={cn('w-3.5 h-3.5',
                     deadlineStatus === 'overdue' ? 'text-red-400' :
                     deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-400' :
-                    'text-gray-400'
+                    'text-muted-foreground'
                   )} />
                   <span className={cn('font-semibold',
                     deadlineStatus === 'overdue' ? 'text-red-600' :
                     deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-600' :
-                    'text-gray-700'
+                    'text-foreground'
                   )}>{deadlineTime}</span>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-sm text-gray-400">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border text-sm text-muted-foreground">
               <Calendar className="w-3.5 h-3.5" />
               No deadline set
             </div>
@@ -170,11 +170,11 @@ export default async function TaskDetailPage({
         )}
 
         {/* Separator */}
-        <hr className="border-gray-100" />
+        <hr className="border-border" />
 
         {/* References */}
         <div>
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">References & Chat</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-3">References & Chat</h2>
           <TaskReferences
             taskId={taskId}
             references={(references ?? []) as TaskReference[]}

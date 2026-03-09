@@ -81,7 +81,7 @@ export function TaskChat({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-3 pb-2 pr-1" style={{ maxHeight: '360px' }}>
         {messages.length === 0 && (
-          <p className="text-sm text-gray-400 text-center py-8">
+          <p className="text-sm text-muted-foreground text-center py-8">
             No messages yet. Start the conversation below.
           </p>
         )}
@@ -108,7 +108,7 @@ export function TaskChat({
                 {body}
               </div>
               {/* Timestamp + sender */}
-              <span className="text-[10px] text-gray-400 px-1">
+              <span className="text-[10px] text-muted-foreground px-1">
                 {isOwn ? 'You' : (otherPartyName ?? 'Team')}
                 {' · '}
                 {formatRelative(msg.created_at)}
@@ -122,14 +122,14 @@ export function TaskChat({
 
       {/* Input */}
       {canEdit && (
-        <div className="mt-3 flex items-end gap-2 border border-gray-200 rounded-2xl bg-white px-3 py-2 focus-within:border-[#f24a49] transition-colors">
+        <div className="mt-3 flex items-end gap-2 border border-border rounded-2xl bg-muted px-3 py-2 focus-within:border-[#f24a49] transition-colors">
           <textarea
             value={text}
             onChange={e => setText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type a message… (Enter to send)"
             rows={1}
-            className="flex-1 resize-none text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none leading-relaxed bg-transparent"
+            className="flex-1 resize-none text-sm text-foreground placeholder:text-muted-foreground focus:outline-none leading-relaxed bg-transparent"
             style={{ maxHeight: '120px', overflowY: 'auto' }}
             onInput={e => {
               const el = e.currentTarget

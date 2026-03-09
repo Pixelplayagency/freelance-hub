@@ -56,24 +56,24 @@ export default async function FreelancerTaskDetailPage({
   return (
     <div className="max-w-2xl">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <Link href="/freelancer/tasks" className="hover:text-gray-900 flex items-center gap-1">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+        <Link href="/freelancer/tasks" className="hover:text-foreground flex items-center gap-1">
           <ChevronLeft className="w-4 h-4" />
           My Tasks
         </Link>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
+      <div className="bg-card rounded-xl border border-border p-6 space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             {project && (
               <div className="flex items-center gap-1.5 mb-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: project.color }} />
-                <span className="text-xs text-gray-500 font-medium">{project.name}</span>
+                <span className="text-xs text-muted-foreground font-medium">{project.name}</span>
               </div>
             )}
-            <h1 className="text-xl font-semibold text-gray-900">{task.title}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{task.title}</h1>
           </div>
           {/* Freelancer can update status */}
           <FreelancerStatusUpdate
@@ -84,7 +84,7 @@ export default async function FreelancerTaskDetailPage({
 
         {/* Description */}
         {task.description && (
-          <p className="text-sm text-gray-600 leading-relaxed">{task.description}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">{task.description}</p>
         )}
 
         {/* Deadline */}
@@ -94,18 +94,18 @@ export default async function FreelancerTaskDetailPage({
             deadlineStatus === 'overdue' ? 'bg-red-50 border-red-100' :
             deadlineStatus === 'today' ? 'bg-amber-50 border-amber-100' :
             deadlineStatus === 'tomorrow' ? 'bg-amber-50/50 border-amber-100/60' :
-            'bg-gray-50 border-gray-100'
+            'bg-muted border-border'
           )}>
             <div className="flex items-center gap-1.5">
               <Calendar className={cn('w-3.5 h-3.5',
                 deadlineStatus === 'overdue' ? 'text-red-500' :
                 deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-500' :
-                'text-gray-400'
+                'text-muted-foreground'
               )} />
               <span className={cn('font-medium',
                 deadlineStatus === 'overdue' ? 'text-red-600' :
                 deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-600' :
-                'text-gray-700'
+                'text-foreground'
               )}>
                 {deadlineStatus === 'overdue' && 'Overdue · '}
                 {deadlineStatus === 'today' && 'Due today · '}
@@ -118,12 +118,12 @@ export default async function FreelancerTaskDetailPage({
                 <Clock className={cn('w-3.5 h-3.5',
                   deadlineStatus === 'overdue' ? 'text-red-400' :
                   deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-400' :
-                  'text-gray-400'
+                  'text-muted-foreground'
                 )} />
                 <span className={cn('font-semibold',
                   deadlineStatus === 'overdue' ? 'text-red-600' :
                   deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-600' :
-                  'text-gray-700'
+                  'text-foreground'
                 )}>{deadlineTime}</span>
               </div>
             )}
@@ -143,11 +143,11 @@ export default async function FreelancerTaskDetailPage({
             )
         }
 
-        <hr className="border-gray-100" />
+        <hr className="border-border" />
 
         {/* References */}
         <div>
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">References & Chat</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-3">References & Chat</h2>
           <TaskReferences
             taskId={taskId}
             references={(references ?? []) as TaskReference[]}

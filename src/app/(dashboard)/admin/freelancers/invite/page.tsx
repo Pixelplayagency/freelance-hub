@@ -14,9 +14,9 @@ export default function InviteFreelancerPage() {
           Freelancers
         </Link>
       </div>
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">Invite freelancer</h1>
-      <div className="bg-white rounded-xl border border-gray-100 p-6">
-        <p className="text-sm text-gray-500 mb-5">
+      <h1 className="text-xl font-semibold text-foreground mb-6">Invite freelancer</h1>
+      <div className="bg-card rounded-xl border border-border p-6">
+        <p className="text-sm text-muted-foreground mb-5">
           Send an invitation email. The freelancer will receive a link to create their account.
         </p>
         <InviteFreelancerForm />

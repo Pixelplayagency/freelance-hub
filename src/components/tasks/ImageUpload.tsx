@@ -66,7 +66,7 @@ export function ImageUpload({ taskId, references, isAdmin }: ImageUploadProps) {
   return (
     <div className="space-y-3">
       {references.length === 0 && (
-        <p className="text-sm text-gray-400">No images attached yet.</p>
+        <p className="text-sm text-muted-foreground">No images attached yet.</p>
       )}
 
       {/* Image grid */}
@@ -74,7 +74,7 @@ export function ImageUpload({ taskId, references, isAdmin }: ImageUploadProps) {
         {references.map(ref => (
           <div
             key={ref.id}
-            className="relative group aspect-video rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
+            className="relative group aspect-video rounded-lg overflow-hidden bg-muted border border-border"
             onMouseEnter={() => ref.storage_path && loadSignedUrl(ref.storage_path, ref.id)}
           >
             {signedUrls[ref.id] ? (
@@ -84,7 +84,7 @@ export function ImageUpload({ taskId, references, isAdmin }: ImageUploadProps) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
                 {ref.title ?? 'Image'}
               </div>
             )}
@@ -115,17 +115,17 @@ export function ImageUpload({ taskId, references, isAdmin }: ImageUploadProps) {
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
             className={cn(
-              'w-full border-2 border-dashed border-gray-200 rounded-lg p-6 text-center transition-colors hover:border-[#f24a49]/40 hover:bg-[#fff3f3]/30',
+              'w-full border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors hover:border-[#f24a49]/40 hover:bg-[#f24a49]/5',
               uploading && 'opacity-60 cursor-not-allowed'
             )}
           >
             {uploading ? (
-              <div className="flex flex-col items-center gap-2 text-gray-400">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
                 <Loader2 className="w-5 h-5 animate-spin" />
                 <span className="text-sm">Uploading…</span>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2 text-gray-400">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
                 <Upload className="w-5 h-5" />
                 <span className="text-sm">Click to upload image</span>
                 <span className="text-xs">PNG, JPG, GIF, WebP</span>

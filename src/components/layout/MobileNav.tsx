@@ -12,7 +12,7 @@ export function MobileNav({ role, userName, avatarUrl }: { role: UserRole; userN
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 lg:hidden">
+        <button className="p-2 rounded-lg hover:bg-muted text-muted-foreground lg:hidden">
           <Menu className="w-5 h-5" />
         </button>
       </SheetTrigger>

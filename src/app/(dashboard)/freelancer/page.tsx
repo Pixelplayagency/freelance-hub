@@ -37,8 +37,8 @@ export default async function FreelancerDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">My Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-0.5">{allTasks.length} task{allTasks.length !== 1 ? 's' : ''} assigned to you</p>
+        <h1 className="text-2xl font-bold text-foreground">My Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{allTasks.length} task{allTasks.length !== 1 ? 's' : ''} assigned to you</p>
       </div>
 
       {/* Alerts */}
@@ -64,13 +64,13 @@ export default async function FreelancerDashboardPage() {
         {stats.map(s => {
           const Icon = s.icon
           return (
-            <div key={s.label} className="bg-white rounded-xl border border-slate-200/70 shadow-sm p-5 flex flex-col gap-3">
+            <div key={s.label} className="bg-card rounded-xl border border-border shadow-sm p-5 flex flex-col gap-3">
               <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.gradient} flex items-center justify-center`}>
                 <Icon className="w-4 h-4 text-white" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-slate-900">{s.value}</div>
-                <div className="text-sm text-slate-500 mt-0.5">{s.label}</div>
+                <div className="text-3xl font-bold text-foreground">{s.value}</div>
+                <div className="text-sm text-muted-foreground mt-0.5">{s.label}</div>
               </div>
             </div>
           )
@@ -79,12 +79,12 @@ export default async function FreelancerDashboardPage() {
 
       {/* Active tasks */}
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Active Tasks</h2>
+        <h2 className="text-sm font-semibold text-foreground mb-3">Active Tasks</h2>
         {activeTasks.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200/70 shadow-sm flex flex-col items-center justify-center py-16 text-center">
-            <CheckCircle2 className="w-10 h-10 text-slate-200 mb-3" />
-            <p className="text-sm font-medium text-slate-500">All caught up!</p>
-            <p className="text-xs text-slate-400 mt-1">No active tasks assigned to you</p>
+          <div className="bg-card rounded-xl border border-border shadow-sm flex flex-col items-center justify-center py-16 text-center">
+            <CheckCircle2 className="w-10 h-10 text-muted mb-3" />
+            <p className="text-sm font-medium text-muted-foreground">All caught up!</p>
+            <p className="text-xs text-muted-foreground mt-1">No active tasks assigned to you</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -94,14 +94,14 @@ export default async function FreelancerDashboardPage() {
                 <Link
                   key={task.id}
                   href={`/freelancer/tasks/${task.id}`}
-                  className="flex items-center gap-3 p-4 bg-white rounded-xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow group"
+                  className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow group"
                 >
                   {project && (
                     <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-[#f24a49] transition-colors">{task.title}</p>
-                    {project && <p className="text-xs text-slate-400 mt-0.5">{project.name}</p>}
+                    <p className="text-sm font-semibold text-foreground truncate group-hover:text-[#f24a49] transition-colors">{task.title}</p>
+                    {project && <p className="text-xs text-muted-foreground mt-0.5">{project.name}</p>}
                   </div>
                   <TaskStatusBadge status={task.status} />
                   {task.due_date && (

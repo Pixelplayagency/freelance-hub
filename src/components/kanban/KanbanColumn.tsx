@@ -44,10 +44,10 @@ export function KanbanColumn({ column, tasks, projectId, isAdmin }: KanbanColumn
       {/* Column header */}
       <div className="flex items-center gap-2 mb-3 px-1">
         <div className={cn('w-2 h-2 rounded-full shrink-0', dot)} />
-        <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {column.label}
         </span>
-        <span className="ml-auto text-xs font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+        <span className="ml-auto text-xs font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
           {tasks.length}
         </span>
       </div>
@@ -56,9 +56,9 @@ export function KanbanColumn({ column, tasks, projectId, isAdmin }: KanbanColumn
       <div
         ref={setNodeRef}
         className={cn(
-          'flex-1 rounded-lg p-2 min-h-[120px] transition-all border border-[#EBEBEB] border-l-4 bg-white/60',
+          'flex-1 rounded-lg p-2 min-h-[120px] transition-all border border-border border-l-4 bg-card/60',
           accent,
-          isOver && 'ring-2 ring-[#f24a49]/40 ring-offset-1 bg-[#fff5f5]'
+          isOver && 'ring-2 ring-[#f24a49]/40 ring-offset-1 bg-[#f24a49]/5'
         )}
       >
         <SortableContext
@@ -78,7 +78,7 @@ export function KanbanColumn({ column, tasks, projectId, isAdmin }: KanbanColumn
         </SortableContext>
 
         {tasks.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-slate-200 rounded-lg text-xs text-slate-400 gap-1">
+          <div className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-border rounded-lg text-xs text-muted-foreground gap-1">
             <span>No tasks</span>
           </div>
         )}

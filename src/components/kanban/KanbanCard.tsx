@@ -64,7 +64,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
     >
       <div
         className={cn(
-          'group bg-white rounded-lg border border-[#EBEBEB] p-3 cursor-grab active:cursor-grabbing hover:shadow-sm hover:border-[#d4d4d4] transition-all',
+          'group bg-card rounded-lg border border-border p-3 cursor-grab active:cursor-grabbing hover:shadow-sm hover:border-[#d4d4d4] transition-all',
           isDragging && 'shadow-2xl rotate-1 scale-[1.02] opacity-90 cursor-grabbing',
           isDeleting && 'opacity-40 pointer-events-none'
         )}
@@ -74,7 +74,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
         <div className="flex items-start gap-1 mb-1.5">
           <Link
             href={taskHref}
-            className="flex-1 text-sm font-semibold text-slate-800 hover:text-[#f24a49] leading-snug line-clamp-2 transition-colors"
+            className="flex-1 text-sm font-semibold text-foreground hover:text-[#f24a49] leading-snug line-clamp-2 transition-colors"
             onClick={e => e.stopPropagation()}
           >
             {task.title}
@@ -83,7 +83,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
             <button
               onClick={handleDelete}
               title="Delete task"
-              className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all shrink-0 -mt-0.5"
+              className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-all shrink-0 -mt-0.5"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -91,7 +91,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
         </div>
 
         {task.description && (
-          <p className="text-xs text-slate-500 line-clamp-1 mb-2">{task.description}</p>
+          <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{task.description}</p>
         )}
 
         <div className="flex items-center justify-between mt-2">
@@ -101,7 +101,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
               {initials}
             </div>
           ) : (
-            <div className="w-6 h-6 rounded-full border-2 border-dashed border-slate-200 shrink-0" />
+            <div className="w-6 h-6 rounded-full border-2 border-dashed border-border shrink-0" />
           )}
 
           {/* Due date */}
