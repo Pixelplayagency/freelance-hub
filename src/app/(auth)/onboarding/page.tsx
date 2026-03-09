@@ -1,4 +1,8 @@
-import { LoginForm } from '@/components/auth/LoginForm'
+export const dynamic = 'force-dynamic'
+
+import { redirect } from 'next/navigation'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { OnboardingForm } from '@/components/auth/OnboardingForm'
 import { CheckCircle2 } from 'lucide-react'
 
 const FEATURES = [
@@ -7,7 +11,21 @@ const FEATURES = [
   'Stay aligned with the team and manage timelines in one place',
 ]
 
-export default function LoginPage() {
+export default async function OnboardingPage() {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', user.id)
+    .single()
+
+  // Already onboarded — send to their dashboard
+  if (profile?.full_name) redirect('/freelancer')
+
   return (
     <div className="min-h-screen flex">
       {/* Left panel — dark */}
@@ -24,10 +42,10 @@ export default function LoginPage() {
 
         <div>
           <h2 className="text-3xl font-bold text-white leading-snug mb-3">
-            Manage your work with clarity
+            Welcome to the team
           </h2>
           <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-            PixelFlow is our internal workspace for managing projects, tasks, and deadlines<br />across the Pixelplay team.
+            You've been invited to PixelFlow — set up your account to get started.
           </p>
           <ul className="space-y-3">
             {FEATURES.map(f => (
@@ -42,8 +60,8 @@ export default function LoginPage() {
         <p className="text-xs text-slate-600">&copy;PixelPlay Agency 2026</p>
       </div>
 
-      {/* Right panel — white form */}
-      <div className="flex-1 flex items-center justify-center bg-white px-8 py-12">
+      {/* Right panel — form */}
+      <div className="flex-1 flex items-center justify-center bg-white px-8 py-12 overflow-y-auto">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-8 lg:hidden">
@@ -56,10 +74,10 @@ export default function LoginPage() {
             <span className="font-semibold text-slate-900 text-sm">PixelFlow</span>
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h1>
-          <p className="text-sm text-slate-500 mb-8">Sign in to your account</p>
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">Set up your account</h1>
+          <p className="text-sm text-slate-500 mb-8">Complete your profile to access the platform</p>
 
-          <LoginForm />
+          <OnboardingForm email={user.email ?? ''} />
         </div>
       </div>
     </div>
