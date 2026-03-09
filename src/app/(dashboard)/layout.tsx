@@ -29,7 +29,11 @@ export default async function DashboardLayout({
   // Block pending and removed freelancers from the dashboard
   if (profile.role === 'freelancer') {
     if (profile.status === 'pending') redirect('/pending-approval')
-    if (profile.status === 'removed') redirect('/login')
+    if (profile.status === 'removed') {
+      // Sign out first to prevent redirect loop (middleware would send them back here)
+      await supabase.auth.signOut()
+      redirect('/login')
+    }
   }
 
   return (
