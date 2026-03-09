@@ -20,13 +20,20 @@ export function LoginForm() {
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       toast.error(error.message)
       setLoading(false)
       return
     }
-    router.push('/admin')
+    // Redirect based on role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single()
+    const destination = profile?.role === 'freelancer' ? '/freelancer' : '/admin'
+    router.push(destination)
     router.refresh()
   }
 
