@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Sidebar } from './Sidebar'
 import type { UserRole } from '@/lib/types/app.types'
 
-export function MobileNav({ role, userName }: { role: UserRole; userName: string | null }) {
+export function MobileNav({ role, userName, avatarUrl }: { role: UserRole; userName: string | null; avatarUrl?: string | null }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -17,7 +17,7 @@ export function MobileNav({ role, userName }: { role: UserRole; userName: string
         </button>
       </SheetTrigger>
       <SheetContent side="left" className="p-0 w-60">
-        <Sidebar role={role} userName={userName} />
+        <Sidebar role={role} userName={userName} avatarUrl={avatarUrl} />
       </SheetContent>
     </Sheet>
   )

@@ -36,7 +36,7 @@ const FREELANCER_NAV: NavItem[] = [
   { href: '/freelancer/profile', label: 'Profile', icon: UserCircle },
 ]
 
-export function Sidebar({ role, userName }: { role: UserRole; userName: string | null }) {
+export function Sidebar({ role, userName, avatarUrl }: { role: UserRole; userName: string | null; avatarUrl?: string | null }) {
   const pathname = usePathname()
   const supabase = useSupabase()
   const router = useRouter()
@@ -97,8 +97,10 @@ export function Sidebar({ role, userName }: { role: UserRole; userName: string |
       {/* User */}
       <div className="border-t px-3 py-4" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
         <div className="flex items-center gap-3 px-2 py-2 rounded-lg">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0" style={{ backgroundColor: '#f24a49' }}>
-            {initials}
+          <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-white shrink-0" style={{ backgroundColor: '#f24a49' }}>
+            {avatarUrl
+              ? <img src={avatarUrl} alt={userName ?? ''} className="w-full h-full object-cover" />
+              : initials}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">{userName ?? 'User'}</p>

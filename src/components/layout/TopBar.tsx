@@ -16,7 +16,7 @@ export async function TopBar() {
       .eq('read', false),
     supabase
       .from('profiles')
-      .select('role, full_name')
+      .select('role, full_name, avatar_url')
       .eq('id', user.id)
       .single(),
   ])
@@ -45,8 +45,10 @@ export async function TopBar() {
       </Link>
 
       {/* User Avatar */}
-      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white select-none" style={{ backgroundColor: '#f24a49' }}>
-        {initials}
+      <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-white select-none shrink-0" style={{ backgroundColor: '#f24a49' }}>
+        {profile?.avatar_url
+          ? <img src={profile.avatar_url} alt={profile.full_name ?? ''} className="w-full h-full object-cover" />
+          : initials}
       </div>
     </div>
   )

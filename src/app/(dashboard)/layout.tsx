@@ -41,14 +41,14 @@ export default async function DashboardLayout({
       <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
         {/* Desktop sidebar */}
         <div className="hidden lg:flex">
-          <Sidebar role={profile.role as 'admin' | 'freelancer'} userName={profile.full_name} />
+          <Sidebar role={profile.role as 'admin' | 'freelancer'} userName={profile.full_name} avatarUrl={profile.avatar_url} />
         </div>
 
         {/* Main content */}
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
           {/* TopBar with mobile hamburger */}
           <div className="flex items-center h-14 border-b border-slate-200 bg-white shrink-0 px-4 gap-3 shadow-sm">
-            <MobileNav role={profile.role as 'admin' | 'freelancer'} userName={profile.full_name} />
+            <MobileNav role={profile.role as 'admin' | 'freelancer'} userName={profile.full_name} avatarUrl={profile.avatar_url} />
             <div className="flex-1" />
             <TopBar />
           </div>
