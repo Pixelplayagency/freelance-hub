@@ -4,6 +4,8 @@ export type FreelancerStatus = 'pending' | 'active' | 'removed'
 
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed'
 
+export type TaskType = 'standard' | 'simple'
+
 export type ProjectStatus = 'active' | 'archived'
 
 export type ReferenceType = 'image' | 'link' | 'video' | 'note'
@@ -56,6 +58,7 @@ export interface Task {
   assigned_to: string | null
   due_date: string | null
   sort_order: number
+  task_type: TaskType
   created_by: string
   created_at: string
   updated_at: string

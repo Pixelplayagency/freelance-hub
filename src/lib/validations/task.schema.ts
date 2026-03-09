@@ -7,6 +7,7 @@ export const taskSchema = z.object({
   assigned_to: z.string().uuid().optional().nullable(),
   due_date: z.string().optional().nullable(),
   status: z.enum(['todo', 'in_progress', 'review', 'completed']).default('todo'),
+  task_type: z.enum(['standard', 'simple']).default('standard'),
 })
 
 export type TaskFormValues = z.infer<typeof taskSchema>

@@ -47,6 +47,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
     const t = task.due_date.slice(11, 16) // HH:MM
     return t === '00:00' ? '' : t
   })
+  const [taskType, setTaskType] = useState<'standard' | 'simple'>((task as any)?.task_type ?? 'standard')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -112,6 +113,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
           assigned_to: assignedTo === '__none__' ? null : assignedTo,
           due_date: deadlineValue,
           status: 'todo',
+          task_type: taskType,
         })
 
         // Upload pending files
@@ -341,6 +343,33 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
               <span className="text-xs">PNG, JPG, GIF, MP4, MOV</span>
             </div>
           </button>
+        </div>
+      )}
+
+      {/* Task type — only shown on creation */}
+      {!task && (
+        <div className="space-y-1.5">
+          <Label>Task type</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {(['standard', 'simple'] as const).map(type => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setTaskType(type)}
+                className={cn(
+                  'flex flex-col items-start gap-0.5 px-3 py-2.5 rounded-lg border text-left transition-all text-sm',
+                  taskType === type
+                    ? 'border-[#f24a49] bg-[#fff3f3] text-[#f24a49]'
+                    : 'border-gray-200 text-slate-600 hover:border-gray-300'
+                )}
+              >
+                <span className="font-medium capitalize">{type === 'standard' ? 'Standard' : 'Simple'}</span>
+                <span className="text-xs text-slate-400">
+                  {type === 'standard' ? 'Submit work for admin review' : 'Mark complete directly'}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

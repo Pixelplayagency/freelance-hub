@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { Bell } from 'lucide-react'
+import { ThemeToggle } from './ThemeToggle'
 
 export async function TopBar() {
   const supabase = await createSupabaseServerClient()
@@ -30,11 +31,14 @@ export async function TopBar() {
     : '?'
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
+      {/* Theme toggle */}
+      <ThemeToggle />
+
       {/* Notification Bell */}
       <Link
         href={notifHref}
-        className="relative p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
+        className="relative p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
       >
         <Bell className="w-5 h-5" />
         {(unreadCount ?? 0) > 0 && (
@@ -45,7 +49,7 @@ export async function TopBar() {
       </Link>
 
       {/* User Avatar */}
-      <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-white select-none shrink-0" style={{ backgroundColor: '#f24a49' }}>
+      <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-white select-none shrink-0 ml-1" style={{ backgroundColor: '#f24a49' }}>
         {profile?.avatar_url
           ? <img src={profile.avatar_url} alt={profile.full_name ?? ''} className="w-full h-full object-cover" />
           : initials}

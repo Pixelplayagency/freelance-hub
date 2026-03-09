@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, DM_Sans } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { SupabaseProvider } from '@/providers/SupabaseProvider'
+import { ThemeProvider } from 'next-themes'
 import './globals.css'
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -29,12 +30,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${plusJakarta.variable} ${dmSans.variable}`}>
-        <SupabaseProvider>
-          {children}
-        </SupabaseProvider>
-        <Toaster position="top-right" richColors />
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <SupabaseProvider>
+            {children}
+          </SupabaseProvider>
+          <Toaster position="top-right" richColors />
+        </ThemeProvider>
       </body>
     </html>
   )

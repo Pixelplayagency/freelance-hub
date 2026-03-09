@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { format, parseISO, isPast, isToday, isTomorrow } from 'date-fns'
 import { cn } from '@/lib/utils/cn'
 import type { TaskReference, TaskStatus } from '@/lib/types/app.types'
+import { MarkCompleteButton } from '@/components/tasks/MarkCompleteButton'
 
 export default async function FreelancerTaskDetailPage({
   params,
@@ -134,8 +135,13 @@ export default async function FreelancerTaskDetailPage({
           <DeadlineProgress createdAt={task.created_at} dueDate={task.due_date} />
         )}
 
-        {/* Submit work */}
-        <SubmitWorkSection taskId={taskId} status={task.status as TaskStatus} />
+        {/* Submit work — standard tasks only */}
+        {(task as any).task_type !== 'simple'
+          ? <SubmitWorkSection taskId={taskId} status={task.status as TaskStatus} />
+          : task.status !== 'completed' && (
+              <MarkCompleteButton taskId={taskId} />
+            )
+        }
 
         <hr className="border-gray-100" />
 
