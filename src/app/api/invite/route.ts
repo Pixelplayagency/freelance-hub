@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     // status='active' so admin-invited users are pre-approved
     const { data, error } = await serviceClient.auth.admin.inviteUserByEmail(email, {
       data: { role: 'freelancer', status: 'active' },
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/auth/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/onboarding`,
     })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })

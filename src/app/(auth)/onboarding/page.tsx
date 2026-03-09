@@ -11,7 +11,19 @@ const FEATURES = [
   'Stay aligned with the team and manage timelines in one place',
 ]
 
-export default async function OnboardingPage() {
+interface Props {
+  searchParams: Promise<{ code?: string }>
+}
+
+export default async function OnboardingPage({ searchParams }: Props) {
+  const { code } = await searchParams
+
+  // If Supabase sent a code (invite link clicked), exchange it via the callback
+  // then come back here without the code in the URL
+  if (code) {
+    redirect(`/auth/callback?code=${code}&next=/onboarding`)
+  }
+
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
