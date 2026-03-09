@@ -12,6 +12,7 @@ import {
   CheckSquare,
   LogOut,
   UserCircle,
+  ShieldCheck,
 } from 'lucide-react'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useRouter } from 'next/navigation'
@@ -26,6 +27,7 @@ const ADMIN_NAV: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
   { href: '/admin/freelancers', label: 'Freelancers', icon: Users },
+  { href: '/admin/admins/invite', label: 'Invite Admin', icon: ShieldCheck },
   { href: '/admin/notifications', label: 'Notifications', icon: Bell },
 ]
 
