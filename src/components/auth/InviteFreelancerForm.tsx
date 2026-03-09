@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import { Check, Copy } from 'lucide-react'
 
 export function InviteFreelancerForm() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
+  const [inviteLink, setInviteLink] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault()
@@ -21,29 +23,53 @@ export function InviteFreelancerForm() {
         body: JSON.stringify({ email }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Failed to send invite')
-      setSent(true)
-      toast.success(`Invite sent to ${email}`)
+      if (!res.ok) throw new Error(data.error ?? 'Failed to generate invite')
+      setInviteLink(data.link)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to send invite')
+      toast.error(err instanceof Error ? err.message : 'Failed to generate invite')
     } finally {
       setLoading(false)
     }
   }
 
-  if (sent) {
+  async function handleCopy() {
+    if (!inviteLink) return
+    await navigator.clipboard.writeText(inviteLink)
+    setCopied(true)
+    toast.success('Link copied!')
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (inviteLink) {
     return (
-      <div className="text-center py-4">
-        <div className="text-3xl mb-3">📨</div>
-        <h3 className="font-medium text-gray-900">Invite sent!</h3>
-        <p className="text-sm text-gray-500 mt-1">
-          An invitation email was sent to <strong>{email}</strong>
-        </p>
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-green-600">
+          <Check className="w-4 h-4" />
+          <span className="text-sm font-medium">Invite link generated for <strong>{email}</strong></span>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500 mb-2">Share this link with the freelancer:</p>
+          <div className="flex gap-2">
+            <Input
+              readOnly
+              value={inviteLink}
+              className="text-xs font-mono bg-gray-50"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={handleCopy}
+            >
+              {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+            </Button>
+          </div>
+          <p className="text-xs text-gray-400 mt-1.5">Link expires in 24 hours.</p>
+        </div>
         <Button
           variant="ghost"
           size="sm"
-          className="mt-4"
-          onClick={() => { setSent(false); setEmail('') }}
+          onClick={() => { setInviteLink(null); setEmail('') }}
         >
           Invite another
         </Button>
@@ -65,7 +91,7 @@ export function InviteFreelancerForm() {
         />
       </div>
       <Button type="submit" className="w-full" style={{ backgroundColor: '#f24a49' }} disabled={loading}>
-        {loading ? 'Sending…' : 'Send invitation'}
+        {loading ? 'Generating…' : 'Generate invite link'}
       </Button>
     </form>
   )

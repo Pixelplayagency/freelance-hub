@@ -24,15 +24,19 @@ export async function POST(request: Request) {
     // Use service client for admin API call
     const serviceClient = createSupabaseServiceClient()
 
-    // status='active' so admin-invited users are pre-approved
-    const { data, error } = await serviceClient.auth.admin.inviteUserByEmail(email, {
-      data: { role: 'freelancer', status: 'active' },
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/onboarding`,
+    // Generate invite link — admin copies and shares it manually (no email required)
+    const { data, error } = await serviceClient.auth.admin.generateLink({
+      type: 'invite',
+      email,
+      options: {
+        data: { role: 'freelancer', status: 'active' },
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/onboarding`,
+      },
     })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
-    return NextResponse.json({ success: true, userId: data.user.id })
+    return NextResponse.json({ success: true, link: data.properties.action_link })
   } catch (err) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
