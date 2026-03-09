@@ -12,7 +12,7 @@ import { Eye, EyeOff } from 'lucide-react'
 export function LoginForm() {
   const supabase = useSupabase()
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -20,19 +20,28 @@ export function LoginForm() {
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+
+    // Resolve username → email
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('email, role')
+      .eq('username', username.toLowerCase())
+      .single()
+
+    if (profileError || !profile) {
+      toast.error('Username not found')
+      setLoading(false)
+      return
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email: profile.email, password })
     if (error) {
       toast.error(error.message)
       setLoading(false)
       return
     }
-    // Redirect based on role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.user.id)
-      .single()
-    const destination = profile?.role === 'freelancer' ? '/freelancer' : '/admin'
+
+    const destination = profile.role === 'freelancer' ? '/freelancer' : '/admin'
     router.push(destination)
     router.refresh()
   }
@@ -40,15 +49,15 @@ export function LoginForm() {
   return (
     <form onSubmit={handleEmailLogin} className="space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="username">Username</Label>
         <Input
-          id="email"
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
+          id="username"
+          type="text"
+          placeholder="your username"
+          value={username}
+          onChange={e => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))}
           required
-          autoComplete="email"
+          autoComplete="username"
         />
       </div>
       <div className="space-y-1.5">
