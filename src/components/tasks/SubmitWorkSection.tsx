@@ -2,7 +2,6 @@
 
 import { useRef, useState } from 'react'
 import { CheckCircle2, Link2, Loader2, Send, Upload, X } from 'lucide-react'
-import { getSignedUploadUrl } from '@/lib/actions/upload.actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
 import { compressImage, formatFileSize } from '@/lib/utils/compressImage'
@@ -77,19 +76,21 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
     }
     setSubmitting(true)
     try {
-      // Upload each file directly to Supabase storage via signed URL
-      const uploads: { type: 'image' | 'video'; path: string; name: string }[] = []
+      // Upload each file directly to Cloudinary CDN
+      const urls: { type: 'image' | 'video'; url: string; name: string }[] = []
       for (const file of pendingFiles) {
-        const { signedUrl, path } = await getSignedUploadUrl(taskId, file.name)
-        const res = await fetch(signedUrl, {
-          method: 'PUT',
-          body: file,
-          headers: { 'Content-Type': file.type },
-        })
-        if (!res.ok) throw new Error(`Failed to upload ${file.name}`)
-        uploads.push({
+        const fd = new FormData()
+        fd.append('file', file)
+        fd.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!)
+        const uploadRes = await fetch(
+          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/auto/upload`,
+          { method: 'POST', body: fd }
+        )
+        if (!uploadRes.ok) throw new Error(`Failed to upload ${file.name}`)
+        const { secure_url } = await uploadRes.json()
+        urls.push({
           type: file.type.startsWith('image/') ? 'image' : 'video',
-          path,
+          url: secure_url,
           name: file.name,
         })
       }
@@ -100,7 +101,7 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           taskId,
-          uploads,
+          urls,
           link: finalLink.trim() || null,
         }),
       })

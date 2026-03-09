@@ -5,9 +5,9 @@ import { revalidatePath } from 'next/cache'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { taskId, uploads, link } = body as {
+    const { taskId, urls, link } = body as {
       taskId: string
-      uploads: { type: 'image' | 'video'; path: string; name: string }[]
+      urls: { type: 'image' | 'video'; url: string; name: string }[]
       link?: string | null
     }
 
@@ -33,14 +33,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Use service client for inserts to bypass the restrictive RLS type policy
-    const serviceClient = await createSupabaseServiceClient()
+    const serviceClient = createSupabaseServiceClient()
 
     // Insert task_reference row for each uploaded file
-    for (const upload of uploads ?? []) {
+    for (const upload of urls ?? []) {
       const { error } = await serviceClient.from('task_references').insert({
         task_id: taskId,
         type: upload.type,
-        storage_path: upload.path,
+        url: upload.url,
         title: `[Final] ${upload.name}`,
         created_by: user.id,
       })

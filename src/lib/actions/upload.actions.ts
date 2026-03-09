@@ -118,8 +118,8 @@ export async function getTaskSubmittedFiles(taskId: string) {
 
   const result: { ref: typeof refs[number]; signedUrl: string | null }[] = []
   for (const ref of refs) {
-    let signedUrl: string | null = null
-    if (ref.storage_path) {
+    let signedUrl: string | null = ref.url ?? null
+    if (!signedUrl && ref.storage_path) {
       const { data } = await supabase.storage
         .from('task-attachments')
         .createSignedUrl(ref.storage_path, 3600)
