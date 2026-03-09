@@ -104,10 +104,12 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
           const data = JSON.parse(xhr.responseText)
           resolve(data.secure_url)
         } else {
-          reject(new Error(`Failed to upload ${file.name}`))
+          let msg = `Upload failed (${xhr.status})`
+          try { msg = JSON.parse(xhr.responseText)?.error?.message ?? msg } catch {}
+          reject(new Error(msg))
         }
       }
-      xhr.onerror = () => reject(new Error(`Failed to upload ${file.name}`))
+      xhr.onerror = () => reject(new Error(`Network error uploading ${file.name}`))
       xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`)
       xhr.send(fd)
     })
@@ -120,6 +122,9 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
     }
     setSubmitting(true)
     try {
+      if (!CLOUD_NAME || !UPLOAD_PRESET) {
+        throw new Error('Cloudinary env vars missing — restart the dev server')
+      }
       const urls: { type: 'image' | 'video'; url: string; name: string }[] = []
       for (let i = 0; i < pendingFiles.length; i++) {
         const file = pendingFiles[i]
