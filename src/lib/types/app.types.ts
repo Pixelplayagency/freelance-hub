@@ -1,5 +1,7 @@
 export type UserRole = 'admin' | 'freelancer'
 
+export type FreelancerStatus = 'pending' | 'active' | 'removed'
+
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed'
 
 export type ProjectStatus = 'active' | 'archived'
@@ -28,6 +30,7 @@ export interface Profile {
   full_name: string | null
   avatar_url: string | null
   role: UserRole
+  status: FreelancerStatus
   created_at: string
   updated_at: string
 }

@@ -26,6 +26,12 @@ export default async function DashboardLayout({
 
   if (!profile) redirect('/login')
 
+  // Block pending and removed freelancers from the dashboard
+  if (profile.role === 'freelancer') {
+    if (profile.status === 'pending') redirect('/pending-approval')
+    if (profile.status === 'removed') redirect('/login')
+  }
+
   return (
     <UserProvider user={profile as Profile}>
       <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
