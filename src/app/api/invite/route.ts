@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       email,
       options: {
         data: { role: 'freelancer', status: 'active' },
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/onboarding`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/auth/callback?next=/onboarding`,
       },
     })
 
