@@ -35,7 +35,8 @@ export async function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname
 
     // Redirect unauthenticated users away from protected routes (including root)
-    if (!user && (path === '/' || path === '/onboarding' || path.startsWith('/admin') || path.startsWith('/freelancer'))) {
+    // /join/[token] is public — anyone with a valid invite link can access it
+    if (!user && !path.startsWith('/join/') && (path === '/' || path === '/onboarding' || path.startsWith('/admin') || path.startsWith('/freelancer'))) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 

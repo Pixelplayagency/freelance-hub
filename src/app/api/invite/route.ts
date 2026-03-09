@@ -3,9 +3,6 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json()
-    if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 })
-
     // Use session client to verify requester is admin
     const sessionClient = await createSupabaseServerClient()
     const { data: { user } } = await sessionClient.auth.getUser()
@@ -21,22 +18,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Admin only' }, { status: 403 })
     }
 
-    // Use service client for admin API call
+    // Use service client to insert token (bypasses RLS)
     const serviceClient = createSupabaseServiceClient()
 
-    // Generate invite link — admin copies and shares it manually (no email required)
-    const { data, error } = await serviceClient.auth.admin.generateLink({
-      type: 'invite',
-      email,
-      options: {
-        data: { role: 'freelancer', status: 'active' },
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/auth/callback?next=/onboarding`,
-      },
-    })
+    const { data, error } = await serviceClient
+      .from('invite_tokens')
+      .insert({ created_by: user.id })
+      .select('token')
+      .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
-    return NextResponse.json({ success: true, link: data.properties.action_link })
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+    const link = `${siteUrl}/join/${data.token}`
+
+    return NextResponse.json({ success: true, link })
   } catch (err) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
