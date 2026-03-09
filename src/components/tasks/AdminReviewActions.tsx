@@ -1,15 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  CheckCircle2, ChevronDown, ChevronUp,
-  Download, ExternalLink, Eye, FileVideo, Loader2, Paperclip, RotateCcw,
+  CheckCircle2, Download, ExternalLink, Eye, FileVideo, Loader2, RotateCcw,
 } from 'lucide-react'
 import { setTaskStatus } from '@/lib/actions/task.actions'
 import { getTaskSubmittedFiles } from '@/lib/actions/upload.actions'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils/cn'
 
 interface SubmittedFile {
   ref: {
@@ -27,30 +25,39 @@ interface AdminReviewActionsProps {
   assigneeName?: string | null
 }
 
+async function downloadFile(url: string, name: string) {
+  try {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = name
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(a.href)
+  } catch {
+    window.open(url, '_blank')
+  }
+}
+
 export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<'approve' | 'revision' | null>(null)
-  const [showWork, setShowWork] = useState(false)
-  const [loadState, setLoadState] = useState<'idle' | 'loading' | 'loaded'>('idle')
+  const [loadState, setLoadState] = useState<'loading' | 'loaded' | 'error'>('loading')
   const [files, setFiles] = useState<SubmittedFile[]>([])
+  const [downloading, setDownloading] = useState<string | null>(null)
 
-  async function toggleWork() {
-    if (!showWork && loadState === 'idle') {
-      setShowWork(true)
-      setLoadState('loading')
-      try {
-        const result = await getTaskSubmittedFiles(taskId)
+  useEffect(() => {
+    getTaskSubmittedFiles(taskId)
+      .then(result => {
         setFiles(result as SubmittedFile[])
         setLoadState('loaded')
-      } catch {
-        toast.error('Failed to load submitted files')
-        setLoadState('idle')
-        setShowWork(false)
-      }
-    } else {
-      setShowWork(v => !v)
-    }
-  }
+      })
+      .catch(() => {
+        setLoadState('error')
+      })
+  }, [taskId])
 
   async function handleApprove() {
     setLoading('approve')
@@ -76,6 +83,12 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
     }
   }
 
+  async function handleDownload(url: string, name: string) {
+    setDownloading(url)
+    await downloadFile(url, name)
+    setDownloading(null)
+  }
+
   const media = files.filter(f => f.ref.type === 'image' || f.ref.type === 'video')
   const links = files.filter(f => f.ref.type === 'link')
   const displayName = assigneeName ?? 'Freelancer'
@@ -89,62 +102,46 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
         <span className="ml-auto text-xs text-amber-600">{displayName} submitted work</span>
       </div>
 
-      {/* View submitted work toggle */}
-      <div className="px-4 pt-3 pb-0">
-        <button
-          type="button"
-          onClick={toggleWork}
-          className={cn(
-            'w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors',
-            showWork
-              ? 'bg-amber-100 border-amber-300 text-amber-800'
-              : 'bg-white border-amber-200 text-amber-700 hover:bg-amber-100/60'
-          )}
-        >
-          <Paperclip className="w-4 h-4 shrink-0" />
-          <span>View submitted work</span>
-          {loadState === 'loading' && <Loader2 className="w-3.5 h-3.5 ml-1 animate-spin" />}
-          {loadState === 'loaded' && files.length > 0 && (
-            <span className="ml-1 text-xs font-normal opacity-70">
-              ({files.length} {files.length === 1 ? 'item' : 'items'})
-            </span>
-          )}
-          {showWork
-            ? <ChevronUp className="w-4 h-4 ml-auto" />
-            : <ChevronDown className="w-4 h-4 ml-auto" />}
-        </button>
-      </div>
+      {/* Submitted work — auto-expanded */}
+      <div className="mx-4 mt-3 rounded-lg border border-amber-200 bg-white overflow-hidden">
+        {loadState === 'loading' && (
+          <div className="flex items-center justify-center gap-2 py-6 text-xs text-gray-400">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading submitted files…
+          </div>
+        )}
 
-      {/* Submitted work panel */}
-      {showWork && loadState === 'loaded' && (
-        <div className="mx-4 mt-2 rounded-lg border border-amber-200 bg-white/80 overflow-hidden">
-          {files.length === 0 ? (
-            <p className="text-xs text-gray-400 text-center py-5">
-              No files or links were submitted yet.
-            </p>
-          ) : (
-            <div className="p-3 space-y-4">
+        {loadState === 'error' && (
+          <p className="text-xs text-red-400 text-center py-5">Failed to load submitted files.</p>
+        )}
 
-              {/* Media grid — images and videos in one grid */}
-              {media.length > 0 && (
-                <div>
-                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
-                    Files ({media.length})
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {media.map(({ ref, signedUrl }) => {
-                      const isVideo = ref.type === 'video'
-                      const label = ref.title?.replace('[Final] ', '') ?? (isVideo ? 'Video' : 'Image')
-                      return (
-                        <div
-                          key={ref.id}
-                          className="relative group rounded-lg overflow-hidden border border-gray-200 bg-gray-900"
-                          style={{ aspectRatio: '16/9' }}
-                        >
+        {loadState === 'loaded' && files.length === 0 && (
+          <p className="text-xs text-gray-400 text-center py-5">No files or links were submitted yet.</p>
+        )}
+
+        {loadState === 'loaded' && files.length > 0 && (
+          <div className="p-3 space-y-4">
+
+            {/* Media grid */}
+            {media.length > 0 && (
+              <div>
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  Files ({media.length})
+                </p>
+                <div className={media.length === 1 ? 'flex flex-col gap-2' : 'grid grid-cols-2 gap-3'}>
+                  {media.map(({ ref, signedUrl }) => {
+                    const isVideo = ref.type === 'video'
+                    const label = ref.title?.replace('[Final] ', '') ?? (isVideo ? 'Video' : 'Image')
+                    const fileUrl = signedUrl ?? ref.url
+
+                    return (
+                      <div key={ref.id} className="rounded-lg overflow-hidden border border-gray-200 bg-gray-900">
+                        {/* Media preview */}
+                        <div style={{ aspectRatio: '16/9' }} className="relative">
                           {isVideo ? (
-                            signedUrl ? (
+                            fileUrl ? (
                               <video
-                                src={signedUrl}
+                                src={fileUrl}
                                 controls
                                 preload="metadata"
                                 className="w-full h-full object-contain"
@@ -156,12 +153,8 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
                               </div>
                             )
                           ) : (
-                            signedUrl ? (
-                              <img
-                                src={signedUrl}
-                                alt={label}
-                                className="w-full h-full object-cover"
-                              />
+                            fileUrl ? (
+                              <img src={fileUrl} alt={label} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400 p-2 text-center bg-gray-100">
                                 {label}
@@ -170,71 +163,73 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
                           )}
 
                           {/* Type badge */}
-                          <div className="absolute top-1 left-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-medium pointer-events-none">
+                          <div className="absolute top-2 left-2 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-medium pointer-events-none">
                             {isVideo ? 'VID' : 'IMG'}
                           </div>
-
-                          {/* View + Download buttons — appear on hover */}
-                          {signedUrl && (
-                            <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <a
-                                href={signedUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title="View full size"
-                                className="flex items-center justify-center w-7 h-7 rounded bg-black/60 hover:bg-black/80 transition-colors"
-                                onClick={e => e.stopPropagation()}
-                              >
-                                <Eye className="w-3.5 h-3.5 text-white" />
-                              </a>
-                              <a
-                                href={signedUrl}
-                                download={label}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title="Download"
-                                className="flex items-center justify-center w-7 h-7 rounded bg-black/60 hover:bg-black/80 transition-colors"
-                                onClick={e => e.stopPropagation()}
-                              >
-                                <Download className="w-3.5 h-3.5 text-white" />
-                              </a>
-                            </div>
-                          )}
                         </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
 
-              {/* Delivery links */}
-              {links.length > 0 && (
-                <div>
-                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
-                    Delivery Links ({links.length})
-                  </p>
-                  <div className="space-y-1.5">
-                    {links.map(({ ref }) => (
-                      <a
-                        key={ref.id}
-                        href={ref.url ?? '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-xs text-blue-600 hover:bg-blue-50 hover:border-blue-100 transition-colors group"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate flex-1 group-hover:underline">{ref.url}</span>
-                        <span className="shrink-0 text-gray-400">Open →</span>
-                      </a>
-                    ))}
-                  </div>
+                        {/* Always-visible action bar */}
+                        {fileUrl && (
+                          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-t border-gray-100">
+                            <span className="text-xs text-gray-500 truncate flex-1">{label}</span>
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="View full size"
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white border border-gray-200 text-xs text-gray-600 hover:bg-gray-100 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              View
+                            </a>
+                            <button
+                              type="button"
+                              title="Download"
+                              onClick={() => handleDownload(fileUrl, label)}
+                              disabled={downloading === fileUrl}
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white border border-gray-200 text-xs text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                            >
+                              {downloading === fileUrl
+                                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                : <Download className="w-3.5 h-3.5" />}
+                              Download
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
-              )}
+              </div>
+            )}
 
-            </div>
-          )}
-        </div>
-      )}
+            {/* Delivery links */}
+            {links.length > 0 && (
+              <div>
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  Delivery Links ({links.length})
+                </p>
+                <div className="space-y-1.5">
+                  {links.map(({ ref }) => (
+                    <a
+                      key={ref.id}
+                      href={ref.url ?? '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-100 text-xs text-blue-600 hover:bg-blue-50 hover:border-blue-100 transition-colors group"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate flex-1 group-hover:underline">{ref.url}</span>
+                      <span className="shrink-0 text-gray-400">Open →</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
+        )}
+      </div>
 
       {/* Action buttons */}
       <div className="px-4 py-3 flex items-center gap-3 mt-1">

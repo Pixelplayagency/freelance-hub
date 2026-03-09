@@ -1,13 +1,15 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { CheckCircle2, Link2, Loader2, Send, Upload, X } from 'lucide-react'
+import { CheckCircle2, FileVideo, Link2, Loader2, Send, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
 import { compressImage, formatFileSize } from '@/lib/utils/compressImage'
 import type { TaskStatus } from '@/lib/types/app.types'
 
 const MAX_VIDEO_BYTES = 500 * 1024 * 1024 // 500 MB
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
+const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
 
 interface SubmitWorkSectionProps {
   taskId: string
@@ -18,9 +20,10 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const [finalLink, setFinalLink] = useState('')
-  const [showLinkInput, setShowLinkInput] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<Record<number, number>>({})
 
   if (status === 'completed') {
     return (
@@ -69,6 +72,47 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
     setPendingFiles(prev => [...prev, ...processed])
   }
 
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault()
+    setDragOver(true)
+  }
+
+  function handleDragLeave() {
+    setDragOver(false)
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setDragOver(false)
+    handleFileSelect(e.dataTransfer.files)
+  }
+
+  async function uploadToCloudinary(file: File, index: number): Promise<string> {
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('upload_preset', UPLOAD_PRESET)
+
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setUploadProgress(prev => ({ ...prev, [index]: Math.round(e.loaded / e.total * 100) }))
+        }
+      }
+      xhr.onload = () => {
+        if (xhr.status < 300) {
+          const data = JSON.parse(xhr.responseText)
+          resolve(data.secure_url)
+        } else {
+          reject(new Error(`Failed to upload ${file.name}`))
+        }
+      }
+      xhr.onerror = () => reject(new Error(`Failed to upload ${file.name}`))
+      xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`)
+      xhr.send(fd)
+    })
+  }
+
   async function handleSubmit() {
     if (pendingFiles.length === 0 && !finalLink.trim()) {
       toast.error('Please upload a file or add a link before submitting')
@@ -76,18 +120,10 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
     }
     setSubmitting(true)
     try {
-      // Upload each file directly to Cloudinary CDN
       const urls: { type: 'image' | 'video'; url: string; name: string }[] = []
-      for (const file of pendingFiles) {
-        const fd = new FormData()
-        fd.append('file', file)
-        fd.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!)
-        const uploadRes = await fetch(
-          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/auto/upload`,
-          { method: 'POST', body: fd }
-        )
-        if (!uploadRes.ok) throw new Error(`Failed to upload ${file.name}`)
-        const { secure_url } = await uploadRes.json()
+      for (let i = 0; i < pendingFiles.length; i++) {
+        const file = pendingFiles[i]
+        const secure_url = await uploadToCloudinary(file, i)
         urls.push({
           type: file.type.startsWith('image/') ? 'image' : 'video',
           url: secure_url,
@@ -95,15 +131,10 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
         })
       }
 
-      // Single API call — saves all DB records + changes status to review
       const res = await fetch('/api/submit-work', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskId,
-          urls,
-          link: finalLink.trim() || null,
-        }),
+        body: JSON.stringify({ taskId, urls, link: finalLink.trim() || null }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Submission failed')
@@ -113,15 +144,25 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Submission failed')
       setSubmitting(false)
+      setUploadProgress({})
     }
   }
+
+  const hasContent = pendingFiles.length > 0 || finalLink.trim().length > 0
 
   return (
     <div className="rounded-xl border border-gray-100 overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
         <Send className="w-4 h-4" style={{ color: '#f24a49' }} />
-        <span className="text-sm font-semibold text-gray-800">Submit your work</span>
+        <span className="text-sm font-semibold text-gray-800">
+          Submit your work
+          {pendingFiles.length > 0 && (
+            <span className="ml-1.5 text-xs font-normal text-gray-400">
+              ({pendingFiles.length} {pendingFiles.length === 1 ? 'file' : 'files'})
+            </span>
+          )}
+        </span>
       </div>
 
       <div className="p-4 space-y-3 bg-white">
@@ -129,29 +170,49 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
         {pendingFiles.length > 0 && (
           <div className="grid grid-cols-3 gap-2">
             {pendingFiles.map((file, i) => (
-              <div key={i} className="relative group aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                {file.type.startsWith('image/') ? (
-                  <img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-500 p-1 text-center leading-tight">{file.name}</div>
-                )}
-                {/* File size badge */}
-                <div className="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1 py-0.5 rounded pointer-events-none">
-                  {formatFileSize(file.size)}
+              <div key={i} className="relative group">
+                <div className="aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-100 relative">
+                  {file.type.startsWith('image/') ? (
+                    <img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-gray-400 p-2">
+                      <FileVideo className="w-5 h-5" />
+                      <span className="text-[9px] text-center leading-tight text-gray-500 line-clamp-2">{file.name}</span>
+                    </div>
+                  )}
+                  {/* File size badge */}
+                  <div className="absolute bottom-1 left-1 bg-black/60 text-white text-[9px] px-1 py-0.5 rounded pointer-events-none">
+                    {formatFileSize(file.size)}
+                  </div>
+                  {/* Remove button */}
+                  {!submitting && (
+                    <button
+                      type="button"
+                      onClick={() => setPendingFiles(p => p.filter((_, j) => j !== i))}
+                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 rounded-full bg-white/90 text-gray-500 hover:text-red-500 transition-all"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setPendingFiles(p => p.filter((_, j) => j !== i))}
-                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 rounded-full bg-white/90 text-gray-500 hover:text-red-500 transition-all"
-                >
-                  <X className="w-3 h-3" />
-                </button>
+                {/* Upload progress bar */}
+                {submitting && (
+                  <div className="mt-1 h-1 rounded-full bg-gray-200 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-150"
+                      style={{ width: `${uploadProgress[i] ?? 0}%`, backgroundColor: '#f24a49' }}
+                    />
+                  </div>
+                )}
+                {submitting && uploadProgress[i] !== undefined && (
+                  <p className="text-[9px] text-gray-400 text-center mt-0.5">{uploadProgress[i]}%</p>
+                )}
               </div>
             ))}
           </div>
         )}
 
-        {/* Upload zone */}
+        {/* Upload zone with drag & drop */}
         <input
           ref={fileInputRef}
           type="file"
@@ -163,57 +224,55 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="w-full border-2 border-dashed border-gray-200 rounded-lg py-4 hover:border-[#f24a49]/40 hover:bg-[#fff3f3]/30 transition-colors"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          disabled={submitting}
+          className={cn(
+            'w-full border-2 border-dashed rounded-lg py-4 transition-colors disabled:opacity-50',
+            dragOver
+              ? 'border-[#f24a49] bg-[#fff3f3]/60'
+              : 'border-gray-200 hover:border-[#f24a49]/40 hover:bg-[#fff3f3]/30'
+          )}
         >
           <div className="flex flex-col items-center gap-1.5 text-gray-400">
-            <Upload className="w-5 h-5" />
-            <span className="text-xs font-medium">Upload final file</span>
-            <span className="text-[10px]">Image or video</span>
+            <Upload className={cn('w-5 h-5', dragOver && 'text-[#f24a49]')} />
+            <span className="text-xs font-medium">{dragOver ? 'Drop to add' : 'Upload final file'}</span>
+            <span className="text-[10px]">Image or video · drag & drop or click</span>
           </div>
         </button>
 
-        {/* Final link */}
-        {showLinkInput ? (
-          <div className="flex gap-2">
-            <input
-              type="url"
-              placeholder="https://drive.google.com/..."
-              value={finalLink}
-              onChange={e => setFinalLink(e.target.value)}
-              autoFocus
-              className="flex-1 text-sm border border-input rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#f24a49]/20 focus:border-[#f24a49]"
-            />
-            {finalLink && (
-              <button type="button" onClick={() => { setFinalLink(''); setShowLinkInput(false) }}
-                className="text-gray-400 hover:text-gray-600 px-1">
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShowLinkInput(true)}
-            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-slate-700 transition-colors"
-          >
-            <Link2 className="w-3.5 h-3.5" />
-            Add a delivery link (Drive, Dropbox, etc.)
-          </button>
-        )}
+        {/* Delivery link — always visible */}
+        <div className="flex items-center gap-2">
+          <Link2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+          <input
+            type="url"
+            placeholder="Delivery link (Drive, Dropbox…) optional"
+            value={finalLink}
+            onChange={e => setFinalLink(e.target.value)}
+            disabled={submitting}
+            className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#f24a49]/20 focus:border-[#f24a49] placeholder:text-gray-300 disabled:opacity-50"
+          />
+          {finalLink && (
+            <button type="button" onClick={() => setFinalLink('')} className="text-gray-400 hover:text-gray-600">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
 
         {/* Submit button */}
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={submitting || (pendingFiles.length === 0 && !finalLink.trim())}
+          disabled={submitting || !hasContent}
           className={cn(
             'w-full py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity',
-            (pendingFiles.length === 0 && !finalLink.trim()) ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-90'
+            !hasContent ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-90'
           )}
           style={{ backgroundColor: '#f24a49' }}
         >
           {submitting ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</>
+            <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</>
           ) : (
             <><Send className="w-4 h-4" /> Send to Review</>
           )}
