@@ -1,29 +1,11 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { FolderKanban, CheckCircle2, Clock, AlertCircle, ArrowUpRight, Plus, TrendingUp, Users } from 'lucide-react'
+import { FolderKanban, CheckCircle2, Clock, AlertCircle, ArrowUpRight, Plus, Users } from 'lucide-react'
 import Link from 'next/link'
 import { isOverdue } from '@/lib/utils/date'
 import { TaskStatusBadge } from '@/components/tasks/TaskStatusBadge'
 import type { TaskStatus } from '@/lib/types/app.types'
 
-const RING_R = 26
-const RING_CIRC = 2 * Math.PI * RING_R
-
-function ProgressRing({ pct, color }: { pct: number; color: string }) {
-  const offset = RING_CIRC * (1 - pct / 100)
-  return (
-    <svg width="68" height="68" viewBox="0 0 68 68" style={{ transform: 'rotate(-90deg)' }}>
-      <circle cx="34" cy="34" r={RING_R} fill="none" stroke="oklch(0.92 0 0)" strokeWidth="5" />
-      <circle
-        cx="34" cy="34" r={RING_R} fill="none"
-        stroke={color} strokeWidth="5"
-        strokeDasharray={RING_CIRC}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
 
 export default async function AdminDashboardPage() {
   const supabase = await createSupabaseServerClient()
@@ -40,9 +22,8 @@ export default async function AdminDashboardPage() {
     supabase
       .from('projects')
       .select('id, name, color, status')
-      .eq('status', 'active')
       .order('created_at', { ascending: false })
-      .limit(6),
+      .limit(20),
     supabase
       .from('tasks')
       .select('id, title, status, due_date, created_at, project:projects(id, name, color), assignee:profiles!assigned_to(id, full_name, avatar_url)'),
@@ -51,7 +32,7 @@ export default async function AdminDashboardPage() {
       .select('id, full_name, avatar_url, username')
       .eq('role', 'freelancer')
       .eq('status', 'active')
-      .limit(5),
+      .limit(20),
   ])
 
   const tasks = allTasks ?? []
@@ -86,6 +67,15 @@ export default async function AdminDashboardPage() {
     ...f,
     currentTask: tasks.find(t => (t.assignee as any)?.id === f.id && t.status !== 'completed') ?? null,
   }))
+
+  const freelancerOutput = (freelancers ?? []).map(f => {
+    const myTasks = tasks.filter(t => (t.assignee as any)?.id === f.id)
+    const done = myTasks.filter(t => t.status === 'completed').length
+    const total = myTasks.length
+    return { ...f, done, total, pct: total > 0 ? Math.round((done / total) * 100) : 0 }
+  }).sort((a, b) => b.done - a.done)
+
+  const completedProjects = projectProgress.filter(p => p.total > 0 && p.pct === 100)
 
   const statCards = [
     {
@@ -233,44 +223,44 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Recent Projects */}
+        {/* Delivered Work */}
         <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-foreground">Projects</h2>
-            <Link
-              href="/admin/projects/new"
-              className="flex items-center gap-1 text-xs text-muted-foreground border border-border rounded-lg px-2.5 py-1 hover:bg-muted transition-colors"
-            >
-              <Plus className="w-3 h-3" /> New
-            </Link>
+            <h2 className="text-sm font-semibold text-foreground">Delivered Work</h2>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           </div>
-          {projectProgress.length === 0 ? (
+          {freelancerOutput.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
-                <FolderKanban className="w-6 h-6 text-muted-foreground/40" />
+                <Users className="w-6 h-6 text-muted-foreground/40" />
               </div>
-              <p className="text-sm font-medium text-foreground">No projects yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Create your first project to get started</p>
+              <p className="text-sm font-medium text-foreground">No freelancers yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Invite team members to see delivery stats</p>
             </div>
           ) : (
-            <div className="space-y-1">
-              {projectProgress.map(p => (
-                <Link
-                  key={p.id}
-                  href={`/admin/projects/${p.id}`}
-                  className="flex items-center gap-3 group px-2 py-2.5 rounded-xl hover:bg-muted transition-colors -mx-2"
-                >
-                  <div className="w-1.5 h-9 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate group-hover:text-[#f24a49] transition-colors">{p.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${p.pct}%`, backgroundColor: p.color }} />
-                      </div>
-                      <span className="text-[10px] text-muted-foreground shrink-0">{p.pct}%</span>
-                    </div>
+            <div className="space-y-3">
+              {freelancerOutput.map(f => (
+                <div key={f.id} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#f24a49] flex items-center justify-center text-xs font-bold text-white shrink-0 overflow-hidden">
+                    {(f as any).avatar_url
+                      ? <img src={(f as any).avatar_url} alt={f.full_name ?? ''} className="w-full h-full object-cover" />
+                      : (f.full_name || f.username || 'U').charAt(0).toUpperCase()}
                   </div>
-                </Link>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-medium text-foreground truncate">{f.full_name || f.username}</p>
+                      <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400 px-1.5 py-0.5 rounded-full shrink-0 ml-2">
+                        {f.done} done
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${f.pct}%` }} />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      {f.total > 0 ? `${f.pct}% of ${f.total} assigned` : 'No tasks assigned'}
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
           )}
@@ -328,40 +318,48 @@ export default async function AdminDashboardPage() {
           )}
         </div>
 
-        {/* Project Progress — Circular Rings */}
+        {/* Completed Projects */}
         <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold text-foreground">Project Progress</h2>
-            <TrendingUp className="w-4 h-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-foreground">Completed Projects</h2>
+            {completedProjects.length > 0 && (
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-100 dark:border-emerald-800">
+                {completedProjects.length} done
+              </span>
+            )}
           </div>
-          {projectProgress.length === 0 ? (
+          {completedProjects.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
-                <TrendingUp className="w-6 h-6 text-muted-foreground/40" />
+                <FolderKanban className="w-6 h-6 text-muted-foreground/40" />
               </div>
-              <p className="text-sm font-medium text-foreground">No projects yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Add a project to track progress</p>
+              <p className="text-sm font-medium text-foreground">No completed projects</p>
+              <p className="text-xs text-muted-foreground mt-1">Projects with all tasks done will appear here</p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3">
-              {projectProgress.slice(0, 6).map(p => (
-                <Link
-                  key={p.id}
-                  href={`/admin/projects/${p.id}`}
-                  className="group flex flex-col items-center gap-2 p-2 rounded-2xl hover:bg-muted transition-colors"
-                >
-                  <div className="relative">
-                    <ProgressRing pct={p.pct} color={p.color} />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs font-bold text-foreground tabular-nums">{p.pct}%</span>
+            <div className="space-y-2">
+              {completedProjects.map(p => {
+                const contributors = (freelancers ?? []).filter(f =>
+                  tasks.some(t => (t.assignee as any)?.id === f.id && (t.project as any)?.id === p.id)
+                )
+                return (
+                  <Link
+                    key={p.id}
+                    href={`/admin/projects/${p.id}`}
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl border border-emerald-100 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-900/10 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors group"
+                  >
+                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate group-hover:text-[#f24a49] transition-colors">{p.name}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {p.total} task{p.total !== 1 ? 's' : ''} completed
+                        {contributors.length > 0 && ` · ${contributors.map(c => c.full_name?.split(' ')[0] ?? c.username).join(', ')}`}
+                      </p>
                     </div>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[11px] font-medium text-foreground truncate w-[72px] group-hover:text-[#f24a49] transition-colors">{p.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{p.done}/{p.total}</p>
-                  </div>
-                </Link>
-              ))}
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  </Link>
+                )
+              })}
             </div>
           )}
         </div>
