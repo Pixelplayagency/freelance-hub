@@ -169,3 +169,33 @@ export async function getStoragePublicUrl(path: string) {
 
   return data?.signedUrl ?? null
 }
+
+export async function uploadProjectImage(
+  base64: string,
+  projectId: string,
+  type: 'cover' | 'avatar'
+): Promise<string> {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  // Decode base64 data URL to buffer
+  const matches = base64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/)
+  if (!matches) throw new Error('Invalid image data')
+  const buffer = Buffer.from(matches[2], 'base64')
+
+  const path = `${projectId}/${type}.jpg`
+
+  const { error } = await supabase.storage
+    .from('project-assets')
+    .upload(path, buffer, {
+      contentType: 'image/jpeg',
+      upsert: true,
+    })
+
+  if (error) throw new Error(error.message)
+
+  const { data } = supabase.storage.from('project-assets').getPublicUrl(path)
+  // Bust cache by appending timestamp
+  return `${data.publicUrl}?t=${Date.now()}`
+}

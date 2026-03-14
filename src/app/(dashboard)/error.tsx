@@ -23,8 +23,8 @@ export default function DashboardError({
           </div>
         </div>
         <div>
-          <h2 className="text-base font-semibold text-gray-900">Something went wrong</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <h2 className="text-base font-semibold text-foreground">Something went wrong</h2>
+          <p className="text-sm text-muted-foreground mt-1">
             An unexpected error occurred. Please try again.
           </p>
         </div>

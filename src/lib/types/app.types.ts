@@ -88,6 +88,11 @@ export interface Project {
   description: string | null
   color: string
   status: ProjectStatus
+  cover_image_url: string | null
+  avatar_url: string | null
+  instagram_url: string | null
+  facebook_url: string | null
+  tiktok_url: string | null
   created_by: string
   created_at: string
   updated_at: string

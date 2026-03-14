@@ -129,7 +129,7 @@ export default async function FreelancerTasksPage() {
                       <span className={cn(
                         'text-xs shrink-0',
                         isOverdue(task.due_date) && task.status !== 'completed' ? 'text-red-500 font-medium' :
-                        isDueSoon(task.due_date) ? 'text-amber-500' : 'text-gray-400'
+                        isDueSoon(task.due_date) ? 'text-amber-500' : 'text-muted-foreground'
                       )}>
                         {formatDateTime(task.due_date)}
                       </span>

@@ -187,7 +187,7 @@ export default function WorkspacePage() {
                 className={cn(
                   'flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all',
                   inviteRole === id
-                    ? 'border-[#f24a49] bg-[#fff3f3] text-[#f24a49]'
+                    ? 'border-[#f24a49] bg-[#f24a49]/10 text-[#f24a49]'
                     : 'border-border text-muted-foreground hover:text-foreground'
                 )}
               >

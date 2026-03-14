@@ -17,7 +17,7 @@ export default async function AdminNotificationsPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">Notifications</h1>
+      <h1 className="text-xl font-semibold text-foreground mb-6">Notifications</h1>
       <NotificationList
         notifications={(notifications ?? []) as Notification[]}
         role="admin"
