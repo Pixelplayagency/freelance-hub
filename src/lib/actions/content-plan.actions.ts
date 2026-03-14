@@ -70,16 +70,34 @@ export async function deleteContentPlan(id: string) {
 
 export async function approveCaption(id: string, approved: boolean) {
   const supabase = await createSupabaseServerClient()
-  const { error } = await supabase.from('content_plans').update({ caption_approved: approved }).eq('id', id)
+  const { error } = await supabase.from('content_plans').update({ caption_approved: approved, caption_rejected: false }).eq('id', id)
   if (error) throw new Error(error.message)
   revalidatePath('/admin/content-planner', 'layout')
+  revalidatePath('/freelancer/content-planner', 'layout')
 }
 
 export async function approvePost(id: string, approved: boolean) {
   const supabase = await createSupabaseServerClient()
-  const { error } = await supabase.from('content_plans').update({ post_approved: approved }).eq('id', id)
+  const { error } = await supabase.from('content_plans').update({ post_approved: approved, post_rejected: false }).eq('id', id)
   if (error) throw new Error(error.message)
   revalidatePath('/admin/content-planner', 'layout')
+  revalidatePath('/freelancer/content-planner', 'layout')
+}
+
+export async function rejectCaption(id: string, rejected: boolean) {
+  const supabase = await createSupabaseServerClient()
+  const { error } = await supabase.from('content_plans').update({ caption_rejected: rejected, caption_approved: false }).eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/content-planner', 'layout')
+  revalidatePath('/freelancer/content-planner', 'layout')
+}
+
+export async function rejectPost(id: string, rejected: boolean) {
+  const supabase = await createSupabaseServerClient()
+  const { error } = await supabase.from('content_plans').update({ post_rejected: rejected, post_approved: false }).eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/content-planner', 'layout')
+  revalidatePath('/freelancer/content-planner', 'layout')
 }
 
 export async function submitForApproval(id: string) {

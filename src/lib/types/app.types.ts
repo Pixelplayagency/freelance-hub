@@ -72,6 +72,8 @@ export interface ContentPlan {
   media_type: 'image' | 'video' | null
   caption_approved: boolean
   post_approved: boolean
+  caption_rejected: boolean
+  post_rejected: boolean
   approval_requested: boolean
   client_comments: string | null
   status: ContentPlanStatus

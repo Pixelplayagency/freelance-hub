@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { CheckCircle2, Clock, Eye, Loader2, Image as ImageIcon } from 'lucide-react'
-import { approveCaption, approvePost } from '@/lib/actions/content-plan.actions'
+import { CheckCircle2, XCircle, Trash2, Clock, Eye, Loader2, Image as ImageIcon } from 'lucide-react'
+import { approveCaption, approvePost, rejectCaption, rejectPost, deleteContentPlan } from '@/lib/actions/content-plan.actions'
 import type { ContentPlan, ContentPlanStatus, ContentType } from '@/lib/types/app.types'
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -52,25 +52,64 @@ function fmtDate(dateStr: string) {
   return `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`
 }
 
+function StatusBadge({ entry }: { entry: ContentPlan }) {
+  const captionRejected = entry.caption_rejected
+  const postRejected = entry.post_rejected
+  const fullyApproved = entry.caption_approved && entry.post_approved
+  const anyRejected = captionRejected || postRejected
+  const pending = entry.approval_requested && !entry.caption_approved && !entry.post_approved && !anyRejected
+
+  if (fullyApproved) {
+    return <span className="text-[11px] font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full border border-green-200">✓ Fully Approved</span>
+  }
+  if (anyRejected) {
+    const parts = []
+    if (captionRejected) parts.push('Caption')
+    if (postRejected) parts.push('Post')
+    return <span className="text-[11px] font-semibold text-red-700 bg-red-50 px-2 py-1 rounded-full border border-red-200">✕ {parts.join(' & ')} Rejected</span>
+  }
+  if (pending) {
+    return (
+      <span className="flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-1 rounded-full border border-amber-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+        Pending Review
+      </span>
+    )
+  }
+  if (entry.caption_approved || entry.post_approved) {
+    const parts = []
+    if (entry.caption_approved) parts.push('Caption')
+    if (entry.post_approved) parts.push('Post')
+    return <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded-full border border-blue-200">✓ {parts.join(' & ')} Approved</span>
+  }
+  return null
+}
+
 export function ContentPlannerAdminList({ entries: initialEntries }: { entries: ContentPlan[] }) {
   const [isPending, startTransition] = useTransition()
   const [entries, setEntries] = useState<ContentPlan[]>(initialEntries)
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('all')
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
   const [lightbox, setLightbox] = useState<{ url: string; type: 'image' | 'video' } | null>(null)
 
   const filtered = entries.filter(e => {
-    if (filter === 'pending') return e.approval_requested && !e.caption_approved && !e.post_approved
+    if (filter === 'pending') return e.approval_requested && !e.caption_approved && !e.post_approved && !e.caption_rejected && !e.post_rejected
     if (filter === 'approved') return e.caption_approved || e.post_approved
+    if (filter === 'rejected') return e.caption_rejected || e.post_rejected
     return true
   }).sort((a, b) => a.date.localeCompare(b.date))
 
-  const pendingCount = entries.filter(e => e.approval_requested && !e.caption_approved && !e.post_approved).length
+  const pendingCount = entries.filter(e => e.approval_requested && !e.caption_approved && !e.post_approved && !e.caption_rejected && !e.post_rejected).length
+  const rejectedCount = entries.filter(e => e.caption_rejected || e.post_rejected).length
+
+  function update(id: string, patch: Partial<ContentPlan>) {
+    setEntries(prev => prev.map(e => e.id === id ? { ...e, ...patch } : e))
+  }
 
   function handleApproveCaption(entry: ContentPlan) {
     const next = !entry.caption_approved
     startTransition(async () => {
       await approveCaption(entry.id, next)
-      setEntries(prev => prev.map(e => e.id === entry.id ? { ...e, caption_approved: next } : e))
+      update(entry.id, { caption_approved: next, caption_rejected: false })
     })
   }
 
@@ -78,7 +117,31 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
     const next = !entry.post_approved
     startTransition(async () => {
       await approvePost(entry.id, next)
-      setEntries(prev => prev.map(e => e.id === entry.id ? { ...e, post_approved: next } : e))
+      update(entry.id, { post_approved: next, post_rejected: false })
+    })
+  }
+
+  function handleRejectCaption(entry: ContentPlan) {
+    const next = !entry.caption_rejected
+    startTransition(async () => {
+      await rejectCaption(entry.id, next)
+      update(entry.id, { caption_rejected: next, caption_approved: false })
+    })
+  }
+
+  function handleRejectPost(entry: ContentPlan) {
+    const next = !entry.post_rejected
+    startTransition(async () => {
+      await rejectPost(entry.id, next)
+      update(entry.id, { post_rejected: next, post_approved: false })
+    })
+  }
+
+  function handleDelete(entry: ContentPlan) {
+    if (!confirm(`Delete this entry (${fmtDate(entry.date)})? This cannot be undone.`)) return
+    startTransition(async () => {
+      await deleteContentPlan(entry.id)
+      setEntries(prev => prev.filter(e => e.id !== entry.id))
     })
   }
 
@@ -97,12 +160,13 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
   return (
     <>
       {/* Filter tabs */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {([
-          { key: 'all', label: 'All', count: entries.length },
-          { key: 'pending', label: 'Pending Review', count: pendingCount },
-          { key: 'approved', label: 'Approved', count: entries.filter(e => e.caption_approved || e.post_approved).length },
-        ] as const).map(({ key, label, count }) => (
+          { key: 'all', label: 'All', count: entries.length, color: '' },
+          { key: 'pending', label: 'Pending Review', count: pendingCount, color: 'amber' },
+          { key: 'approved', label: 'Approved', count: entries.filter(e => e.caption_approved || e.post_approved).length, color: 'green' },
+          { key: 'rejected', label: 'Rejected', count: rejectedCount, color: 'red' },
+        ] as const).map(({ key, label, count, color }) => (
           <button key={key} onClick={() => setFilter(key)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
               filter === key
@@ -112,7 +176,11 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
             {label}
             {count > 0 && (
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                filter === key ? 'bg-white/20' : key === 'pending' && count > 0 ? 'bg-amber-100 text-amber-700' : 'bg-muted text-muted-foreground'
+                filter === key ? 'bg-white/20 text-white'
+                  : color === 'amber' ? 'bg-amber-100 text-amber-700'
+                  : color === 'red' ? 'bg-red-100 text-red-700'
+                  : color === 'green' ? 'bg-green-100 text-green-700'
+                  : 'bg-muted text-muted-foreground'
               }`}>{count}</span>
             )}
           </button>
@@ -129,11 +197,11 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
           {filtered.map(entry => (
             <div key={entry.id}
               className={`rounded-xl border bg-card overflow-hidden transition-all ${
-                entry.approval_requested && !entry.caption_approved && !entry.post_approved
-                  ? 'border-amber-200 shadow-sm shadow-amber-100'
+                entry.caption_rejected || entry.post_rejected ? 'border-red-200 shadow-sm shadow-red-50'
+                  : entry.approval_requested && !entry.caption_approved && !entry.post_approved ? 'border-amber-200 shadow-sm shadow-amber-50'
                   : 'border-border'
               }`}>
-              <div className="flex gap-0 items-stretch">
+              <div className="flex items-stretch">
                 {/* Media thumbnail */}
                 <div className="relative shrink-0 w-24 bg-muted flex items-center justify-center overflow-hidden">
                   {entry.media_url ? (
@@ -178,20 +246,14 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
                       </span>
                     </div>
 
-                    {/* Right: approval status badge */}
-                    <div className="shrink-0">
-                      {entry.caption_approved && entry.post_approved ? (
-                        <span className="text-[11px] font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full border border-green-200">✓ Fully Approved</span>
-                      ) : entry.approval_requested && !entry.caption_approved && !entry.post_approved ? (
-                        <span className="flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-1 rounded-full border border-amber-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                          Pending Review
-                        </span>
-                      ) : (entry.caption_approved || entry.post_approved) ? (
-                        <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded-full border border-blue-200">
-                          {entry.caption_approved ? '✓ Caption' : ''}{entry.caption_approved && entry.post_approved ? ' · ' : ''}{entry.post_approved ? '✓ Post' : ''}
-                        </span>
-                      ) : null}
+                    {/* Right: status badge + delete */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <StatusBadge entry={entry} />
+                      <button onClick={() => handleDelete(entry)} disabled={isPending}
+                        title="Delete entry"
+                        className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-30">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
 
@@ -201,7 +263,7 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
                   )}
 
                   {/* Freelancer submitted note */}
-                  {entry.approval_requested && (
+                  {entry.approval_requested && !entry.caption_rejected && !entry.post_rejected && (
                     <p className="text-[11px] text-amber-600 mb-2">⚡ Freelancer submitted for review</p>
                   )}
 
@@ -210,25 +272,47 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
                     <p className="text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-lg mb-3 italic">"{entry.client_comments}"</p>
                   )}
 
-                  {/* Approve buttons */}
-                  <div className="flex gap-2 flex-wrap">
+                  {/* Action buttons */}
+                  <div className="flex gap-2 flex-wrap items-center">
+                    {/* Caption */}
                     <button onClick={() => handleApproveCaption(entry)} disabled={isPending}
                       className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50"
                       style={entry.caption_approved
                         ? { backgroundColor: '#dcfce7', color: '#15803d', borderColor: '#86efac' }
                         : { borderColor: '#e5e7eb', color: '#6b7280' }}>
                       <CheckCircle2 className="w-3 h-3" />
-                      {entry.caption_approved ? 'Caption Approved' : 'Approve Caption'}
+                      {entry.caption_approved ? 'Caption ✓' : 'Approve Caption'}
                     </button>
+                    <button onClick={() => handleRejectCaption(entry)} disabled={isPending}
+                      className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50"
+                      style={entry.caption_rejected
+                        ? { backgroundColor: '#fee2e2', color: '#b91c1c', borderColor: '#fca5a5' }
+                        : { borderColor: '#e5e7eb', color: '#6b7280' }}>
+                      <XCircle className="w-3 h-3" />
+                      {entry.caption_rejected ? 'Caption ✕' : 'Reject Caption'}
+                    </button>
+
+                    <span className="text-border text-xs select-none">|</span>
+
+                    {/* Post */}
                     <button onClick={() => handleApprovePost(entry)} disabled={isPending}
                       className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50"
                       style={entry.post_approved
                         ? { backgroundColor: '#dcfce7', color: '#15803d', borderColor: '#86efac' }
                         : { borderColor: '#e5e7eb', color: '#6b7280' }}>
                       <CheckCircle2 className="w-3 h-3" />
-                      {entry.post_approved ? 'Post Approved' : 'Approve Post'}
+                      {entry.post_approved ? 'Post ✓' : 'Approve Post'}
                     </button>
-                    {isPending && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground self-center" />}
+                    <button onClick={() => handleRejectPost(entry)} disabled={isPending}
+                      className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50"
+                      style={entry.post_rejected
+                        ? { backgroundColor: '#fee2e2', color: '#b91c1c', borderColor: '#fca5a5' }
+                        : { borderColor: '#e5e7eb', color: '#6b7280' }}>
+                      <XCircle className="w-3 h-3" />
+                      {entry.post_rejected ? 'Post ✕' : 'Reject Post'}
+                    </button>
+
+                    {isPending && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
                   </div>
                 </div>
               </div>

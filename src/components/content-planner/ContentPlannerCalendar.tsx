@@ -9,6 +9,7 @@ import {
 import {
   createContentPlan, updateContentPlan, deleteContentPlan,
   approveCaption, approvePost, submitForApproval,
+  rejectCaption, rejectPost,
 } from '@/lib/actions/content-plan.actions'
 import type { ContentPlan, ContentType, ContentPlanStatus } from '@/lib/types/app.types'
 
@@ -254,8 +255,9 @@ export function ContentPlannerCalendar({
     const next = !entry.caption_approved
     startTransition(async () => {
       await approveCaption(entry.id, next)
-      setEntryMap(prev => prev[entry.date] ? { ...prev, [entry.date]: { ...prev[entry.date], caption_approved: next } } : prev)
-      setPanel(s => s && s.entry?.id === entry.id ? { ...s, entry: { ...s.entry, caption_approved: next } } : s)
+      const patch = { caption_approved: next, caption_rejected: false }
+      setEntryMap(prev => prev[entry.date] ? { ...prev, [entry.date]: { ...prev[entry.date], ...patch } } : prev)
+      setPanel(s => s && s.entry?.id === entry.id ? { ...s, entry: { ...s.entry!, ...patch } } : s)
     })
   }
 
@@ -263,21 +265,28 @@ export function ContentPlannerCalendar({
     const next = !entry.post_approved
     startTransition(async () => {
       await approvePost(entry.id, next)
-      setEntryMap(prev => prev[entry.date] ? { ...prev, [entry.date]: { ...prev[entry.date], post_approved: next } } : prev)
-      setPanel(s => s && s.entry?.id === entry.id ? { ...s, entry: { ...s.entry, post_approved: next } } : s)
+      const patch = { post_approved: next, post_rejected: false }
+      setEntryMap(prev => prev[entry.date] ? { ...prev, [entry.date]: { ...prev[entry.date], ...patch } } : prev)
+      setPanel(s => s && s.entry?.id === entry.id ? { ...s, entry: { ...s.entry!, ...patch } } : s)
     })
   }
 
   // ── Approval status label for a given entry ────────────────────────────
   function ApprovalBadge({ entry }: { entry: ContentPlan }) {
+    if (entry.caption_rejected || entry.post_rejected) {
+      const parts = []
+      if (entry.caption_rejected) parts.push('Caption')
+      if (entry.post_rejected) parts.push('Post')
+      return <span className="text-[10px] font-semibold text-red-700 bg-red-50 px-1.5 py-0.5 rounded-full border border-red-200">✕ {parts.join(' & ')} Rejected</span>
+    }
     if (entry.caption_approved && entry.post_approved) {
       return <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">✓ Fully Approved</span>
     }
     if (entry.caption_approved) {
-      return <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">✓ Caption</span>
+      return <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">✓ Caption Approved</span>
     }
     if (entry.post_approved) {
-      return <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">✓ Post</span>
+      return <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">✓ Post Approved</span>
     }
     if (entry.approval_requested) {
       return <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200">Under Review</span>
@@ -581,33 +590,43 @@ export function ContentPlannerCalendar({
                 {!isAdmin && (
                   <div className="space-y-2">
                     {/* Current approval status */}
-                    <div className="rounded-lg bg-muted/50 px-3 py-2 space-y-1">
+                    <div className="rounded-lg bg-muted/50 px-3 py-2 space-y-1.5">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] text-muted-foreground">Caption</span>
                         {panel.entry.caption_approved
                           ? <span className="text-[10px] font-semibold text-green-600 flex items-center gap-0.5"><Check className="w-2.5 h-2.5" /> Approved</span>
+                          : panel.entry.caption_rejected
+                          ? <span className="text-[10px] font-semibold text-red-600">✕ Rejected</span>
                           : <span className="text-[10px] text-muted-foreground/50">Pending</span>}
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] text-muted-foreground">Post</span>
                         {panel.entry.post_approved
                           ? <span className="text-[10px] font-semibold text-green-600 flex items-center gap-0.5"><Check className="w-2.5 h-2.5" /> Approved</span>
+                          : panel.entry.post_rejected
+                          ? <span className="text-[10px] font-semibold text-red-600">✕ Rejected</span>
                           : <span className="text-[10px] text-muted-foreground/50">Pending</span>}
                       </div>
                     </div>
 
-                    {/* Submit for review */}
-                    {!panel.entry.approval_requested && !panel.entry.caption_approved && !panel.entry.post_approved ? (
+                    {/* Submit for review — show if nothing is rejected and not yet submitted */}
+                    {!panel.entry.approval_requested && !panel.entry.caption_approved && !panel.entry.post_approved && !panel.entry.caption_rejected && !panel.entry.post_rejected ? (
                       <button onClick={handleSubmitForApproval} disabled={isPending}
                         className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-lg border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50">
                         <Send className="w-3 h-3" />
                         Send for Approval
                       </button>
-                    ) : panel.entry.approval_requested && !panel.entry.caption_approved && !panel.entry.post_approved ? (
+                    ) : panel.entry.approval_requested && !panel.entry.caption_approved && !panel.entry.post_approved && !panel.entry.caption_rejected && !panel.entry.post_rejected ? (
                       <div className="flex items-center justify-center gap-1.5 text-[10px] text-amber-600 bg-amber-50 border border-amber-200 rounded-lg py-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                         Under Review
                       </div>
+                    ) : (panel.entry.caption_rejected || panel.entry.post_rejected) ? (
+                      <button onClick={handleSubmitForApproval} disabled={isPending}
+                        className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors disabled:opacity-50">
+                        <Send className="w-3 h-3" />
+                        Resubmit for Approval
+                      </button>
                     ) : null}
                   </div>
                 )}
