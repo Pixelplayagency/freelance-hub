@@ -54,7 +54,7 @@ export function FreelancerCardActions({ id, mode }: Props) {
       <button
         onClick={handleRemove}
         disabled={approvePending || removePending}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 text-gray-600 hover:border-red-200 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border text-foreground hover:border-red-200 hover:text-red-600 hover:bg-red-500/10 transition-colors disabled:opacity-50"
       >
         {removePending
           ? <Loader2 className="w-3.5 h-3.5 animate-spin" />

@@ -28,7 +28,7 @@ const COLUMNS = TASK_STATUSES.map(s => ({
   label: s.label,
   bg: s.bg,
   dot: {
-    todo: 'bg-slate-400',
+    todo: 'bg-muted-foreground',
     in_progress: 'bg-blue-500',
     review: 'bg-amber-500',
     completed: 'bg-green-500',

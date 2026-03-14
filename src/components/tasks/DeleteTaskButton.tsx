@@ -20,7 +20,7 @@ export function DeleteTaskButton({ taskId, projectId }: { taskId: string; projec
   if (confirm) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-500">Delete task?</span>
+        <span className="text-xs text-muted-foreground">Delete task?</span>
         <button
           onClick={handleDelete}
           disabled={isPending}
@@ -30,7 +30,7 @@ export function DeleteTaskButton({ taskId, projectId }: { taskId: string; projec
         </button>
         <button
           onClick={() => setConfirm(false)}
-          className="text-xs text-slate-400 hover:text-slate-600"
+          className="text-xs text-muted-foreground hover:text-foreground/70"
         >
           Cancel
         </button>
@@ -42,7 +42,7 @@ export function DeleteTaskButton({ taskId, projectId }: { taskId: string; projec
     <button
       onClick={() => setConfirm(true)}
       title="Delete task"
-      className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+      className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
     >
       <Trash2 className="w-4 h-4" />
     </button>

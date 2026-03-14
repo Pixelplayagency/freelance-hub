@@ -37,7 +37,7 @@ interface KanbanColumnProps {
 export function KanbanColumn({ column, tasks, projectId, isAdmin }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id })
   const accent = STATUS_ACCENT[column.id] ?? 'border-l-slate-300'
-  const dot = STATUS_DOT[column.id] ?? 'bg-slate-400'
+  const dot = STATUS_DOT[column.id] ?? 'bg-muted-foreground'
 
   return (
     <div className="flex flex-col min-w-[272px] w-full">

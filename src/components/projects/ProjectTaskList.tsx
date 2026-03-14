@@ -16,14 +16,14 @@ interface Props {
 }
 
 const STATUS_STYLES: Record<TaskStatus, { dot: string; border: string; header: string }> = {
-  todo:        { dot: 'bg-slate-400',  border: 'border-l-slate-300',  header: 'text-slate-500' },
-  in_progress: { dot: 'bg-blue-500',   border: 'border-l-blue-400',   header: 'text-blue-600'  },
-  review:      { dot: 'bg-amber-500',  border: 'border-l-amber-400',  header: 'text-amber-600' },
-  completed:   { dot: 'bg-green-500',  border: 'border-l-green-400',  header: 'text-green-600' },
+  todo:        { dot: 'bg-muted-foreground',  border: 'border-l-muted-foreground',  header: 'text-muted-foreground' },
+  in_progress: { dot: 'bg-blue-500',          border: 'border-l-blue-400',          header: 'text-blue-400'         },
+  review:      { dot: 'bg-amber-500',         border: 'border-l-amber-400',         header: 'text-amber-400'        },
+  completed:   { dot: 'bg-green-500',         border: 'border-l-green-400',         header: 'text-green-400'        },
 }
 
 const BAR_COLORS: Record<TaskStatus, string> = {
-  todo:        'bg-slate-300',
+  todo:        'bg-muted-foreground',
   in_progress: 'bg-blue-400',
   review:      'bg-amber-400',
   completed:   'bg-green-500',

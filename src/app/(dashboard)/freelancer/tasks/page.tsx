@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils/cn'
 import { TASK_STATUSES } from '@/lib/types/app.types'
 
 const BAR_COLORS: Record<string, string> = {
-  todo:        'bg-slate-300',
+  todo:        'bg-muted-foreground',
   in_progress: 'bg-blue-400',
   review:      'bg-amber-400',
   completed:   'bg-green-500',
@@ -101,7 +101,7 @@ export default async function FreelancerTasksPage() {
           <div key={status.id} className="mb-6">
             <div className="flex items-center gap-2 mb-2">
               <div className={cn('w-2 h-2 rounded-full', {
-                'bg-slate-400': status.id === 'todo',
+                'bg-muted-foreground': status.id === 'todo',
                 'bg-blue-500': status.id === 'in_progress',
                 'bg-amber-500': status.id === 'review',
                 'bg-green-500': status.id === 'completed',

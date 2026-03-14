@@ -66,7 +66,7 @@ export default async function ProjectPage({
         <div className="flex-1 min-w-0">
           <Link
             href="/admin/projects"
-            className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 mb-2 transition-colors w-fit"
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2 transition-colors w-fit"
           >
             <ChevronLeft className="w-3 h-3" />
             Projects
@@ -76,10 +76,10 @@ export default async function ProjectPage({
               className="w-4 h-4 rounded-full shrink-0"
               style={{ backgroundColor: project.color }}
             />
-            <h1 className="text-2xl font-bold text-slate-900 truncate">{project.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground truncate">{project.name}</h1>
           </div>
           {project.description && (
-            <p className="text-sm text-slate-500 mt-1">{project.description}</p>
+            <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
           )}
         </div>
         {isAdmin && (

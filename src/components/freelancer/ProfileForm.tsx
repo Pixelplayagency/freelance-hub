@@ -101,8 +101,8 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           </button>
         </div>
         <div>
-          <p className="text-sm font-medium text-slate-900">Profile picture</p>
-          <p className="text-xs text-slate-400 mt-0.5">Click to upload a new photo</p>
+          <p className="text-sm font-medium text-foreground">Profile picture</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Click to upload a new photo</p>
         </div>
         <input
           ref={fileInputRef}
@@ -129,12 +129,12 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       {/* Read-only fields */}
       <div className="space-y-1.5">
         <Label>Username</Label>
-        <Input value={`@${profile.username ?? ''}`} disabled className="bg-gray-50 text-slate-400 cursor-not-allowed" />
+        <Input value={`@${profile.username ?? ''}`} disabled className="bg-muted text-muted-foreground cursor-not-allowed" />
       </div>
 
       <div className="space-y-1.5">
         <Label>Email</Label>
-        <Input value={profile.email} disabled className="bg-gray-50 text-slate-400 cursor-not-allowed" />
+        <Input value={profile.email} disabled className="bg-muted text-muted-foreground cursor-not-allowed" />
       </div>
 
       <Button

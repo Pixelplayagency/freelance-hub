@@ -80,9 +80,9 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
           type="button"
           className={cn(
             'flex items-center gap-2.5 w-full rounded-lg border px-3 py-2.5 text-sm transition-all text-left',
-            'border-input bg-white hover:border-[#f24a49]/50 focus:outline-none',
+            'border-input bg-background hover:border-[#f24a49]/50 focus:outline-none',
             open && 'border-[#f24a49]/60 ring-2 ring-[#f24a49]/10',
-            displayLabel ? 'text-slate-800' : 'text-slate-400'
+            displayLabel ? 'text-foreground' : 'text-muted-foreground'
           )}
         >
           <CalendarDays className="w-4 h-4 shrink-0" style={{ color: '#f24a49' }} />
@@ -91,7 +91,7 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
             <span
               role="button"
               onClick={handleClear}
-              className="p-0.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-0.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="w-3.5 h-3.5" />
             </span>
@@ -100,7 +100,7 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-auto p-0 overflow-hidden rounded-xl border border-gray-100 shadow-xl"
+        className="w-auto p-0 overflow-hidden rounded-xl border border-border shadow-xl"
         align="start"
         sideOffset={6}
       >
@@ -122,33 +122,33 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
               month: 'space-y-3',
               nav: 'flex items-center justify-between mb-1',
               button_previous: cn(
-                'w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200',
-                'text-gray-500 hover:text-slate-900 hover:border-gray-300 hover:bg-gray-50 transition-colors'
+                'w-8 h-8 flex items-center justify-center rounded-lg border border-border',
+                'text-muted-foreground hover:text-foreground hover:border-muted-foreground hover:bg-muted transition-colors'
               ),
               button_next: cn(
-                'w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200',
-                'text-gray-500 hover:text-slate-900 hover:border-gray-300 hover:bg-gray-50 transition-colors'
+                'w-8 h-8 flex items-center justify-center rounded-lg border border-border',
+                'text-muted-foreground hover:text-foreground hover:border-muted-foreground hover:bg-muted transition-colors'
               ),
               month_caption: 'flex items-center justify-center gap-1 px-8',
               caption_label: 'hidden',
               dropdowns: 'flex items-center gap-1',
               dropdown: cn(
-                'text-sm font-semibold text-slate-800 bg-white border border-gray-200 rounded-lg px-2 py-1',
+                'text-sm font-semibold text-foreground bg-background border border-border rounded-lg px-2 py-1',
                 'hover:border-[#f24a49]/40 focus:outline-none cursor-pointer'
               ),
               weekdays: 'grid grid-cols-7 mb-1',
-              weekday: 'text-[11px] font-medium text-gray-400 text-center py-1',
+              weekday: 'text-[11px] font-medium text-muted-foreground text-center py-1',
               weeks: 'space-y-1',
               week: 'grid grid-cols-7',
               day: 'flex items-center justify-center p-0',
               day_button: cn(
-                'w-9 h-9 rounded-lg text-sm font-medium transition-all',
-                'hover:bg-[#fff3f3] hover:text-[#f24a49]',
+                'w-9 h-9 rounded-lg text-sm font-medium transition-all text-foreground',
+                'hover:bg-[#f24a49]/10 hover:text-[#f24a49]',
                 'focus:outline-none focus:ring-2 focus:ring-[#f24a49]/30'
               ),
               selected: '[&>button]:bg-[#f24a49] [&>button]:text-white [&>button]:hover:bg-[#e03938] [&>button]:hover:text-white',
               today: '[&>button]:border [&>button]:border-[#f24a49]/40 [&>button]:text-[#f24a49]',
-              outside: '[&>button]:text-gray-300 [&>button]:hover:text-gray-400 [&>button]:hover:bg-transparent',
+              outside: '[&>button]:text-muted-foreground/40 [&>button]:hover:text-muted-foreground [&>button]:hover:bg-transparent',
               disabled: '[&>button]:opacity-30 [&>button]:cursor-not-allowed',
             }}
             components={{
@@ -160,16 +160,16 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
           />
 
           {/* Divider */}
-          <div className="w-px bg-gray-100 my-3" />
+          <div className="w-px bg-border my-3" />
 
           {/* Time picker — right side */}
           <div className="flex flex-col justify-between p-4 w-40">
             <div>
-              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-3">Time</p>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Time</p>
 
               {/* Hours grid */}
               <div className="mb-3">
-                <p className="text-[10px] text-gray-400 mb-1.5">Hour</p>
+                <p className="text-[10px] text-muted-foreground mb-1.5">Hour</p>
                 <div className="grid grid-cols-4 gap-1">
                   {HOURS.map(h => (
                     <button
@@ -181,7 +181,7 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
                         'h-7 rounded-md text-xs font-medium transition-all',
                         hour12 === h
                           ? 'text-white'
-                          : 'text-gray-600 bg-white border border-gray-200 hover:border-[#f24a49]/40 hover:text-[#f24a49]',
+                          : 'text-foreground bg-background border border-border hover:border-[#f24a49]/40 hover:text-[#f24a49]',
                         !selected && 'opacity-40 cursor-not-allowed'
                       )}
                       style={hour12 === h ? { backgroundColor: '#f24a49' } : undefined}
@@ -194,7 +194,7 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
 
               {/* Minutes */}
               <div className="mb-3">
-                <p className="text-[10px] text-gray-400 mb-1.5">Minute</p>
+                <p className="text-[10px] text-muted-foreground mb-1.5">Minute</p>
                 <div className="grid grid-cols-4 gap-1">
                   {MINUTES.map(m => (
                     <button
@@ -206,7 +206,7 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
                         'h-7 rounded-md text-xs font-medium transition-all',
                         minStr === m
                           ? 'text-white'
-                          : 'text-gray-600 bg-white border border-gray-200 hover:border-[#f24a49]/40 hover:text-[#f24a49]',
+                          : 'text-foreground bg-background border border-border hover:border-[#f24a49]/40 hover:text-[#f24a49]',
                         !selected && 'opacity-40 cursor-not-allowed'
                       )}
                       style={minStr === m ? { backgroundColor: '#f24a49' } : undefined}
@@ -219,7 +219,7 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
 
               {/* AM / PM */}
               <div>
-                <p className="text-[10px] text-gray-400 mb-1.5">Period</p>
+                <p className="text-[10px] text-muted-foreground mb-1.5">Period</p>
                 <div className="grid grid-cols-2 gap-1">
                   {(['AM', 'PM'] as const).map(val => (
                     <button
@@ -231,7 +231,7 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
                         'h-7 rounded-md text-xs font-semibold transition-all',
                         ampm === val && time
                           ? 'text-white'
-                          : 'text-gray-500 bg-white border border-gray-200 hover:border-[#f24a49]/40 hover:text-[#f24a49]',
+                          : 'text-foreground bg-background border border-border hover:border-[#f24a49]/40 hover:text-[#f24a49]',
                         (!selected || !time) && 'opacity-40 cursor-not-allowed'
                       )}
                       style={ampm === val && time ? { backgroundColor: '#f24a49' } : undefined}
@@ -244,20 +244,20 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
             </div>
 
             {/* Selected time display */}
-            <div className="mt-3 pt-3 border-t border-gray-100 text-center">
-              <p className="text-xs font-semibold text-slate-700">
+            <div className="mt-3 pt-3 border-t border-border text-center">
+              <p className="text-xs font-semibold text-foreground">
                 {time ? formatTime(time) : '--:-- --'}
               </p>
               {selected && (
-                <p className="text-[10px] text-gray-400 mt-0.5">{format(selected, 'MMM d, yyyy')}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{format(selected, 'MMM d, yyyy')}</p>
               )}
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 flex items-center justify-between border-t border-gray-100 bg-gray-50/60">
-          <span className="text-xs text-gray-400">
+        <div className="px-4 py-3 flex items-center justify-between border-t border-border bg-muted/60">
+          <span className="text-xs text-muted-foreground">
             {displayLabel ?? 'No deadline set'}
           </span>
           <button

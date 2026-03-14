@@ -289,10 +289,10 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
           {pendingLinks.length > 0 && (
             <div className="space-y-1.5">
               {pendingLinks.map((link, i) => (
-                <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-100 bg-gray-50 text-sm">
-                  <ExternalLink className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                  <span className="flex-1 truncate text-slate-700">{link.label || link.url}</span>
-                  <button type="button" onClick={() => removePendingLink(i)} className="text-gray-400 hover:text-red-500 transition-colors">
+                <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-muted text-sm">
+                  <ExternalLink className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <span className="flex-1 truncate text-foreground">{link.label || link.url}</span>
+                  <button type="button" onClick={() => removePendingLink(i)} className="text-muted-foreground hover:text-red-500 transition-colors">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -301,7 +301,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
           )}
 
           {showLinkForm ? (
-            <div className="space-y-2 p-3 rounded-lg border border-dashed border-gray-200 bg-gray-50/50">
+            <div className="space-y-2 p-3 rounded-lg border border-dashed border-border bg-muted/50">
               <Input
                 type="url"
                 placeholder="https://..."
@@ -341,7 +341,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
             <button
               type="button"
               onClick={() => setShowLinkForm(true)}
-              className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors w-full border border-dashed border-gray-200 rounded-lg px-3 py-2 hover:border-gray-300"
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-full border border-dashed border-border rounded-lg px-3 py-2 hover:border-muted-foreground"
             >
               <Plus className="w-3.5 h-3.5" />
               Add link
@@ -361,7 +361,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
           {pendingFiles.length > 0 && (
             <div className="grid grid-cols-3 gap-2">
               {pendingFiles.map((file, i) => (
-                <div key={i} className="relative group aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                <div key={i} className="relative group aspect-video rounded-lg overflow-hidden border border-border bg-muted">
                   {file.type.startsWith('image/') ? (
                     <img
                       src={URL.createObjectURL(file)}
@@ -369,14 +369,14 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 p-1 text-center">
+                    <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground p-1 text-center">
                       {file.name}
                     </div>
                   )}
                   <button
                     type="button"
                     onClick={() => removePendingFile(i)}
-                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 rounded bg-white/90 text-gray-500 hover:text-red-500 transition-all"
+                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 rounded bg-card/90 text-muted-foreground hover:text-red-500 transition-all"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -397,11 +397,11 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className={cn(
-              'w-full border-2 border-dashed border-gray-200 rounded-lg py-5 text-center transition-colors',
-              'hover:border-[#f24a49]/40 hover:bg-[#fff3f3]/30'
+              'w-full border-2 border-dashed border-border rounded-lg py-5 text-center transition-colors',
+              'hover:border-[#f24a49]/40 hover:bg-[#f24a49]/5'
             )}
           >
-            <div className="flex flex-col items-center gap-1.5 text-gray-400">
+            <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
               <ImagePlus className="w-5 h-5" />
               <span className="text-sm">Click to upload</span>
               <span className="text-xs">PNG, JPG, GIF, MP4, MOV</span>
@@ -423,12 +423,12 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
                 className={cn(
                   'flex flex-col items-start gap-0.5 px-3 py-2.5 rounded-lg border text-left transition-all text-sm',
                   taskType === type
-                    ? 'border-[#f24a49] bg-[#fff3f3] text-[#f24a49]'
-                    : 'border-gray-200 text-slate-600 hover:border-gray-300'
+                    ? 'border-[#f24a49] bg-[#f24a49]/10 text-[#f24a49]'
+                    : 'border-border text-foreground hover:border-muted-foreground'
                 )}
               >
                 <span className="font-medium capitalize">{type === 'standard' ? 'Standard' : 'Simple'}</span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-muted-foreground">
                   {type === 'standard' ? 'Submit work for admin review' : 'Mark complete directly'}
                 </span>
               </button>

@@ -54,7 +54,7 @@ export function InviteFreelancerForm({ role = 'freelancer' }: Props) {
             <Input
               readOnly
               value={inviteLink}
-              className="text-xs font-mono bg-gray-50"
+              className="text-xs font-mono bg-muted"
             />
             <Button
               type="button"

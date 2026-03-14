@@ -41,7 +41,7 @@ export function DeadlineProgress({ createdAt, dueDate }: DeadlineProgressProps) 
     statusColor = 'text-amber-500'
   } else {
     statusText = `${daysLeft} days left`
-    statusColor = 'text-gray-500'
+    statusColor = 'text-muted-foreground'
   }
 
   const barColor = overdue ? '#f24a49' : pct > 80 ? '#f59e0b' : pct > 50 ? '#f59e0b' : '#22c55e'
@@ -49,16 +49,16 @@ export function DeadlineProgress({ createdAt, dueDate }: DeadlineProgressProps) 
   return (
     <div className="space-y-2.5">
       <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-3 text-gray-400">
+        <div className="flex items-center gap-3 text-muted-foreground">
           <span>{format(start, 'MMM d')}</span>
-          <span className="text-gray-200">→</span>
+          <span className="text-muted-foreground/40">→</span>
           <span>{format(end, 'MMM d, yyyy')}</span>
         </div>
         <span className={cn('font-semibold', statusColor)}>{statusText}</span>
       </div>
 
       {/* Bar */}
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{ width: `${pct}%`, backgroundColor: barColor }}
@@ -67,7 +67,7 @@ export function DeadlineProgress({ createdAt, dueDate }: DeadlineProgressProps) 
 
       {/* % label */}
       <div className="flex justify-end">
-        <span className="text-[10px] text-gray-400">{Math.round(pct)}% of timeline used</span>
+        <span className="text-[10px] text-muted-foreground">{Math.round(pct)}% of timeline used</span>
       </div>
     </div>
   )
