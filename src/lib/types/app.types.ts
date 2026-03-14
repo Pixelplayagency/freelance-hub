@@ -65,6 +65,11 @@ export interface ContentClient {
   created_at: string
 }
 
+export interface MediaItem {
+  url: string
+  type: 'image' | 'video'
+}
+
 export interface ContentPlan {
   id: string
   client_id: string | null
@@ -77,6 +82,7 @@ export interface ContentPlan {
   caption: string | null
   media_url: string | null
   media_type: 'image' | 'video' | null
+  media_items: MediaItem[]
   caption_approved: boolean
   post_approved: boolean
   caption_rejected: boolean

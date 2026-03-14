@@ -11,7 +11,7 @@ import {
   approveCaption, approvePost, submitForApproval,
   rejectCaption, rejectPost,
 } from '@/lib/actions/content-plan.actions'
-import type { ContentPlan, ContentType, ContentPlanStatus } from '@/lib/types/app.types'
+import type { ContentPlan, ContentType, ContentPlanStatus, MediaItem } from '@/lib/types/app.types'
 
 const CLOUD_NAME = 'desj9wmtd'
 const UPLOAD_PRESET = 'task-uploads'
@@ -118,10 +118,16 @@ interface PanelState {
   scheduled_time: string
   caption: string
   client_comments: string
-  media_url: string | null
-  media_type: 'image' | 'video' | null
+  media_items: MediaItem[]
   status: ContentPlanStatus
   uploading: boolean
+}
+
+function entryMediaItems(entry: ContentPlan | null): MediaItem[] {
+  if (!entry) return []
+  if (entry.media_items?.length) return entry.media_items
+  if (entry.media_url) return [{ url: entry.media_url, type: entry.media_type ?? 'image' }]
+  return []
 }
 
 function makePanel(date: string, entry: ContentPlan | null): PanelState {
@@ -132,8 +138,7 @@ function makePanel(date: string, entry: ContentPlan | null): PanelState {
     scheduled_time: entry?.scheduled_time ?? '',
     caption: entry?.caption ?? '',
     client_comments: entry?.client_comments ?? '',
-    media_url: entry?.media_url ?? null,
-    media_type: entry?.media_type ?? null,
+    media_items: entryMediaItems(entry),
     status: entry?.status ?? 'scheduled',
     uploading: false,
   }
@@ -214,27 +219,25 @@ export function ContentPlannerCalendar({
   }
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !panel) return
-    const isVideo = file.type.startsWith('video/')
-    const isImage = file.type.startsWith('image/')
-    if (!isVideo && !isImage) return
+    const files = Array.from(e.target.files ?? []).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'))
+    if (!files.length || !panel) return
     setPanel(s => s ? { ...s, uploading: true } : s)
-    const fd = new FormData()
-    fd.append('file', file)
-    fd.append('upload_preset', UPLOAD_PRESET)
-    fd.append('quality', 'auto')
-    const endpoint = isVideo
-      ? `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`
-      : `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`
+    const uploaded: MediaItem[] = []
     try {
-      const res = await fetch(endpoint, { method: 'POST', body: fd })
-      const data = await res.json()
-      if (data.secure_url) {
-        setPanel(s => s ? { ...s, media_url: data.secure_url, media_type: isVideo ? 'video' : 'image', uploading: false } : s)
-      } else {
-        setPanel(s => s ? { ...s, uploading: false } : s)
+      for (const file of files) {
+        const isVideo = file.type.startsWith('video/')
+        const fd = new FormData()
+        fd.append('file', file)
+        fd.append('upload_preset', UPLOAD_PRESET)
+        fd.append('quality', 'auto')
+        const endpoint = isVideo
+          ? `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`
+          : `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`
+        const res = await fetch(endpoint, { method: 'POST', body: fd })
+        const data = await res.json()
+        if (data.secure_url) uploaded.push({ url: data.secure_url, type: isVideo ? 'video' : 'image' })
       }
+      setPanel(s => s ? { ...s, media_items: [...s.media_items, ...uploaded], uploading: false } : s)
     } catch {
       setPanel(s => s ? { ...s, uploading: false } : s)
       setSaveError('Media upload failed. Please try again.')
@@ -254,8 +257,9 @@ export function ContentPlannerCalendar({
         scheduled_time: panel.scheduled_time || null,
         caption: panel.caption || null,
         ...(isAdmin ? { client_comments: panel.client_comments || null } : {}),
-        media_url: panel.media_url,
-        media_type: panel.media_type,
+        media_items: panel.media_items,
+        media_url: panel.media_items[0]?.url ?? null,
+        media_type: panel.media_items[0]?.type ?? null,
         status: panel.status,
       }
       try {
@@ -346,7 +350,7 @@ export function ContentPlannerCalendar({
 
   return (
     <div className="flex gap-5 relative">
-      <input ref={fileRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleFileSelect} />
+      <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFileSelect} />
 
       {/* ── Calendar ── */}
       <div className="flex-1 min-w-0 space-y-3">
@@ -415,25 +419,56 @@ export function ContentPlannerCalendar({
                                 className={`w-full text-left rounded-lg overflow-hidden transition-all ${active ? 'ring-1 ring-[#f24a49]' : 'hover:ring-1 hover:ring-border'}`}
                                 style={{ border: '1px solid var(--border)' }}
                               >
-                                {/* Media — full width */}
-                                <div className="relative group w-full bg-muted overflow-hidden" style={{ height: 110 }}>
-                                  {entry.media_url ? (
-                                    entry.media_type === 'video'
-                                      ? <video src={entry.media_url} className="w-full h-full object-cover" muted />
-                                      : <img src={thumbUrl(entry.media_url)} alt="" className="w-full h-full object-cover" />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                      <ImageIcon className="w-6 h-6 text-muted-foreground/20" />
+                                {/* Media grid */}
+                                {(() => {
+                                  const items = entryMediaItems(entry)
+                                  if (!items.length) {
+                                    return (
+                                      <div className="w-full bg-muted flex items-center justify-center" style={{ height: 110 }}>
+                                        <ImageIcon className="w-6 h-6 text-muted-foreground/20" />
+                                      </div>
+                                    )
+                                  }
+                                  if (items.length === 1) {
+                                    const item = items[0]
+                                    return (
+                                      <div className="relative group w-full bg-muted overflow-hidden" style={{ height: 110 }}>
+                                        {item.type === 'video'
+                                          ? <video src={item.url} className="w-full h-full object-cover" muted />
+                                          : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
+                                        <button
+                                          onClick={e => { e.stopPropagation(); setViewMedia({ url: item.url, type: item.type }) }}
+                                          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                          <Eye className="w-5 h-5 text-white drop-shadow" />
+                                        </button>
+                                      </div>
+                                    )
+                                  }
+                                  const visible = items.slice(0, 4)
+                                  const extra = items.length - 4
+                                  const cols = visible.length === 2 ? 2 : 2
+                                  return (
+                                    <div className="w-full bg-muted overflow-hidden grid gap-px" style={{ height: 110, gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+                                      {visible.map((item, i) => (
+                                        <div key={i} className="relative group overflow-hidden bg-muted">
+                                          {item.type === 'video'
+                                            ? <video src={item.url} className="w-full h-full object-cover" muted />
+                                            : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
+                                          {i === 3 && extra > 0 && (
+                                            <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
+                                              <span className="text-white text-sm font-bold">+{extra + 1}</span>
+                                            </div>
+                                          )}
+                                          <button
+                                            onClick={e => { e.stopPropagation(); setViewMedia({ url: item.url, type: item.type }) }}
+                                            className="absolute inset-0 bg-black/0 group-hover:bg-black/35 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                                            <Eye className="w-3.5 h-3.5 text-white drop-shadow" />
+                                          </button>
+                                        </div>
+                                      ))}
                                     </div>
-                                  )}
-                                  {entry.media_url && (
-                                    <button
-                                      onClick={e => { e.stopPropagation(); setViewMedia({ url: entry.media_url!, type: entry.media_type! }) }}
-                                      className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                      <Eye className="w-5 h-5 text-white drop-shadow" />
-                                    </button>
-                                  )}
-                                </div>
+                                  )
+                                })()}
 
                                 {/* Card body */}
                                 <div className="p-2 space-y-1.5 bg-background">
@@ -636,32 +671,39 @@ export function ContentPlannerCalendar({
             {/* Media */}
             <div>
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Media</p>
-              <div className="flex gap-2.5 items-start">
-                <div className="relative shrink-0 rounded-lg overflow-hidden bg-muted border border-border flex items-center justify-center" style={{ width: 88, height: 88 }}>
-                  {panel.uploading ? <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                    : panel.media_url
-                      ? (panel.media_type === 'video'
-                          ? <video src={panel.media_url} className="w-full h-full object-cover" muted />
-                          : <img src={thumbUrl(panel.media_url)} alt="" className="w-full h-full object-cover" />)
-                      : <ImageIcon className="w-6 h-6 text-muted-foreground/20" />}
-                  {panel.media_url && (
-                    <button onClick={() => setViewMedia({ url: panel.media_url!, type: panel.media_type! })}
-                      className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Eye className="w-3.5 h-3.5 text-white" />
+              <div className="grid grid-cols-3 gap-1.5">
+                {panel.media_items.map((item, i) => (
+                  <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-muted border border-border group">
+                    {item.type === 'video'
+                      ? <video src={item.url} className="w-full h-full object-cover" muted />
+                      : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <button
+                        onClick={() => setViewMedia({ url: item.url, type: item.type })}
+                        className="p-1 text-white"
+                      >
+                        <Eye className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => setPanel(s => s ? { ...s, media_items: s.media_items.filter((_, j) => j !== i) } : s)}
+                      className="absolute top-0.5 right-0.5 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-2.5 h-2.5 text-white" />
                     </button>
-                  )}
-                </div>
-                <div className="flex-1 flex flex-col gap-1.5">
-                  <button type="button" onClick={() => fileRef.current?.click()} disabled={panel.uploading}
-                    className="flex items-center gap-1.5 text-[11px] border border-border rounded-lg px-2.5 py-1.5 hover:bg-muted transition-colors text-foreground disabled:opacity-50">
-                    <Upload className="w-2.5 h-2.5" />
-                    {panel.uploading ? 'Uploading…' : panel.media_url ? 'Replace' : 'Upload'}
-                  </button>
-                  {panel.media_url && (
-                    <button type="button" onClick={() => setPanel(s => s ? { ...s, media_url: null, media_type: null } : s)}
-                      className="text-[10px] text-red-400 hover:text-red-600 text-left transition-colors">Remove</button>
-                  )}
-                </div>
+                  </div>
+                ))}
+                {/* Add more / upload button */}
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={panel.uploading}
+                  className="aspect-square rounded-lg border border-dashed border-border flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-foreground hover:border-[#f24a49] transition-colors disabled:opacity-50"
+                >
+                  {panel.uploading
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <><Upload className="w-3.5 h-3.5" /><span className="text-[9px] font-medium">Add</span></>}
+                </button>
               </div>
             </div>
 

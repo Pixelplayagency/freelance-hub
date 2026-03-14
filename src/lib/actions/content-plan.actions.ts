@@ -2,7 +2,7 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import type { ContentType, ContentPlanStatus } from '@/lib/types/app.types'
+import type { ContentType, ContentPlanStatus, MediaItem } from '@/lib/types/app.types'
 
 // ── Clients ────────────────────────────────────────────────────────────────
 
@@ -54,6 +54,7 @@ interface ContentPlanInput {
   caption?: string | null
   media_url?: string | null
   media_type?: 'image' | 'video' | null
+  media_items?: MediaItem[]
   status?: ContentPlanStatus
   client_comments?: string | null
 }
