@@ -6,6 +6,25 @@ import { isOverdue } from '@/lib/utils/date'
 import { TaskStatusBadge } from '@/components/tasks/TaskStatusBadge'
 import type { TaskStatus } from '@/lib/types/app.types'
 
+const RING_R = 26
+const RING_CIRC = 2 * Math.PI * RING_R
+
+function ProgressRing({ pct, color }: { pct: number; color: string }) {
+  const offset = RING_CIRC * (1 - pct / 100)
+  return (
+    <svg width="68" height="68" viewBox="0 0 68 68" style={{ transform: 'rotate(-90deg)' }}>
+      <circle cx="34" cy="34" r={RING_R} fill="none" stroke="oklch(0.92 0 0)" strokeWidth="5" />
+      <circle
+        cx="34" cy="34" r={RING_R} fill="none"
+        stroke={color} strokeWidth="5"
+        strokeDasharray={RING_CIRC}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export default async function AdminDashboardPage() {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -42,7 +61,6 @@ export default async function AdminDashboardPage() {
   const completedCount = tasks.filter(t => t.status === 'completed').length
   const overdueCount = tasks.filter(t => isOverdue(t.due_date) && t.status !== 'completed').length
 
-  // Weekly task activity (last 7 days, index 0 = 6 days ago, index 6 = today)
   const weeklyData = Array(7).fill(0)
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const weekLabels: string[] = []
@@ -58,14 +76,12 @@ export default async function AdminDashboardPage() {
   })
   const maxBar = Math.max(...weeklyData, 1)
 
-  // Project progress
   const projectProgress = (projectsList ?? []).map(p => {
     const pt = tasks.filter(t => (t.project as any)?.id === p.id)
     const done = pt.filter(t => t.status === 'completed').length
     return { ...p, done, total: pt.length, pct: pt.length > 0 ? Math.round((done / pt.length) * 100) : 0 }
   })
 
-  // Team: freelancers + their current task
   const teamData = (freelancers ?? []).map(f => ({
     ...f,
     currentTask: tasks.find(t => (t.assignee as any)?.id === f.id && t.status !== 'completed') ?? null,
@@ -77,18 +93,21 @@ export default async function AdminDashboardPage() {
       value: activeTasks,
       icon: Clock,
       iconClass: 'bg-blue-50 text-blue-500 dark:bg-blue-900/20 dark:text-blue-400',
+      accent: '#3b82f6',
     },
     {
       label: 'In Review',
       value: inReview,
       icon: AlertCircle,
       iconClass: 'bg-amber-50 text-amber-500 dark:bg-amber-900/20 dark:text-amber-400',
+      accent: '#f59e0b',
     },
     {
       label: 'Completed',
       value: completedCount,
       icon: CheckCircle2,
       iconClass: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/20 dark:text-emerald-400',
+      accent: '#10b981',
     },
   ]
 
@@ -119,13 +138,21 @@ export default async function AdminDashboardPage() {
         {/* Featured card */}
         <Link
           href="/admin/projects"
-          className="rounded-2xl p-6 hover:opacity-90 transition-all duration-200 flex flex-col gap-4 min-h-[140px]"
+          className="relative overflow-hidden rounded-2xl p-6 hover:opacity-90 transition-all duration-200 flex flex-col gap-4 min-h-[140px]"
           style={{
             background: 'linear-gradient(135deg, #1C1C1E 0%, #2a2a2c 100%)',
             boxShadow: '0 4px 24px rgba(242,74,73,0.18)',
           }}
         >
-          <div className="flex items-start justify-between">
+          {/* Dot grid overlay */}
+          <div
+            className="absolute inset-0 rounded-2xl opacity-20 pointer-events-none"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.35) 1px, transparent 1px)',
+              backgroundSize: '16px 16px',
+            }}
+          />
+          <div className="relative flex items-start justify-between">
             <div
               className="w-10 h-10 rounded-xl bg-[#f24a49] flex items-center justify-center"
               style={{ boxShadow: '0 2px 10px rgba(242,74,73,0.5)' }}
@@ -134,8 +161,8 @@ export default async function AdminDashboardPage() {
             </div>
             <ArrowUpRight className="w-4 h-4 text-white/25" />
           </div>
-          <div>
-            <div className="text-4xl font-bold text-white tracking-tight">{activeProjects}</div>
+          <div className="relative">
+            <div className="text-4xl font-bold text-white tracking-tight tabular-nums">{activeProjects}</div>
             <div className="text-sm text-white/50 mt-1">Active Projects</div>
           </div>
         </Link>
@@ -147,7 +174,7 @@ export default async function AdminDashboardPage() {
               key={s.label}
               href="/admin/projects"
               className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-4 min-h-[140px] transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-              style={{ boxShadow: 'var(--shadow-card)' }}
+              style={{ borderTop: `3px solid ${s.accent}`, boxShadow: 'var(--shadow-card)' }}
             >
               <div className="flex items-start justify-between">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.iconClass}`}>
@@ -156,7 +183,7 @@ export default async function AdminDashboardPage() {
                 <ArrowUpRight className="w-4 h-4 text-muted-foreground/25" />
               </div>
               <div>
-                <div className="text-4xl font-bold text-foreground tracking-tight">{s.value}</div>
+                <div className="text-4xl font-bold text-foreground tracking-tight tabular-nums">{s.value}</div>
                 <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
               </div>
             </Link>
@@ -181,7 +208,7 @@ export default async function AdminDashboardPage() {
               return (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
                   <span
-                    className="text-[10px] font-semibold text-foreground"
+                    className="text-[10px] font-semibold text-foreground tabular-nums"
                     style={{ minHeight: '14px', visibility: count > 0 ? 'visible' : 'hidden' }}
                   >
                     {count}
@@ -193,8 +220,9 @@ export default async function AdminDashboardPage() {
                         height: `${Math.max(heightPct, 4)}%`,
                         background: isPrimary
                           ? 'linear-gradient(180deg, #f24a49 0%, #d93d3c 100%)'
-                          : undefined,
-                        backgroundColor: !isPrimary ? (count > 0 ? 'oklch(0.75 0 0)' : 'oklch(0.93 0 0)') : undefined,
+                          : count > 0
+                          ? 'linear-gradient(180deg, oklch(0.78 0 0) 0%, oklch(0.70 0 0) 100%)'
+                          : 'oklch(0.93 0 0)',
                       }}
                     />
                   </div>
@@ -232,10 +260,7 @@ export default async function AdminDashboardPage() {
                   href={`/admin/projects/${p.id}`}
                   className="flex items-center gap-3 group px-2 py-2.5 rounded-xl hover:bg-muted transition-colors -mx-2"
                 >
-                  <div
-                    className="w-1.5 h-9 rounded-full shrink-0"
-                    style={{ backgroundColor: p.color }}
-                  />
+                  <div className="w-1.5 h-9 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate group-hover:text-[#f24a49] transition-colors">{p.name}</p>
                     <div className="flex items-center gap-2 mt-1">
@@ -303,9 +328,9 @@ export default async function AdminDashboardPage() {
           )}
         </div>
 
-        {/* Project Progress */}
+        {/* Project Progress — Circular Rings */}
         <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-5">
             <h2 className="text-sm font-semibold text-foreground">Project Progress</h2>
             <TrendingUp className="w-4 h-4 text-muted-foreground" />
           </div>
@@ -318,26 +343,22 @@ export default async function AdminDashboardPage() {
               <p className="text-xs text-muted-foreground mt-1">Add a project to track progress</p>
             </div>
           ) : (
-            <div className="space-y-5">
-              {projectProgress.slice(0, 5).map(p => (
-                <Link key={p.id} href={`/admin/projects/${p.id}`} className="block group">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
-                      <span className="text-sm font-medium text-foreground truncate max-w-[160px] group-hover:text-[#f24a49] transition-colors">
-                        {p.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 ml-2 shrink-0">
-                      <span className="text-xs text-muted-foreground">{p.done}/{p.total}</span>
-                      <span className="text-xs font-semibold tabular-nums" style={{ color: p.color }}>{p.pct}%</span>
+            <div className="grid grid-cols-3 gap-3">
+              {projectProgress.slice(0, 6).map(p => (
+                <Link
+                  key={p.id}
+                  href={`/admin/projects/${p.id}`}
+                  className="group flex flex-col items-center gap-2 p-2 rounded-2xl hover:bg-muted transition-colors"
+                >
+                  <div className="relative">
+                    <ProgressRing pct={p.pct} color={p.color} />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-bold text-foreground tabular-nums">{p.pct}%</span>
                     </div>
                   </div>
-                  <div className="h-2 bg-muted/60 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${p.pct}%`, backgroundColor: p.color }}
-                    />
+                  <div className="text-center">
+                    <p className="text-[11px] font-medium text-foreground truncate w-[72px] group-hover:text-[#f24a49] transition-colors">{p.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{p.done}/{p.total}</p>
                   </div>
                 </Link>
               ))}
