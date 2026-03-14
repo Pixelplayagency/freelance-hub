@@ -166,10 +166,27 @@ export function ContentPlannerCalendar({
   const [viewMedia, setViewMedia] = useState<{ url: string; type: 'image' | 'video' } | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
+  const [carouselIdx, setCarouselIdx] = useState<Record<string, number>>({})
+  const [commentEditing, setCommentEditing] = useState<string | null>(null)
+  const [commentDraft, setCommentDraft] = useState('')
+  const [commentSaving, setCommentSaving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const captionRef = useRef<HTMLTextAreaElement>(null)
   const emojiRef = useRef<HTMLDivElement>(null)
   const weeks = getWeeks(year, month)
+
+  async function saveComment(ds: string, value: string) {
+    const entry = entryMap[ds]
+    if (!entry) return
+    setCommentSaving(true)
+    try {
+      await updateContentPlan(entry.id, { client_comments: value.trim() || null })
+      setEntryMap(prev => ({ ...prev, [ds]: { ...prev[ds], client_comments: value.trim() || null } }))
+    } finally {
+      setCommentSaving(false)
+      setCommentEditing(null)
+    }
+  }
 
   // Close emoji picker on outside click
   useEffect(() => {
@@ -419,7 +436,7 @@ export function ContentPlannerCalendar({
                                 className={`w-full text-left rounded-lg overflow-hidden transition-all ${active ? 'ring-1 ring-[#f24a49]' : 'hover:ring-1 hover:ring-border'}`}
                                 style={{ border: '1px solid var(--border)' }}
                               >
-                                {/* Media grid */}
+                                {/* Media carousel */}
                                 {(() => {
                                   const items = entryMediaItems(entry)
                                   if (!items.length) {
@@ -429,43 +446,55 @@ export function ContentPlannerCalendar({
                                       </div>
                                     )
                                   }
-                                  if (items.length === 1) {
-                                    const item = items[0]
-                                    return (
-                                      <div className="relative group w-full bg-muted overflow-hidden" style={{ height: 110 }}>
-                                        {item.type === 'video'
-                                          ? <video src={item.url} className="w-full h-full object-cover" muted />
-                                          : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
-                                        <button
-                                          onClick={e => { e.stopPropagation(); setViewMedia({ url: item.url, type: item.type }) }}
-                                          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                          <Eye className="w-5 h-5 text-white drop-shadow" />
-                                        </button>
-                                      </div>
-                                    )
-                                  }
-                                  const visible = items.slice(0, 4)
-                                  const extra = items.length - 4
-                                  const cols = visible.length === 2 ? 2 : 2
+                                  const idx = Math.min(carouselIdx[ds] ?? 0, items.length - 1)
+                                  const item = items[idx]
                                   return (
-                                    <div className="w-full bg-muted overflow-hidden grid gap-px" style={{ height: 110, gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
-                                      {visible.map((item, i) => (
-                                        <div key={i} className="relative group overflow-hidden bg-muted">
-                                          {item.type === 'video'
-                                            ? <video src={item.url} className="w-full h-full object-cover" muted />
-                                            : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
-                                          {i === 3 && extra > 0 && (
-                                            <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
-                                              <span className="text-white text-sm font-bold">+{extra + 1}</span>
-                                            </div>
-                                          )}
+                                    <div className="relative group w-full bg-muted overflow-hidden" style={{ height: 110 }}>
+                                      {item.type === 'video'
+                                        ? <video src={item.url} className="w-full h-full object-cover" muted />
+                                        : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
+
+                                      {/* Eye preview */}
+                                      <button
+                                        onClick={e => { e.stopPropagation(); setViewMedia({ url: item.url, type: item.type }) }}
+                                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <Eye className="w-4 h-4 text-white drop-shadow" />
+                                      </button>
+
+                                      {/* Prev/Next arrows */}
+                                      {items.length > 1 && (
+                                        <>
                                           <button
-                                            onClick={e => { e.stopPropagation(); setViewMedia({ url: item.url, type: item.type }) }}
-                                            className="absolute inset-0 bg-black/0 group-hover:bg-black/35 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                                            <Eye className="w-3.5 h-3.5 text-white drop-shadow" />
+                                            onClick={e => { e.stopPropagation(); setCarouselIdx(p => ({ ...p, [ds]: (idx - 1 + items.length) % items.length })) }}
+                                            className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 rounded-full p-0.5 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                          >
+                                            <ChevronLeft className="w-3 h-3" />
                                           </button>
+                                          <button
+                                            onClick={e => { e.stopPropagation(); setCarouselIdx(p => ({ ...p, [ds]: (idx + 1) % items.length })) }}
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 rounded-full p-0.5 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                          >
+                                            <ChevronRight className="w-3 h-3" />
+                                          </button>
+                                          {/* Dots */}
+                                          <div className="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1 z-10">
+                                            {items.map((_, i) => (
+                                              <button
+                                                key={i}
+                                                onClick={e => { e.stopPropagation(); setCarouselIdx(p => ({ ...p, [ds]: i })) }}
+                                                className={`w-1.5 h-1.5 rounded-full transition-all ${i === idx ? 'bg-white' : 'bg-white/40'}`}
+                                              />
+                                            ))}
+                                          </div>
+                                        </>
+                                      )}
+
+                                      {/* Count badge */}
+                                      {items.length > 1 && (
+                                        <div className="absolute top-1.5 right-1.5 bg-black/50 rounded-full px-1.5 py-0.5 text-[9px] text-white font-semibold z-10">
+                                          {idx + 1}/{items.length}
                                         </div>
-                                      ))}
+                                      )}
                                     </div>
                                   )
                                 })()}
@@ -510,20 +539,54 @@ export function ContentPlannerCalendar({
                                 </div>
                               </button>
 
-                              {/* Client comments — separate box below card */}
-                              <button
-                                onClick={() => openPanel(ds)}
-                                className="w-full text-left rounded-lg px-2.5 py-2 transition-colors hover:brightness-95"
-                                style={{ backgroundColor: 'rgba(120,120,128,0.15)', border: '1px solid rgba(120,120,128,0.12)' }}
-                              >
-                                {entry.client_comments ? (
-                                  <p className="text-[10px] text-foreground/70 leading-snug line-clamp-3">{entry.client_comments}</p>
+                              {/* Client comments — inline editable for admin, read-only for freelancer */}
+                              {isAdmin ? (
+                                commentEditing === ds ? (
+                                  <div className="relative" onClick={e => e.stopPropagation()}>
+                                    <textarea
+                                      autoFocus
+                                      rows={3}
+                                      value={commentDraft}
+                                      onChange={e => setCommentDraft(e.target.value)}
+                                      onBlur={() => saveComment(ds, commentDraft)}
+                                      onKeyDown={e => { if (e.key === 'Escape') { setCommentEditing(null) } }}
+                                      placeholder="Leave a comment for the freelancer…"
+                                      className="w-full text-[10px] rounded-lg px-2.5 py-2 resize-none leading-snug focus:outline-none focus:ring-1 focus:ring-[#f24a49]"
+                                      style={{ backgroundColor: 'rgba(120,120,128,0.15)', border: '1px solid rgba(120,120,128,0.3)' }}
+                                    />
+                                    {commentSaving && (
+                                      <Loader2 className="absolute bottom-2 right-2 w-3 h-3 animate-spin text-muted-foreground" />
+                                    )}
+                                  </div>
                                 ) : (
-                                  <p className="text-[10px] italic leading-snug" style={{ color: 'rgba(120,120,128,0.5)' }}>
-                                    client comments about the post and caption
-                                  </p>
-                                )}
-                              </button>
+                                  <button
+                                    onClick={e => { e.stopPropagation(); setCommentDraft(entry.client_comments ?? ''); setCommentEditing(ds) }}
+                                    className="w-full text-left rounded-lg px-2.5 py-2 transition-colors hover:brightness-95"
+                                    style={{ backgroundColor: 'rgba(120,120,128,0.15)', border: '1px solid rgba(120,120,128,0.12)' }}
+                                  >
+                                    {entry.client_comments ? (
+                                      <p className="text-[10px] text-foreground/70 leading-snug line-clamp-3">{entry.client_comments}</p>
+                                    ) : (
+                                      <p className="text-[10px] italic leading-snug" style={{ color: 'rgba(120,120,128,0.5)' }}>
+                                        Leave a comment for the freelancer…
+                                      </p>
+                                    )}
+                                  </button>
+                                )
+                              ) : (
+                                <div
+                                  className="w-full text-left rounded-lg px-2.5 py-2"
+                                  style={{ backgroundColor: 'rgba(120,120,128,0.15)', border: '1px solid rgba(120,120,128,0.12)' }}
+                                >
+                                  {entry.client_comments ? (
+                                    <p className="text-[10px] text-foreground/70 leading-snug line-clamp-3">{entry.client_comments}</p>
+                                  ) : (
+                                    <p className="text-[10px] italic leading-snug" style={{ color: 'rgba(120,120,128,0.5)' }}>
+                                      client comments about the post and caption
+                                    </p>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           )}
 
@@ -650,15 +713,8 @@ export function ContentPlannerCalendar({
               />
             </div>
 
-            {/* Client Comments — admin editable, freelancer read-only (shown outside on card) */}
-            {isAdmin ? (
-              <div>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Client Comments</p>
-                <textarea rows={3} placeholder="Leave a comment for the freelancer…" value={panel.client_comments}
-                  onChange={e => setPanel(s => s ? { ...s, client_comments: e.target.value } : s)}
-                  className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none leading-relaxed" />
-              </div>
-            ) : panel.client_comments ? (
+            {/* Client Comments — admin edits inline on card; freelancer sees read-only here if exists */}
+            {!isAdmin && panel.client_comments ? (
               <div>
                 <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Client Comments</p>
                 <div className="rounded-lg px-3 py-2 text-xs text-foreground/70 leading-relaxed"
