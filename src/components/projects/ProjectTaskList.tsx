@@ -15,23 +15,51 @@ interface Props {
   assigneeMap?: AssigneeMap
 }
 
-const STATUS_STYLES: Record<TaskStatus, {
+const STATUS_CONFIG: Record<TaskStatus, {
   dot: string
+  label: string
+  headerText: string
+  badge: string
   leftBar: string
-  header: string
-  headerBg: string
-  countBadge: string
+  rowHover: string
 }> = {
-  todo:        { dot: 'bg-slate-400',  leftBar: 'border-l-slate-300',   header: 'text-slate-500 dark:text-slate-400',  headerBg: 'bg-slate-50 dark:bg-slate-800/50',   countBadge: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300' },
-  in_progress: { dot: 'bg-blue-500',   leftBar: 'border-l-blue-400',    header: 'text-blue-600 dark:text-blue-400',    headerBg: 'bg-blue-50 dark:bg-blue-900/30',     countBadge: 'bg-blue-100 text-blue-700 dark:bg-blue-800/60 dark:text-blue-300'  },
-  review:      { dot: 'bg-amber-500',  leftBar: 'border-l-amber-400',   header: 'text-amber-600 dark:text-amber-400',  headerBg: 'bg-amber-50 dark:bg-amber-900/30',   countBadge: 'bg-amber-100 text-amber-700 dark:bg-amber-800/60 dark:text-amber-300' },
-  completed:   { dot: 'bg-green-500',  leftBar: 'border-l-green-400',   header: 'text-green-600 dark:text-green-400',  headerBg: 'bg-green-50 dark:bg-green-900/30',   countBadge: 'bg-green-100 text-green-700 dark:bg-green-800/60 dark:text-green-300' },
+  todo: {
+    dot: 'bg-slate-400',
+    label: 'To Do',
+    headerText: 'text-slate-600 dark:text-slate-400',
+    badge: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+    leftBar: 'border-l-slate-300 dark:border-l-slate-600',
+    rowHover: 'hover:bg-slate-50 dark:hover:bg-slate-800/40',
+  },
+  in_progress: {
+    dot: 'bg-blue-500',
+    label: 'In Progress',
+    headerText: 'text-blue-600 dark:text-blue-400',
+    badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
+    leftBar: 'border-l-blue-400',
+    rowHover: 'hover:bg-blue-50/50 dark:hover:bg-blue-900/20',
+  },
+  review: {
+    dot: 'bg-amber-500',
+    label: 'Review',
+    headerText: 'text-amber-600 dark:text-amber-400',
+    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+    leftBar: 'border-l-amber-400',
+    rowHover: 'hover:bg-amber-50/50 dark:hover:bg-amber-900/20',
+  },
+  completed: {
+    dot: 'bg-emerald-500',
+    label: 'Completed',
+    headerText: 'text-emerald-600 dark:text-emerald-400',
+    badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
+    leftBar: 'border-l-emerald-400',
+    rowHover: 'hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20',
+  },
 }
 
 function isOverdue(due: string) { return new Date(due) < new Date() }
 function isDueSoon(due: string) {
-  const d = new Date(due)
-  const now = new Date()
+  const d = new Date(due); const now = new Date()
   return d >= now && (d.getTime() - now.getTime()) < 2 * 24 * 60 * 60 * 1000
 }
 function formatDue(due: string) {
@@ -44,7 +72,6 @@ export function ProjectTaskList({ tasks, projectId, isAdmin, assigneeMap = {} }:
     return acc
   }, { todo: 0, in_progress: 0, review: 0, completed: 0 })
 
-  // Only show groups that have tasks, but always show todo/in_progress/review even if empty
   const visibleStatuses = TASK_STATUSES.filter(s =>
     s.id !== 'completed' ? true : counts[s.id] > 0
   )
@@ -60,32 +87,32 @@ export function ProjectTaskList({ tasks, projectId, isAdmin, assigneeMap = {} }:
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {visibleStatuses.map(s => {
+        const cfg = STATUS_CONFIG[s.id]
         const group = tasks.filter(t => t.status === s.id)
-        const styles = STATUS_STYLES[s.id]
 
         return (
-          <div key={s.id} className="rounded-2xl border border-border bg-card overflow-hidden">
-            {/* Group header */}
-            <div className={cn('flex items-center gap-2.5 px-4 py-3 border-b border-border', styles.headerBg)}>
-              <span className={cn('w-2 h-2 rounded-full shrink-0', styles.dot)} />
-              <span className={cn('text-xs font-bold uppercase tracking-widest', styles.header)}>
-                {s.label}
+          <div key={s.id} className="bg-card border border-border rounded-2xl overflow-hidden">
+            {/* Section header — compact */}
+            <div className="flex items-center gap-2 px-4 py-2.5">
+              <span className={cn('w-2 h-2 rounded-full shrink-0', cfg.dot)} />
+              <span className={cn('text-xs font-bold uppercase tracking-widest', cfg.headerText)}>
+                {cfg.label}
               </span>
-              <span className={cn('ml-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-full', styles.countBadge)}>
+              <span className={cn('ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full tabular-nums', cfg.badge)}>
                 {counts[s.id]}
               </span>
             </div>
 
-            {/* Tasks */}
+            {/* Task rows */}
             {group.length === 0 ? (
-              <div className="px-4 py-5 text-center">
-                <p className="text-xs text-muted-foreground/50 italic">No tasks</p>
+              <div className="px-4 py-3 border-t border-border/50">
+                <p className="text-xs text-muted-foreground/40 italic text-center">No tasks</p>
               </div>
             ) : (
-              <div className="divide-y divide-border">
-                {group.map(task => {
+              <div className="border-t border-border/50">
+                {group.map((task, idx) => {
                   const coAssignees = assigneeMap[task.id] ?? []
                   const primaryAssignee = task.assignee as { id?: string; full_name: string | null; avatar_url: string | null } | null
                   const allAssignees = coAssignees.length > 0
@@ -102,8 +129,10 @@ export function ProjectTaskList({ tasks, projectId, isAdmin, assigneeMap = {} }:
                       key={task.id}
                       href={href}
                       className={cn(
-                        'flex items-center gap-3 px-4 py-3.5 border-l-4 hover:bg-muted/40 transition-colors group',
-                        styles.leftBar
+                        'flex items-center gap-3 px-4 py-3 border-l-[3px] transition-colors group',
+                        idx > 0 && 'border-t border-border/40',
+                        cfg.leftBar,
+                        cfg.rowHover,
                       )}
                     >
                       {/* Title + description */}
@@ -118,7 +147,7 @@ export function ProjectTaskList({ tasks, projectId, isAdmin, assigneeMap = {} }:
                         )}
                       </div>
 
-                      {/* Assignees */}
+                      {/* Assignee avatars */}
                       {allAssignees.length > 0 && (
                         <div className="hidden sm:flex items-center shrink-0">
                           <div className="flex -space-x-1.5">
@@ -146,7 +175,7 @@ export function ProjectTaskList({ tasks, projectId, isAdmin, assigneeMap = {} }:
                             )}
                           </div>
                           {allAssignees.length === 1 && (
-                            <span className="text-xs text-muted-foreground ml-2 hidden md:block truncate max-w-[100px]">
+                            <span className="text-xs text-muted-foreground ml-2 hidden md:block truncate max-w-[90px]">
                               {allAssignees[0].full_name}
                             </span>
                           )}
@@ -168,7 +197,7 @@ export function ProjectTaskList({ tasks, projectId, isAdmin, assigneeMap = {} }:
                         </div>
                       )}
 
-                      <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0 group-hover:text-foreground transition-colors" />
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30 shrink-0 group-hover:text-foreground transition-colors" />
                     </Link>
                   )
                 })}
