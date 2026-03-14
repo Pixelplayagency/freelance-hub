@@ -150,25 +150,37 @@ export function ContentPlannerTaskView({ tasks: initialTasks }: { tasks: TaskWit
 
   /* Board pan state */
   const boardRef = useRef<HTMLDivElement>(null)
-  const pan = useRef({ active: false, startX: 0, scrollLeft: 0 })
+  const pan = useRef({ active: false, moved: false, startX: 0, scrollLeft: 0, pointerId: -1 })
   const [isPanning, setIsPanning] = useState(false)
 
   function onBoardPointerDown(e: React.PointerEvent) {
     const target = e.target as HTMLElement
-    if (target.closest('[data-drag-handle]')) return // let dnd-kit handle card drags
-    pan.current = { active: true, startX: e.clientX, scrollLeft: boardRef.current?.scrollLeft ?? 0 }
-    boardRef.current?.setPointerCapture(e.pointerId)
-    setIsPanning(true)
+    // Let dnd-kit handle card drags; let buttons/links handle their own clicks
+    if (target.closest('[data-drag-handle]')) return
+    if (target.closest('button, a, input, textarea, select')) return
+    pan.current = { active: true, moved: false, startX: e.clientX, scrollLeft: boardRef.current?.scrollLeft ?? 0, pointerId: e.pointerId }
   }
 
   function onBoardPointerMove(e: React.PointerEvent) {
     if (!pan.current.active) return
     const dx = e.clientX - pan.current.startX
-    if (boardRef.current) boardRef.current.scrollLeft = pan.current.scrollLeft - dx
+    // Only capture pointer once we detect intentional horizontal movement
+    if (!pan.current.moved && Math.abs(dx) > 5) {
+      pan.current.moved = true
+      try { boardRef.current?.setPointerCapture(pan.current.pointerId) } catch {}
+      setIsPanning(true)
+    }
+    if (pan.current.moved && boardRef.current) {
+      boardRef.current.scrollLeft = pan.current.scrollLeft - dx
+    }
   }
 
   function onBoardPointerUp() {
+    if (pan.current.moved) {
+      try { boardRef.current?.releasePointerCapture(pan.current.pointerId) } catch {}
+    }
     pan.current.active = false
+    pan.current.moved = false
     setIsPanning(false)
   }
 
