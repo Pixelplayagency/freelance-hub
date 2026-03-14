@@ -49,6 +49,7 @@ export default async function FreelancerClientCalendarPage({
         <p className="text-sm text-muted-foreground mt-0.5">Monthly content schedule</p>
       </div>
       <ContentPlannerCalendar
+        key={`${year}-${month}`}
         entries={(entries ?? []) as ContentPlan[]}
         month={month}
         year={year}

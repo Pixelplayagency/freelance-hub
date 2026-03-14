@@ -13,8 +13,8 @@ import {
 } from '@/lib/actions/content-plan.actions'
 import type { ContentPlan, ContentType, ContentPlanStatus } from '@/lib/types/app.types'
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
-const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+const CLOUD_NAME = 'desj9wmtd'
+const UPLOAD_PRESET = 'task-uploads'
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December']
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
@@ -189,7 +189,11 @@ export function ContentPlannerCalendar({
       } else {
         setPanel(s => s ? { ...s, uploading: false } : s)
       }
-    } catch { setPanel(s => s ? { ...s, uploading: false } : s) }
+    } catch {
+      setPanel(s => s ? { ...s, uploading: false } : s)
+      setSaveError('Media upload failed. Please try again.')
+      setTimeout(() => setSaveError(null), 5000)
+    }
     e.target.value = ''
   }
 
