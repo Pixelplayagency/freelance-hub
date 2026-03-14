@@ -207,8 +207,11 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
             const initial = client.name.charAt(0).toUpperCase()
             const hasSocials = client.instagram_url || client.facebook_url || client.tiktok_url
             return (
-              <div key={client.id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
-
+              <a
+                key={client.id}
+                href={`${basePath}/${client.id}`}
+                className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col group cursor-pointer"
+              >
                 {/* Cover banner */}
                 <div className="relative h-28 overflow-hidden shrink-0">
                   {client.cover_image_url ? (
@@ -221,7 +224,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
                   )}
                   {isAdmin && (
                     <button
-                      onClick={() => openEdit(client)}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); openEdit(client) }}
                       className="absolute top-2 right-2 bg-black/40 backdrop-blur-sm text-white p-1.5 rounded-lg hover:bg-black/60 transition-colors"
                     >
                       <Settings2 className="w-3.5 h-3.5" />
@@ -252,31 +255,37 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
 
                   {/* Name + socials */}
                   <div className="flex items-start justify-between gap-2 mb-1.5">
-                    <h3 className="font-semibold text-foreground leading-snug flex-1 min-w-0 truncate">
+                    <h3 className="font-semibold text-foreground leading-snug flex-1 min-w-0 truncate group-hover:text-[#f24a49] transition-colors">
                       {client.name}
                     </h3>
                     {hasSocials && (
                       <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
                         {client.instagram_url && (
-                          <a href={client.instagram_url} target="_blank" rel="noopener noreferrer"
-                            onClick={e => e.stopPropagation()}
-                            className="text-muted-foreground hover:text-[#E1306C] transition-colors">
+                          <button
+                            type="button"
+                            onClick={e => { e.preventDefault(); e.stopPropagation(); window.open(client.instagram_url!, '_blank', 'noopener,noreferrer') }}
+                            className="text-muted-foreground hover:text-[#E1306C] transition-colors"
+                          >
                             <Instagram className="w-3.5 h-3.5" />
-                          </a>
+                          </button>
                         )}
                         {client.facebook_url && (
-                          <a href={client.facebook_url} target="_blank" rel="noopener noreferrer"
-                            onClick={e => e.stopPropagation()}
-                            className="text-muted-foreground hover:text-[#1877F2] transition-colors">
+                          <button
+                            type="button"
+                            onClick={e => { e.preventDefault(); e.stopPropagation(); window.open(client.facebook_url!, '_blank', 'noopener,noreferrer') }}
+                            className="text-muted-foreground hover:text-[#1877F2] transition-colors"
+                          >
                             <Facebook className="w-3.5 h-3.5" />
-                          </a>
+                          </button>
                         )}
                         {client.tiktok_url && (
-                          <a href={client.tiktok_url} target="_blank" rel="noopener noreferrer"
-                            onClick={e => e.stopPropagation()}
-                            className="text-muted-foreground hover:text-foreground transition-colors">
+                          <button
+                            type="button"
+                            onClick={e => { e.preventDefault(); e.stopPropagation(); window.open(client.tiktok_url!, '_blank', 'noopener,noreferrer') }}
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                          >
                             <TikTokIcon className="w-3.5 h-3.5" />
-                          </a>
+                          </button>
                         )}
                       </div>
                     )}
@@ -300,23 +309,19 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
                   <div className="flex items-center gap-2">
                     {isAdmin && (
                       <button
-                        onClick={() => handleDelete(client.id)}
+                        onClick={e => { e.preventDefault(); e.stopPropagation(); handleDelete(client.id) }}
                         disabled={isPending}
                         className="p-1 rounded text-muted-foreground/40 hover:text-red-500 transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     )}
-                    <button
-                      onClick={() => router.push(`${basePath}/${client.id}`)}
-                      className="text-xs font-semibold flex items-center gap-1 hover:gap-2 transition-all"
-                      style={{ color: '#f24a49' }}
-                    >
+                    <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all" style={{ color: '#f24a49' }}>
                       Open <ArrowRight className="w-3 h-3" />
-                    </button>
+                    </span>
                   </div>
                 </div>
-              </div>
+              </a>
             )
           })}
         </div>
