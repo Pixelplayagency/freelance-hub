@@ -49,7 +49,7 @@ export function VideoReferenceAdd({ taskId, references, isAdmin }: VideoReferenc
   return (
     <div className="space-y-4">
       {references.length === 0 && !showForm && (
-        <p className="text-sm text-gray-400">No videos attached yet.</p>
+        <p className="text-sm text-muted-foreground">No videos attached yet.</p>
       )}
 
       <div className="space-y-4">
@@ -72,7 +72,7 @@ export function VideoReferenceAdd({ taskId, references, isAdmin }: VideoReferenc
       {isAdmin && (
         <>
           {showForm ? (
-            <form onSubmit={handleAdd} className="space-y-3 p-3 rounded-lg border border-dashed border-gray-200">
+            <form onSubmit={handleAdd} className="space-y-3 p-3 rounded-lg border border-dashed border-border">
               <div className="space-y-1">
                 <Label className="text-xs">YouTube or Vimeo URL *</Label>
                 <Input

@@ -55,7 +55,7 @@ export function LinksList({ taskId, references, isAdmin }: LinksListProps) {
 
       <div className="space-y-2">
         {references.map(ref => (
-          <div key={ref.id} className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-100 bg-gray-50 group">
+          <div key={ref.id} className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-muted group">
             <ExternalLink className="w-4 h-4 text-gray-400 shrink-0" />
             <a
               href={ref.url ?? '#'}
@@ -80,7 +80,7 @@ export function LinksList({ taskId, references, isAdmin }: LinksListProps) {
       {isAdmin && (
         <>
           {showForm ? (
-            <form onSubmit={handleAdd} className="space-y-3 p-3 rounded-lg border border-dashed border-gray-200">
+            <form onSubmit={handleAdd} className="space-y-3 p-3 rounded-lg border border-dashed border-border">
               <div className="space-y-1">
                 <Label className="text-xs">URL *</Label>
                 <Input

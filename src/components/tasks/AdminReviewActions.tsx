@@ -95,16 +95,16 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
   const displayName = assigneeName ?? 'Freelancer'
 
   return (
-    <div className="rounded-xl border border-amber-200 bg-amber-50 overflow-hidden">
+    <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/15 overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-amber-100 flex items-center gap-2">
+      <div className="px-4 py-3 border-b border-amber-100 dark:border-amber-800/50 flex items-center gap-2">
         <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-        <span className="text-sm font-semibold text-amber-800">Pending your review</span>
-        <span className="ml-auto text-xs text-amber-600">{displayName} submitted work</span>
+        <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Pending your review</span>
+        <span className="ml-auto text-xs text-amber-600 dark:text-amber-400">{displayName} submitted work</span>
       </div>
 
       {/* Submitted work — auto-expanded */}
-      <div className="mx-4 mt-3 rounded-lg border border-amber-200 bg-card overflow-hidden">
+      <div className="mx-4 mt-3 rounded-lg border border-amber-200 dark:border-amber-800/40 bg-card overflow-hidden">
         {loadState === 'loading' && (
           <div className="flex items-center justify-center gap-2 py-6 text-xs text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" />

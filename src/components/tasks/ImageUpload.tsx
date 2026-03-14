@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { Upload, Trash2, Loader2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Upload, Trash2, Loader2, Eye, Download } from 'lucide-react'
 import { getSignedUploadUrl, saveTaskReference, deleteTaskReference } from '@/lib/actions/upload.actions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
@@ -24,6 +24,13 @@ export function ImageUpload({ taskId, references, isAdmin }: ImageUploadProps) {
     const url = await getStoragePublicUrl(path)
     if (url) setSignedUrls(prev => ({ ...prev, [refId]: url }))
   }
+
+  // Load all signed URLs on mount so View/Download buttons render immediately
+  useEffect(() => {
+    references.forEach(ref => {
+      if (ref.storage_path) loadSignedUrl(ref.storage_path, ref.id)
+    })
+  }, [references])
 
   async function handleFile(file: File) {
     if (!file.type.startsWith('image/')) {
@@ -74,33 +81,61 @@ export function ImageUpload({ taskId, references, isAdmin }: ImageUploadProps) {
         {references.map(ref => (
           <div
             key={ref.id}
-            className="relative group aspect-video rounded-lg overflow-hidden bg-muted border border-border"
-            onMouseEnter={() => ref.storage_path && loadSignedUrl(ref.storage_path, ref.id)}
+            className="relative group rounded-lg overflow-hidden bg-muted border border-border"
           >
-            {signedUrls[ref.id] ? (
-              <img
-                src={signedUrls[ref.id]}
-                alt={ref.title ?? 'Image'}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                {ref.title ?? 'Image'}
+            {/* Image preview */}
+            <div className="aspect-video relative">
+              {signedUrls[ref.id] ? (
+                <img
+                  src={signedUrls[ref.id]}
+                  alt={ref.title ?? 'Image'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs p-2 text-center">
+                  {ref.title ?? 'Image'}
+                </div>
+              )}
+              {isAdmin && (
+                <button
+                  onClick={() => handleDelete(ref.id)}
+                  className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 p-1 rounded bg-white/90 hover:bg-red-50 text-gray-500 hover:text-red-500 transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* View / Download — visible to everyone */}
+            {signedUrls[ref.id] && (
+              <div className="flex items-center gap-1.5 px-2 py-1.5 bg-muted border-t border-border">
+                <span className="text-[10px] text-muted-foreground truncate flex-1">{ref.title ?? 'Image'}</span>
+                <a
+                  href={signedUrls[ref.id]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="View full size"
+                  className="flex items-center gap-1 px-2 py-1 rounded text-xs border border-border bg-card hover:bg-secondary transition-colors"
+                >
+                  <Eye className="w-3 h-3" />
+                  View
+                </a>
+                <a
+                  href={signedUrls[ref.id]}
+                  download={ref.title ?? 'image'}
+                  title="Download"
+                  className="flex items-center gap-1 px-2 py-1 rounded text-xs border border-border bg-card hover:bg-secondary transition-colors"
+                >
+                  <Download className="w-3 h-3" />
+                  Save
+                </a>
               </div>
-            )}
-            {isAdmin && (
-              <button
-                onClick={() => handleDelete(ref.id)}
-                className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 p-1 rounded bg-white/90 hover:bg-red-50 text-gray-500 hover:text-red-500 transition-all"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
             )}
           </div>
         ))}
       </div>
 
-      {/* Upload zone */}
+      {/* Upload zone — admin only */}
       {isAdmin && (
         <>
           <input

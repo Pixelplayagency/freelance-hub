@@ -32,6 +32,7 @@ export default async function TaskDetailPage({
       .from('task_references')
       .select('*')
       .eq('task_id', taskId)
+      .not('title', 'like', '[Final]%')
       .order('created_at'),
     supabase
       .from('profiles')
@@ -116,20 +117,20 @@ export default async function TaskDetailPage({
           {deadlineParsed ? (
             <div className={cn(
               'flex items-center gap-3 px-3 py-2 rounded-lg border text-sm',
-              deadlineStatus === 'overdue' ? 'bg-red-50 border-red-100' :
-              deadlineStatus === 'today' ? 'bg-amber-50 border-amber-100' :
-              deadlineStatus === 'tomorrow' ? 'bg-amber-50/50 border-amber-100/60' :
+              deadlineStatus === 'overdue' ? 'bg-red-50 border-red-100 dark:bg-red-900/20 dark:border-red-900/40' :
+              deadlineStatus === 'today' ? 'bg-amber-50 border-amber-100 dark:bg-amber-900/20 dark:border-amber-900/40' :
+              deadlineStatus === 'tomorrow' ? 'bg-amber-50/50 border-amber-100/60 dark:bg-amber-900/10 dark:border-amber-900/30' :
               'bg-muted border-border'
             )}>
               <div className="flex items-center gap-1.5">
                 <Calendar className={cn('w-3.5 h-3.5',
-                  deadlineStatus === 'overdue' ? 'text-red-500' :
-                  deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-500' :
+                  deadlineStatus === 'overdue' ? 'text-red-500 dark:text-red-400' :
+                  deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-500 dark:text-amber-400' :
                   'text-muted-foreground'
                 )} />
                 <span className={cn('font-medium',
-                  deadlineStatus === 'overdue' ? 'text-red-600' :
-                  deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-600' :
+                  deadlineStatus === 'overdue' ? 'text-red-600 dark:text-red-400' :
+                  deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-600 dark:text-amber-400' :
                   'text-foreground'
                 )}>
                   {deadlineStatus === 'overdue' && 'Overdue · '}
@@ -146,8 +147,8 @@ export default async function TaskDetailPage({
                     'text-muted-foreground'
                   )} />
                   <span className={cn('font-semibold',
-                    deadlineStatus === 'overdue' ? 'text-red-600' :
-                    deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-600' :
+                    deadlineStatus === 'overdue' ? 'text-red-600 dark:text-red-400' :
+                    deadlineStatus === 'today' || deadlineStatus === 'tomorrow' ? 'text-amber-600 dark:text-amber-400' :
                     'text-foreground'
                   )}>{deadlineTime}</span>
                 </div>

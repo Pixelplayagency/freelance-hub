@@ -32,6 +32,7 @@ export default async function FreelancerTaskDetailPage({
       .from('task_references')
       .select('*')
       .eq('task_id', taskId)
+      .not('title', 'like', '[Final]%')
       .order('created_at'),
   ])
 
