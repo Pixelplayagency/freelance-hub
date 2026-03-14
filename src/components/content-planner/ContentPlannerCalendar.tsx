@@ -207,7 +207,8 @@ export function ContentPlannerCalendar({
         platforms: panel.platforms,
         scheduled_time: panel.scheduled_time || null,
         caption: panel.caption || null,
-        client_comments: panel.client_comments || null,
+        // client_comments only saved by admin (via ContentPlannerAdminList)
+        ...(isAdmin ? { client_comments: panel.client_comments || null } : {}),
         media_url: panel.media_url,
         media_type: panel.media_type,
         status: panel.status,
@@ -432,6 +433,15 @@ export function ContentPlannerCalendar({
                                   </span>
                                   <ApprovalBadge entry={entry} />
                                 </div>
+
+                                {/* Client comments preview */}
+                                {entry.client_comments && (
+                                  <div className="mt-1.5 pt-1.5 border-t border-border/50 rounded-b-lg bg-muted/40 -mx-2 px-2 pb-1.5">
+                                    <p className="text-[10px] text-muted-foreground italic leading-snug line-clamp-3">
+                                      💬 {entry.client_comments}
+                                    </p>
+                                  </div>
+                                )}
                               </div>
                             </button>
                           )}
@@ -526,12 +536,22 @@ export function ContentPlannerCalendar({
                 className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none leading-relaxed" />
             </div>
 
-            {/* Client Comments */}
+            {/* Client Comments — read-only display for freelancer; editable for admin */}
             <div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Client Notes</p>
-              <textarea rows={2} placeholder="Client feedback or notes…" value={panel.client_comments}
-                onChange={e => setPanel(s => s ? { ...s, client_comments: e.target.value } : s)}
-                className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none" />
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Client Comments</p>
+              {isAdmin ? (
+                <textarea rows={2} placeholder="Leave a comment for the freelancer…" value={panel.client_comments}
+                  onChange={e => setPanel(s => s ? { ...s, client_comments: e.target.value } : s)}
+                  className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none" />
+              ) : panel.client_comments ? (
+                <div className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-muted/40 text-foreground leading-relaxed min-h-[56px]">
+                  {panel.client_comments}
+                </div>
+              ) : (
+                <div className="w-full text-xs border border-dashed border-border rounded-lg px-3 py-2 bg-muted/20 text-muted-foreground/40 italic min-h-[56px] flex items-center">
+                  No comments yet
+                </div>
+              )}
             </div>
 
             {/* Media */}
