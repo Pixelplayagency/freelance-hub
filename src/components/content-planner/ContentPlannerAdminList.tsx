@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { CheckCircle2, XCircle, Trash2, Clock, Eye, Loader2, Image as ImageIcon, MessageSquare } from 'lucide-react'
-import { approveCaption, approvePost, rejectCaption, rejectPost, deleteContentPlan, updateContentPlan } from '@/lib/actions/content-plan.actions'
+import { CheckCircle2, XCircle, Trash2, Clock, Eye, Loader2, Image as ImageIcon } from 'lucide-react'
+import { approveCaption, approvePost, rejectCaption, rejectPost, deleteContentPlan } from '@/lib/actions/content-plan.actions'
 import type { ContentPlan, ContentPlanStatus, ContentType } from '@/lib/types/app.types'
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -90,10 +90,6 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
   const [entries, setEntries] = useState<ContentPlan[]>(initialEntries)
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
   const [lightbox, setLightbox] = useState<{ url: string; type: 'image' | 'video' } | null>(null)
-  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>(() =>
-    Object.fromEntries(initialEntries.map(e => [e.id, e.client_comments ?? '']))
-  )
-  const [savingComment, setSavingComment] = useState<string | null>(null)
 
   const filtered = entries.filter(e => {
     if (filter === 'pending') return e.approval_requested && !e.caption_approved && !e.post_approved && !e.caption_rejected && !e.post_rejected
@@ -147,19 +143,6 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
       await deleteContentPlan(entry.id)
       setEntries(prev => prev.filter(e => e.id !== entry.id))
     })
-  }
-
-  async function handleSaveComment(id: string) {
-    const draft = commentDrafts[id] ?? ''
-    const current = entries.find(e => e.id === id)?.client_comments ?? ''
-    if (draft === current) return
-    setSavingComment(id)
-    try {
-      await updateContentPlan(id, { client_comments: draft || null })
-      update(id, { client_comments: draft || null })
-    } finally {
-      setSavingComment(null)
-    }
   }
 
   if (entries.length === 0) {
@@ -288,23 +271,6 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
                       )}
                     </p>
                   )}
-
-                  {/* Client comments — editable by admin */}
-                  <div className="mb-3">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <MessageSquare className="w-3 h-3 text-muted-foreground/60" />
-                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Client Comments</span>
-                      {savingComment === entry.id && <Loader2 className="w-2.5 h-2.5 animate-spin text-muted-foreground/50 ml-auto" />}
-                    </div>
-                    <textarea
-                      rows={2}
-                      placeholder="Leave a comment about the post and caption for the freelancer…"
-                      value={commentDrafts[entry.id] ?? ''}
-                      onChange={e => setCommentDrafts(prev => ({ ...prev, [entry.id]: e.target.value }))}
-                      onBlur={() => handleSaveComment(entry.id)}
-                      className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-muted/30 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none leading-relaxed"
-                    />
-                  </div>
 
                   {/* Action buttons */}
                   <div className="flex gap-2 flex-wrap items-center">

@@ -207,8 +207,7 @@ export function ContentPlannerCalendar({
         platforms: panel.platforms,
         scheduled_time: panel.scheduled_time || null,
         caption: panel.caption || null,
-        // client_comments only saved by admin (via ContentPlannerAdminList)
-        ...(isAdmin ? { client_comments: panel.client_comments || null } : {}),
+        client_comments: panel.client_comments || null,
         media_url: panel.media_url,
         media_type: panel.media_type,
         status: panel.status,
@@ -363,87 +362,88 @@ export function ContentPlannerCalendar({
                           </div>
 
                           {inMonth && entry && (
-                            <button
-                              onClick={() => openPanel(ds)}
-                              className={`w-full text-left rounded-lg overflow-hidden transition-all ${active ? 'ring-1 ring-[#f24a49]' : 'hover:ring-1 hover:ring-border'}`}
-                              style={{ border: '1px solid var(--border)' }}
-                            >
-                              {/* Media — full width */}
-                              <div className="relative group w-full bg-muted overflow-hidden" style={{ height: 110 }}>
-                                {entry.media_url ? (
-                                  entry.media_type === 'video'
-                                    ? <video src={entry.media_url} className="w-full h-full object-cover" muted />
-                                    : <img src={thumbUrl(entry.media_url)} alt="" className="w-full h-full object-cover" />
+                            <div className="space-y-1">
+                              {/* Main content card */}
+                              <button
+                                onClick={() => openPanel(ds)}
+                                className={`w-full text-left rounded-lg overflow-hidden transition-all ${active ? 'ring-1 ring-[#f24a49]' : 'hover:ring-1 hover:ring-border'}`}
+                                style={{ border: '1px solid var(--border)' }}
+                              >
+                                {/* Media — full width */}
+                                <div className="relative group w-full bg-muted overflow-hidden" style={{ height: 110 }}>
+                                  {entry.media_url ? (
+                                    entry.media_type === 'video'
+                                      ? <video src={entry.media_url} className="w-full h-full object-cover" muted />
+                                      : <img src={thumbUrl(entry.media_url)} alt="" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <ImageIcon className="w-6 h-6 text-muted-foreground/20" />
+                                    </div>
+                                  )}
+                                  {entry.media_url && (
+                                    <button
+                                      onClick={e => { e.stopPropagation(); setViewMedia({ url: entry.media_url!, type: entry.media_type! }) }}
+                                      className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                      <Eye className="w-5 h-5 text-white drop-shadow" />
+                                    </button>
+                                  )}
+                                </div>
+
+                                {/* Card body */}
+                                <div className="p-2 space-y-1.5 bg-background">
+                                  {entry.platforms?.length > 0 && (
+                                    <div className="flex gap-1.5 items-center">
+                                      {entry.platforms.map(pid => {
+                                        const p = PLATFORMS.find(x => x.id === pid)
+                                        if (!p) return null
+                                        return (
+                                          <span key={pid} className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
+                                            {p.icon(16)}
+                                          </span>
+                                        )
+                                      })}
+                                      {entry.scheduled_time && (
+                                        <span className="text-sm font-semibold text-foreground ml-auto tabular-nums">{to12h(entry.scheduled_time)}</span>
+                                      )}
+                                    </div>
+                                  )}
+                                  {!entry.platforms?.length && entry.scheduled_time && (
+                                    <p className="text-sm font-semibold text-foreground tabular-nums">{to12h(entry.scheduled_time)}</p>
+                                  )}
+                                  <div>
+                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                                      style={{ backgroundColor: TYPE_BG[entry.content_type], color: TYPE_COLORS[entry.content_type] }}>
+                                      {TYPE_LABELS[entry.content_type]}
+                                    </span>
+                                  </div>
+                                  {entry.caption && (
+                                    <p className="text-sm leading-snug text-foreground/80 line-clamp-3">{entry.caption}</p>
+                                  )}
+                                  <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                                    <span className="flex items-center gap-1 text-[11px] text-muted-foreground font-medium">
+                                      <span className="w-2 h-2 rounded-full inline-block shrink-0" style={{ backgroundColor: dotColor! }} />
+                                      {STATUS_LABELS[entry.status]}
+                                    </span>
+                                    <ApprovalBadge entry={entry} />
+                                  </div>
+                                </div>
+                              </button>
+
+                              {/* Client comments — separate box below card */}
+                              <button
+                                onClick={() => openPanel(ds)}
+                                className="w-full text-left rounded-lg px-2.5 py-2 transition-colors hover:brightness-95"
+                                style={{ backgroundColor: 'rgba(120,120,128,0.15)', border: '1px solid rgba(120,120,128,0.12)' }}
+                              >
+                                {entry.client_comments ? (
+                                  <p className="text-[10px] text-foreground/70 leading-snug line-clamp-3">{entry.client_comments}</p>
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center">
-                                    <ImageIcon className="w-6 h-6 text-muted-foreground/20" />
-                                  </div>
+                                  <p className="text-[10px] italic leading-snug" style={{ color: 'rgba(120,120,128,0.5)' }}>
+                                    client comments about the post and caption
+                                  </p>
                                 )}
-                                {/* Eye on hover */}
-                                {entry.media_url && (
-                                  <button
-                                    onClick={e => { e.stopPropagation(); setViewMedia({ url: entry.media_url!, type: entry.media_type! }) }}
-                                    className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <Eye className="w-5 h-5 text-white drop-shadow" />
-                                  </button>
-                                )}
-                              </div>
-
-                              {/* Card body */}
-                              <div className="p-2 space-y-1.5 bg-background">
-                                {/* Platform icons row */}
-                                {entry.platforms?.length > 0 && (
-                                  <div className="flex gap-1.5 items-center">
-                                    {entry.platforms.map(pid => {
-                                      const p = PLATFORMS.find(x => x.id === pid)
-                                      if (!p) return null
-                                      return (
-                                        <span key={pid} className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
-                                          {p.icon(16)}
-                                        </span>
-                                      )
-                                    })}
-                                    {entry.scheduled_time && (
-                                      <span className="text-sm font-semibold text-foreground ml-auto tabular-nums">{to12h(entry.scheduled_time)}</span>
-                                    )}
-                                  </div>
-                                )}
-                                {!entry.platforms?.length && entry.scheduled_time && (
-                                  <p className="text-sm font-semibold text-foreground tabular-nums">{to12h(entry.scheduled_time)}</p>
-                                )}
-
-                                {/* Type pill */}
-                                <div>
-                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                                    style={{ backgroundColor: TYPE_BG[entry.content_type], color: TYPE_COLORS[entry.content_type] }}>
-                                    {TYPE_LABELS[entry.content_type]}
-                                  </span>
-                                </div>
-
-                                {/* Caption preview — readable size */}
-                                {entry.caption && (
-                                  <p className="text-sm leading-snug text-foreground/80 line-clamp-3">{entry.caption}</p>
-                                )}
-
-                                {/* Status + approval */}
-                                <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                                  <span className="flex items-center gap-1 text-[11px] text-muted-foreground font-medium">
-                                    <span className="w-2 h-2 rounded-full inline-block shrink-0" style={{ backgroundColor: dotColor! }} />
-                                    {STATUS_LABELS[entry.status]}
-                                  </span>
-                                  <ApprovalBadge entry={entry} />
-                                </div>
-
-                                {/* Client comments preview */}
-                                {entry.client_comments && (
-                                  <div className="mt-1.5 pt-1.5 border-t border-border/50 rounded-b-lg bg-muted/40 -mx-2 px-2 pb-1.5">
-                                    <p className="text-[10px] text-muted-foreground italic leading-snug line-clamp-3">
-                                      💬 {entry.client_comments}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            </button>
+                              </button>
+                            </div>
                           )}
 
                           {/* Empty cell — show faint + on hover */}
@@ -536,22 +536,12 @@ export function ContentPlannerCalendar({
                 className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none leading-relaxed" />
             </div>
 
-            {/* Client Comments — read-only display for freelancer; editable for admin */}
+            {/* Client Comments — editable */}
             <div>
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Client Comments</p>
-              {isAdmin ? (
-                <textarea rows={2} placeholder="Leave a comment for the freelancer…" value={panel.client_comments}
-                  onChange={e => setPanel(s => s ? { ...s, client_comments: e.target.value } : s)}
-                  className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none" />
-              ) : panel.client_comments ? (
-                <div className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-muted/40 text-foreground leading-relaxed min-h-[56px]">
-                  {panel.client_comments}
-                </div>
-              ) : (
-                <div className="w-full text-xs border border-dashed border-border rounded-lg px-3 py-2 bg-muted/20 text-muted-foreground/40 italic min-h-[56px] flex items-center">
-                  No comments yet
-                </div>
-              )}
+              <textarea rows={3} placeholder="client comments about the post and caption" value={panel.client_comments}
+                onChange={e => setPanel(s => s ? { ...s, client_comments: e.target.value } : s)}
+                className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none leading-relaxed" />
             </div>
 
             {/* Media */}
