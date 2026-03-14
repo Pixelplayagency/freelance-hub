@@ -111,6 +111,7 @@ export async function getTaskSubmittedFiles(taskId: string) {
     .select('*')
     .eq('task_id', taskId)
     .in('type', ['image', 'video', 'link'])
+    .like('title', '[Final]%')
     .order('created_at')
 
   if (error) throw new Error(error.message)
@@ -141,6 +142,7 @@ export async function clearSubmittedFiles(taskId: string) {
     .select('id, storage_path')
     .eq('task_id', taskId)
     .in('type', ['image', 'video', 'link'])
+    .like('title', '[Final]%')
 
   if (!refs || refs.length === 0) return
 
@@ -150,12 +152,13 @@ export async function clearSubmittedFiles(taskId: string) {
     await supabase.storage.from('task-attachments').remove(storagePaths)
   }
 
-  // Delete the DB rows
+  // Delete the DB rows (only freelancer-submitted files, not admin references)
   await supabase
     .from('task_references')
     .delete()
     .eq('task_id', taskId)
     .in('type', ['image', 'video', 'link'])
+    .like('title', '[Final]%')
 }
 
 export async function getStoragePublicUrl(path: string) {
