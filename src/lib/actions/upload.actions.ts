@@ -201,6 +201,37 @@ export async function uploadProjectImage(
   return data.secure_url as string
 }
 
+export async function uploadClientImage(
+  base64: string,
+  clientId: string,
+  type: 'cover' | 'avatar'
+): Promise<string> {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+  if (!cloudName || !uploadPreset) throw new Error('Cloudinary not configured')
+
+  const form = new FormData()
+  form.append('file', base64)
+  form.append('upload_preset', uploadPreset)
+  form.append('folder', `freelancehub/clients/${clientId}`)
+  form.append('public_id', type)
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    { method: 'POST', body: form }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error?.message ?? 'Cloudinary upload failed')
+  }
+  const data = await res.json()
+  return data.secure_url as string
+}
+
 export async function uploadProjectMedia(
   base64: string,
   projectId: string,

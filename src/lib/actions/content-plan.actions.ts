@@ -16,6 +16,25 @@ export async function createContentClient(name: string) {
   revalidatePath('/freelancer/content-planner')
 }
 
+export async function updateContentClient(id: string, data: {
+  name?: string
+  description?: string | null
+  color?: string
+  cover_image_url?: string | null
+  avatar_url?: string | null
+  instagram_url?: string | null
+  facebook_url?: string | null
+  tiktok_url?: string | null
+}) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+  const { error } = await supabase.from('content_clients').update(data).eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/content-planner')
+  revalidatePath('/freelancer/content-planner')
+}
+
 export async function deleteContentClient(id: string) {
   const supabase = await createSupabaseServerClient()
   const { error } = await supabase.from('content_clients').delete().eq('id', id)

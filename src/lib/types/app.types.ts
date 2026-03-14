@@ -54,6 +54,13 @@ export type ContentType = 'post' | 'story' | 'reel'
 export interface ContentClient {
   id: string
   name: string
+  description: string | null
+  color: string
+  cover_image_url: string | null
+  avatar_url: string | null
+  instagram_url: string | null
+  facebook_url: string | null
+  tiktok_url: string | null
   created_by: string | null
   created_at: string
 }
