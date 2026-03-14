@@ -93,7 +93,7 @@ export default async function AdminDashboardPage() {
   ]
 
   return (
-    <div className="space-y-5 dashboard-page">
+    <div className="space-y-6 dashboard-page">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -106,7 +106,7 @@ export default async function AdminDashboardPage() {
         </div>
         <Link
           href="/admin/projects/new"
-          className="flex items-center gap-2 bg-[#f24a49] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#e03e3d] transition-colors shrink-0"
+          className="flex items-center gap-2 bg-[#f24a49] text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-[#e03e3d] transition-colors shrink-0"
           style={{ boxShadow: 'var(--shadow-primary)' }}
         >
           <Plus className="w-4 h-4" />
@@ -119,24 +119,24 @@ export default async function AdminDashboardPage() {
         {/* Featured card */}
         <Link
           href="/admin/projects"
-          className="rounded-xl p-5 hover:opacity-90 transition-all duration-200 flex flex-col justify-between min-h-[130px]"
+          className="rounded-2xl p-6 hover:opacity-90 transition-all duration-200 flex flex-col gap-4 min-h-[140px]"
           style={{
             background: 'linear-gradient(135deg, #1C1C1E 0%, #2a2a2c 100%)',
-            boxShadow: '0 4px 14px rgba(242,74,73,0.15)',
+            boxShadow: '0 4px 24px rgba(242,74,73,0.18)',
           }}
         >
           <div className="flex items-start justify-between">
             <div
-              className="w-9 h-9 rounded-lg bg-[#f24a49] flex items-center justify-center"
-              style={{ boxShadow: '0 2px 8px rgba(242,74,73,0.4)' }}
+              className="w-10 h-10 rounded-xl bg-[#f24a49] flex items-center justify-center"
+              style={{ boxShadow: '0 2px 10px rgba(242,74,73,0.5)' }}
             >
-              <FolderKanban className="w-4 h-4 text-white" />
+              <FolderKanban className="w-5 h-5 text-white" />
             </div>
-            <ArrowUpRight className="w-4 h-4 text-white/30" />
+            <ArrowUpRight className="w-4 h-4 text-white/25" />
           </div>
           <div>
-            <div className="text-3xl font-bold text-white">{activeProjects}</div>
-            <div className="text-sm text-white/50 mt-0.5">Active Projects</div>
+            <div className="text-4xl font-bold text-white tracking-tight">{activeProjects}</div>
+            <div className="text-sm text-white/50 mt-1">Active Projects</div>
           </div>
         </Link>
 
@@ -146,18 +146,18 @@ export default async function AdminDashboardPage() {
             <Link
               key={s.label}
               href="/admin/projects"
-              className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between min-h-[130px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-4 min-h-[140px] transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
               style={{ boxShadow: 'var(--shadow-card)' }}
             >
               <div className="flex items-start justify-between">
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.iconClass}`}>
-                  <Icon className="w-4 h-4" />
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.iconClass}`}>
+                  <Icon className="w-5 h-5" />
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-muted-foreground/30" />
+                <ArrowUpRight className="w-4 h-4 text-muted-foreground/25" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-foreground">{s.value}</div>
-                <div className="text-sm text-muted-foreground mt-0.5">{s.label}</div>
+                <div className="text-4xl font-bold text-foreground tracking-tight">{s.value}</div>
+                <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
               </div>
             </Link>
           )
@@ -167,12 +167,12 @@ export default async function AdminDashboardPage() {
       {/* Chart + Projects */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Task Activity Chart */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-sm font-semibold text-foreground">Task Activity</h2>
-            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Last 7 days</span>
+            <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">Last 7 days</span>
           </div>
-          <div className="flex items-end gap-2 sm:gap-3" style={{ height: '140px' }}>
+          <div className="flex items-end gap-2 sm:gap-3" style={{ height: '160px' }}>
             {weeklyData.map((count, i) => {
               const heightPct = (count / maxBar) * 100
               const isToday = i === 6
@@ -186,9 +186,9 @@ export default async function AdminDashboardPage() {
                   >
                     {count}
                   </span>
-                  <div className="w-full flex items-end" style={{ height: '96px' }}>
+                  <div className="w-full flex items-end" style={{ height: '108px' }}>
                     <div
-                      className="w-full rounded-t-md transition-all duration-500"
+                      className="w-full rounded-lg transition-all duration-500"
                       style={{
                         height: `${Math.max(heightPct, 4)}%`,
                         background: isPrimary
@@ -206,7 +206,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Recent Projects */}
-        <div className="bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-foreground">Projects</h2>
             <Link
@@ -217,8 +217,8 @@ export default async function AdminDashboardPage() {
             </Link>
           </div>
           {projectProgress.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-3">
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
                 <FolderKanban className="w-6 h-6 text-muted-foreground/40" />
               </div>
               <p className="text-sm font-medium text-foreground">No projects yet</p>
@@ -230,15 +230,20 @@ export default async function AdminDashboardPage() {
                 <Link
                   key={p.id}
                   href={`/admin/projects/${p.id}`}
-                  className="flex items-center gap-3 group px-2 py-2 rounded-lg hover:bg-muted transition-colors -mx-2"
+                  className="flex items-center gap-3 group px-2 py-2.5 rounded-xl hover:bg-muted transition-colors -mx-2"
                 >
                   <div
-                    className="w-1.5 h-8 rounded-full shrink-0"
+                    className="w-1.5 h-9 rounded-full shrink-0"
                     style={{ backgroundColor: p.color }}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate group-hover:text-[#f24a49] transition-colors">{p.name}</p>
-                    <p className="text-xs text-muted-foreground">{p.total} task{p.total !== 1 ? 's' : ''} · {p.pct}% done</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${p.pct}%`, backgroundColor: p.color }} />
+                      </div>
+                      <span className="text-[10px] text-muted-foreground shrink-0">{p.pct}%</span>
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -250,7 +255,7 @@ export default async function AdminDashboardPage() {
       {/* Team + Progress */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Team Collaboration */}
-        <div className="bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-foreground">Team</h2>
             <Link
@@ -261,8 +266,8 @@ export default async function AdminDashboardPage() {
             </Link>
           </div>
           {teamData.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-3">
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
                 <Users className="w-6 h-6 text-muted-foreground/40" />
               </div>
               <p className="text-sm font-medium text-foreground">No team members yet</p>
@@ -274,8 +279,10 @@ export default async function AdminDashboardPage() {
             <div className="space-y-3">
               {teamData.map(member => (
                 <div key={member.id} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#f24a49] flex items-center justify-center shrink-0 text-xs font-bold text-white">
-                    {(member.full_name || member.username || 'U').charAt(0).toUpperCase()}
+                  <div className="w-9 h-9 rounded-full bg-[#f24a49] flex items-center justify-center shrink-0 text-xs font-bold text-white overflow-hidden">
+                    {(member as any).avatar_url
+                      ? <img src={(member as any).avatar_url} alt={member.full_name ?? ''} className="w-full h-full object-cover" />
+                      : (member.full_name || member.username || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">
@@ -297,35 +304,38 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Project Progress */}
-        <div className="bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-foreground">Project Progress</h2>
             <TrendingUp className="w-4 h-4 text-muted-foreground" />
           </div>
           {projectProgress.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-3">
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
                 <TrendingUp className="w-6 h-6 text-muted-foreground/40" />
               </div>
               <p className="text-sm font-medium text-foreground">No projects yet</p>
               <p className="text-xs text-muted-foreground mt-1">Add a project to track progress</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-5">
               {projectProgress.slice(0, 5).map(p => (
                 <Link key={p.id} href={`/admin/projects/${p.id}`} className="block group">
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
-                      <span className="text-sm font-medium text-foreground truncate max-w-[180px] group-hover:text-[#f24a49] transition-colors">
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+                      <span className="text-sm font-medium text-foreground truncate max-w-[160px] group-hover:text-[#f24a49] transition-colors">
                         {p.name}
                       </span>
                     </div>
-                    <span className="text-xs font-semibold text-muted-foreground ml-2 shrink-0">{p.pct}%</span>
+                    <div className="flex items-center gap-2 ml-2 shrink-0">
+                      <span className="text-xs text-muted-foreground">{p.done}/{p.total}</span>
+                      <span className="text-xs font-semibold tabular-nums" style={{ color: p.color }}>{p.pct}%</span>
+                    </div>
                   </div>
                   <div className="h-2 bg-muted/60 rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all duration-500"
+                      className="h-full rounded-full transition-all duration-700"
                       style={{ width: `${p.pct}%`, backgroundColor: p.color }}
                     />
                   </div>

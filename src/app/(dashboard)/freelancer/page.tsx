@@ -91,7 +91,7 @@ export default async function FreelancerDashboardPage() {
   ]
 
   return (
-    <div className="space-y-5 dashboard-page">
+    <div className="space-y-6 dashboard-page">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">My Dashboard</h1>
@@ -107,24 +107,24 @@ export default async function FreelancerDashboardPage() {
         {/* Featured card */}
         <Link
           href="/freelancer/tasks"
-          className="rounded-xl p-5 hover:opacity-90 transition-all duration-200 flex flex-col justify-between min-h-[130px]"
+          className="rounded-2xl p-6 hover:opacity-90 transition-all duration-200 flex flex-col gap-4 min-h-[140px]"
           style={{
             background: 'linear-gradient(135deg, #1C1C1E 0%, #2a2a2c 100%)',
-            boxShadow: '0 4px 14px rgba(242,74,73,0.15)',
+            boxShadow: '0 4px 24px rgba(242,74,73,0.18)',
           }}
         >
           <div className="flex items-start justify-between">
             <div
-              className="w-9 h-9 rounded-lg bg-[#f24a49] flex items-center justify-center"
-              style={{ boxShadow: '0 2px 8px rgba(242,74,73,0.4)' }}
+              className="w-10 h-10 rounded-xl bg-[#f24a49] flex items-center justify-center"
+              style={{ boxShadow: '0 2px 10px rgba(242,74,73,0.5)' }}
             >
-              <ListTodo className="w-4 h-4 text-white" />
+              <ListTodo className="w-5 h-5 text-white" />
             </div>
-            <ArrowUpRight className="w-4 h-4 text-white/30" />
+            <ArrowUpRight className="w-4 h-4 text-white/25" />
           </div>
           <div>
-            <div className="text-3xl font-bold text-white">{todo}</div>
-            <div className="text-sm text-white/50 mt-0.5">To Do</div>
+            <div className="text-4xl font-bold text-white tracking-tight">{todo}</div>
+            <div className="text-sm text-white/50 mt-1">To Do</div>
           </div>
         </Link>
 
@@ -134,18 +134,18 @@ export default async function FreelancerDashboardPage() {
             <Link
               key={s.label}
               href="/freelancer/tasks"
-              className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between min-h-[130px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-4 min-h-[140px] transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
               style={{ boxShadow: 'var(--shadow-card)' }}
             >
               <div className="flex items-start justify-between">
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.iconClass}`}>
-                  <Icon className="w-4 h-4" />
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.iconClass}`}>
+                  <Icon className="w-5 h-5" />
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-muted-foreground/30" />
+                <ArrowUpRight className="w-4 h-4 text-muted-foreground/25" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-foreground">{s.value}</div>
-                <div className="text-sm text-muted-foreground mt-0.5">{s.label}</div>
+                <div className="text-4xl font-bold text-foreground tracking-tight">{s.value}</div>
+                <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
               </div>
             </Link>
           )
@@ -155,12 +155,12 @@ export default async function FreelancerDashboardPage() {
       {/* Chart + Due Today */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Activity chart */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-sm font-semibold text-foreground">Task Activity</h2>
-            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Last 7 days</span>
+            <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">Last 7 days</span>
           </div>
-          <div className="flex items-end gap-2 sm:gap-3" style={{ height: '140px' }}>
+          <div className="flex items-end gap-2 sm:gap-3" style={{ height: '160px' }}>
             {weeklyData.map((count, i) => {
               const heightPct = (count / maxBar) * 100
               const isToday = i === 6
@@ -174,9 +174,9 @@ export default async function FreelancerDashboardPage() {
                   >
                     {count}
                   </span>
-                  <div className="w-full flex items-end" style={{ height: '96px' }}>
+                  <div className="w-full flex items-end" style={{ height: '108px' }}>
                     <div
-                      className="w-full rounded-t-md transition-all duration-500"
+                      className="w-full rounded-lg transition-all duration-500"
                       style={{
                         height: `${Math.max(heightPct, 4)}%`,
                         background: isPrimary
@@ -194,7 +194,7 @@ export default async function FreelancerDashboardPage() {
         </div>
 
         {/* Due Today */}
-        <div className="bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-sm font-semibold text-foreground">Due Today</h2>
             {tasksDueToday.length > 0 && (
@@ -204,8 +204,8 @@ export default async function FreelancerDashboardPage() {
             )}
           </div>
           {tasksDueToday.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mb-3">
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mb-3">
                 <CheckCircle2 className="w-6 h-6 text-emerald-500" />
               </div>
               <p className="text-sm font-medium text-foreground">All clear!</p>
@@ -239,11 +239,11 @@ export default async function FreelancerDashboardPage() {
       {/* Active Tasks + Project Progress */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Active Tasks */}
-        <div className="bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
           <h2 className="text-sm font-semibold text-foreground mb-4">Active Tasks</h2>
           {activeTasks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mb-3">
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mb-3">
                 <CheckCircle2 className="w-6 h-6 text-emerald-500" />
               </div>
               <p className="text-sm font-medium text-foreground">All caught up!</p>
@@ -257,7 +257,7 @@ export default async function FreelancerDashboardPage() {
                   <Link
                     key={task.id}
                     href={`/freelancer/tasks/${task.id}`}
-                    className="flex items-center gap-2.5 py-1.5 hover:bg-muted rounded-lg px-1.5 -mx-1.5 group transition-colors"
+                    className="flex items-center gap-2.5 py-1.5 hover:bg-muted rounded-xl px-2 -mx-2 group transition-colors"
                   >
                     {project && (
                       <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
@@ -274,33 +274,36 @@ export default async function FreelancerDashboardPage() {
         </div>
 
         {/* Project Progress */}
-        <div className="bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-foreground">Project Progress</h2>
             <TrendingUp className="w-4 h-4 text-muted-foreground" />
           </div>
           {projectProgress.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-3">
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
                 <TrendingUp className="w-6 h-6 text-muted-foreground/40" />
               </div>
               <p className="text-sm font-medium text-foreground">No projects yet</p>
               <p className="text-xs text-muted-foreground mt-1">Tasks will appear here once assigned</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-5">
               {projectProgress.slice(0, 5).map(p => (
                 <div key={p.id} className="block">
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
-                      <span className="text-sm font-medium text-foreground truncate max-w-[180px]">{p.name}</span>
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+                      <span className="text-sm font-medium text-foreground truncate max-w-[160px]">{p.name}</span>
                     </div>
-                    <span className="text-xs font-semibold text-muted-foreground ml-2 shrink-0">{p.pct}%</span>
+                    <div className="flex items-center gap-2 ml-2 shrink-0">
+                      <span className="text-xs text-muted-foreground">{p.done}/{p.total}</span>
+                      <span className="text-xs font-semibold tabular-nums" style={{ color: p.color }}>{p.pct}%</span>
+                    </div>
                   </div>
                   <div className="h-2 bg-muted/60 rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all duration-500"
+                      className="h-full rounded-full transition-all duration-700"
                       style={{ width: `${p.pct}%`, backgroundColor: p.color }}
                     />
                   </div>
