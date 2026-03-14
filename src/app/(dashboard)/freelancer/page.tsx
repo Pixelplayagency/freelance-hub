@@ -88,21 +88,21 @@ export default async function FreelancerDashboardPage() {
   const statCards = [
     {
       label: 'In Progress', value: inProgress, icon: Clock,
-      bg: 'bg-blue-50 dark:bg-blue-950/40', border: 'border-blue-100 dark:border-blue-900/60',
-      iconBg: 'bg-blue-100 dark:bg-blue-900/60', iconColor: 'text-blue-600 dark:text-blue-400',
-      numColor: 'text-blue-700 dark:text-blue-300', labelColor: 'text-blue-500 dark:text-blue-400',
+      gradient: 'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)',
+      glow: 'rgba(59,130,246,0.25)',
+      iconBg: 'rgba(255,255,255,0.18)',
     },
     {
       label: 'In Review', value: inReview, icon: AlertTriangle,
-      bg: 'bg-amber-50 dark:bg-amber-950/40', border: 'border-amber-100 dark:border-amber-900/60',
-      iconBg: 'bg-amber-100 dark:bg-amber-900/60', iconColor: 'text-amber-600 dark:text-amber-400',
-      numColor: 'text-amber-700 dark:text-amber-300', labelColor: 'text-amber-500 dark:text-amber-400',
+      gradient: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+      glow: 'rgba(245,158,11,0.25)',
+      iconBg: 'rgba(255,255,255,0.18)',
     },
     {
       label: 'Completed', value: completed, icon: CheckCircle2,
-      bg: 'bg-emerald-50 dark:bg-emerald-950/40', border: 'border-emerald-100 dark:border-emerald-900/60',
-      iconBg: 'bg-emerald-100 dark:bg-emerald-900/60', iconColor: 'text-emerald-600 dark:text-emerald-400',
-      numColor: 'text-emerald-700 dark:text-emerald-300', labelColor: 'text-emerald-500 dark:text-emerald-400',
+      gradient: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+      glow: 'rgba(16,185,129,0.25)',
+      iconBg: 'rgba(255,255,255,0.18)',
     },
   ]
 
@@ -158,17 +158,31 @@ export default async function FreelancerDashboardPage() {
             <Link
               key={s.label}
               href="/freelancer/tasks"
-              className={`${s.bg} border ${s.border} rounded-2xl p-5 flex flex-col justify-between min-h-[130px] hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200`}
+              className="relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between min-h-[130px] hover:-translate-y-0.5 transition-all duration-200"
+              style={{
+                background: s.gradient,
+                boxShadow: `0 4px 20px ${s.glow}`,
+              }}
             >
-              <div className="flex items-center justify-between">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${s.iconBg}`}>
-                  <Icon className={s.iconColor} style={{ width: 18, height: 18 }} />
+              <div
+                className="absolute inset-0 rounded-2xl opacity-20 pointer-events-none"
+                style={{
+                  backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.35) 1px, transparent 1px)',
+                  backgroundSize: '16px 16px',
+                }}
+              />
+              <div className="relative flex items-center justify-between">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center"
+                  style={{ background: s.iconBg }}
+                >
+                  <Icon className="text-white" style={{ width: 18, height: 18 }} />
                 </div>
-                <ArrowUpRight className={`w-4 h-4 ${s.iconColor} opacity-40`} />
+                <ArrowUpRight className="w-4 h-4 text-white/30" />
               </div>
-              <div>
-                <p className={`text-3xl font-bold tabular-nums ${s.numColor}`}>{s.value}</p>
-                <p className={`text-xs mt-1 font-medium ${s.labelColor} opacity-80`}>{s.label}</p>
+              <div className="relative">
+                <p className="text-3xl font-bold tabular-nums text-white">{s.value}</p>
+                <p className="text-xs mt-1 font-medium text-white/70">{s.label}</p>
               </div>
             </Link>
           )
