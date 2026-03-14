@@ -179,23 +179,77 @@ export async function uploadProjectImage(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
-  // Decode base64 data URL to buffer
-  const matches = base64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/)
-  if (!matches) throw new Error('Invalid image data')
-  const buffer = Buffer.from(matches[2], 'base64')
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+  if (!cloudName || !uploadPreset) throw new Error('Cloudinary not configured')
 
-  const path = `${projectId}/${type}.jpg`
+  const form = new FormData()
+  form.append('file', base64)
+  form.append('upload_preset', uploadPreset)
+  form.append('folder', `freelancehub/projects/${projectId}`)
+  form.append('public_id', type)
+  form.append('overwrite', 'true')
 
-  const { error } = await supabase.storage
-    .from('project-assets')
-    .upload(path, buffer, {
-      contentType: 'image/jpeg',
-      upsert: true,
-    })
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    { method: 'POST', body: form }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error?.message ?? 'Cloudinary upload failed')
+  }
+  const data = await res.json()
+  return data.secure_url as string
+}
 
-  if (error) throw new Error(error.message)
+export async function uploadProjectMedia(
+  base64: string,
+  projectId: string,
+  mediaType: 'image' | 'video'
+): Promise<{ url: string; thumbnail_url: string | null; cloudinary_public_id: string }> {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
 
-  const { data } = supabase.storage.from('project-assets').getPublicUrl(path)
-  // Bust cache by appending timestamp
-  return `${data.publicUrl}?t=${Date.now()}`
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+  if (!cloudName || !uploadPreset) throw new Error('Cloudinary not configured')
+
+  const form = new FormData()
+  form.append('file', base64)
+  form.append('upload_preset', uploadPreset)
+  form.append('folder', `freelancehub/projects/${projectId}/media`)
+
+  const resourceType = mediaType === 'video' ? 'video' : 'image'
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+    { method: 'POST', body: form }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error?.message ?? 'Cloudinary upload failed')
+  }
+  const data = await res.json()
+
+  const thumbnail_url = mediaType === 'video'
+    ? (data.secure_url as string).replace('/upload/', '/upload/so_0,w_400,h_400,c_fill,f_jpg/')
+    : null
+
+  // Save to project_media table
+  await supabase.from('project_media').insert({
+    project_id: projectId,
+    type: mediaType === 'video' ? 'reel' : 'image',
+    cloudinary_public_id: data.public_id as string,
+    url: data.secure_url as string,
+    thumbnail_url,
+    created_by: user.id,
+  })
+
+  revalidatePath(`/admin/projects/${projectId}`)
+
+  return {
+    url: data.secure_url as string,
+    thumbnail_url,
+    cloudinary_public_id: data.public_id as string,
+  }
 }
