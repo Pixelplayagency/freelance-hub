@@ -3,10 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import { ProjectTaskList } from '@/components/projects/ProjectTaskList'
 import { CreateTaskButton } from '@/components/tasks/CreateTaskButton'
 import { DeleteProjectButton } from '@/components/projects/DeleteProjectButton'
-import {
-  ChevronLeft, Instagram, Facebook,
-  CheckCircle2, Clock, RotateCcw, Circle,
-} from 'lucide-react'
+import { ChevronLeft, Instagram, Facebook } from 'lucide-react'
 import Link from 'next/link'
 import type { Task, Profile, TaskStatus } from '@/lib/types/app.types'
 
@@ -20,11 +17,11 @@ function TikTokIcon({ className }: { className?: string }) {
   )
 }
 
-const STAT_CONFIG: { status: TaskStatus; label: string; icon: React.FC<{ className?: string }>; color: string; bg: string }[] = [
-  { status: 'todo',        label: 'To Do',       icon: ({ className }) => <Circle className={className} />,        color: 'text-slate-500',  bg: 'bg-slate-100 dark:bg-slate-800/60'  },
-  { status: 'in_progress', label: 'In Progress', icon: ({ className }) => <RotateCcw className={className} />,     color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/30'     },
-  { status: 'review',      label: 'Review',      icon: ({ className }) => <Clock className={className} />,         color: 'text-amber-500',  bg: 'bg-amber-50 dark:bg-amber-900/30'   },
-  { status: 'completed',   label: 'Completed',   icon: ({ className }) => <CheckCircle2 className={className} />, color: 'text-green-500',  bg: 'bg-green-50 dark:bg-green-900/30'   },
+const STAT_CONFIG = [
+  { status: 'todo'        as TaskStatus, label: 'To Do',       dot: '#94a3b8', num: '#64748b' },
+  { status: 'in_progress' as TaskStatus, label: 'In Progress', dot: '#3b82f6', num: '#3b82f6' },
+  { status: 'review'      as TaskStatus, label: 'Review',      dot: '#f59e0b', num: '#f59e0b' },
+  { status: 'completed'   as TaskStatus, label: 'Completed',   dot: '#10b981', num: '#10b981' },
 ]
 
 const BAR_COLORS: Record<TaskStatus, string> = {
@@ -165,14 +162,17 @@ export default async function ProjectPage({
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">{project.description}</p>
           )}
 
-          {/* Stat chips */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-            {STAT_CONFIG.map(({ status, label, icon: Icon, color, bg }) => (
-              <div key={status} className={`rounded-xl px-3 py-2 flex items-center gap-2 ${bg}`}>
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${color}`} />
-                <div>
-                  <p className={`text-base font-bold leading-none ${color}`}>{counts[status]}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{label}</p>
+          {/* Stats strip */}
+          <div className="flex rounded-xl overflow-hidden border border-border mb-4">
+            {STAT_CONFIG.map(({ status, label, dot, num }, i) => (
+              <div
+                key={status}
+                className={`flex-1 py-3 px-2 flex flex-col items-center bg-muted/20 ${i > 0 ? 'border-l border-border' : ''}`}
+              >
+                <span className="text-2xl font-bold tabular-nums leading-none" style={{ color: num }}>{counts[status]}</span>
+                <div className="flex items-center gap-1 mt-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: dot }} />
+                  <span className="text-[10px] text-muted-foreground">{label}</span>
                 </div>
               </div>
             ))}
