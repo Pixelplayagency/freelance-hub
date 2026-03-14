@@ -23,7 +23,7 @@ export default async function AdminClientCalendarPage({
 
   const { data: entries } = await supabase
     .from('content_plans')
-    .select('*')
+    .select('*, creator:profiles!created_by(full_name, username)')
     .eq('client_id', clientId)
     .order('date', { ascending: false })
 

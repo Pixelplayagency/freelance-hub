@@ -264,7 +264,12 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
 
                   {/* Freelancer submitted note */}
                   {entry.approval_requested && !entry.caption_rejected && !entry.post_rejected && (
-                    <p className="text-[11px] text-amber-600 mb-2">⚡ Freelancer submitted for review</p>
+                    <p className="text-[11px] text-amber-600 mb-2">
+                      ⚡ Submitted for review
+                      {entry.creator && (
+                        <span className="text-muted-foreground"> by <span className="font-semibold text-foreground">{entry.creator.full_name ?? entry.creator.username ?? 'Unknown'}</span></span>
+                      )}
+                    </p>
                   )}
 
                   {/* Client comments */}
