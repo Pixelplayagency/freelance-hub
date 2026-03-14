@@ -22,9 +22,10 @@ function TikTokIcon({ className }: { className?: string }) {
 
 interface ProjectCardProps {
   project: Project & { task_count?: number }
+  readOnly?: boolean
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, readOnly = false }: ProjectCardProps) {
   const [showEdit, setShowEdit] = useState(false)
   const initial = project.name.charAt(0).toUpperCase()
   const hasSocials = project.instagram_url || project.facebook_url || project.tiktok_url
@@ -43,7 +44,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <>
-      <Link href={`/admin/projects/${project.id}`} className="group block">
+      <Link href={readOnly ? `/freelancer/projects/${project.id}` : `/admin/projects/${project.id}`} className="group block">
         <div className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
 
           {/* Cover image / gradient banner */}
@@ -61,15 +62,17 @@ export function ProjectCard({ project }: ProjectCardProps) {
               />
             )}
 
-            {/* Edit button */}
-            <button
-              type="button"
-              onClick={handleEditClick}
-              className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-colors opacity-0 group-hover:opacity-100"
-              title="Edit project"
-            >
-              <Pencil className="w-3.5 h-3.5" />
-            </button>
+            {/* Edit button — admin only */}
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={handleEditClick}
+                className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-colors opacity-0 group-hover:opacity-100"
+                title="Edit project"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            )}
 
             {project.status === 'archived' && (
               <span className="absolute top-2 left-2 text-[10px] font-semibold uppercase tracking-wide bg-black/40 text-white px-2 py-0.5 rounded-full">
@@ -165,8 +168,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </div>
       </Link>
 
-      {/* Edit dialog */}
-      <Dialog open={showEdit} onOpenChange={setShowEdit}>
+      {/* Edit dialog — admin only */}
+      <Dialog open={!readOnly && showEdit} onOpenChange={readOnly ? undefined : setShowEdit}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit project</DialogTitle>

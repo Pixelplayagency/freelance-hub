@@ -35,6 +35,7 @@ const ADMIN_NAV: NavItem[] = [
 const FREELANCER_NAV_BASE: NavItem[] = [
   { href: '/freelancer', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/freelancer/tasks', label: 'My Tasks', icon: CheckSquare },
+  { href: '/freelancer/projects', label: 'Projects', icon: FolderKanban },
   { href: '/freelancer/notifications', label: 'Notifications', icon: Bell },
   { href: '/freelancer/profile', label: 'Profile', icon: UserCircle },
 ]
