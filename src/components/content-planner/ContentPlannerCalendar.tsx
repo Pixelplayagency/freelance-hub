@@ -154,7 +154,8 @@ export function ContentPlannerCalendar({
     let m = month + dir, y = year
     if (m < 0) { m = 11; y-- }
     if (m > 11) { m = 0; y++ }
-    router.push(`${basePath}?month=${m}&year=${y}`)
+    const sep = basePath.includes('?') ? '&' : '?'
+    router.push(`${basePath}${sep}month=${m}&year=${y}`)
   }
 
   function openPanel(date: string) { setPanel(makePanel(date, entryMap[date] ?? null)) }
