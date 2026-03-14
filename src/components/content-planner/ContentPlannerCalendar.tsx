@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition, useRef } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ChevronLeft, ChevronRight, X, Plus, Eye, Upload,
-  Loader2, CheckCircle2, Image as ImageIcon, Check, Trash2, Send,
+  Loader2, CheckCircle2, Image as ImageIcon, Check, Trash2, Send, Smile,
 } from 'lucide-react'
 import {
   createContentPlan, updateContentPlan, deleteContentPlan,
@@ -71,6 +71,19 @@ const PLATFORMS = [
       </svg>
     ),
   },
+]
+
+const EMOJIS = [
+  // Smileys
+  '😀','😂','😍','🥰','😎','🤩','😜','😏','🥺','😭','🤔','😮','🙄','🥳','🤗','😤','😡','😴','🫠','🥹',
+  // Hearts & hands
+  '❤️','🧡','💛','💚','💙','💜','🖤','🤍','💖','💯','👍','👏','🙌','💪','🤞','✌️','🫶','🤝','👋','🤜',
+  // Nature
+  '🌟','⭐','🌙','☀️','🌈','🔥','❄️','🌊','🌸','🌺','🌻','🍀','🌿','🦋','🐝','🌴','🏔️','🌙','💫','✨',
+  // Food & drink
+  '🍕','🍔','🍟','🌮','🍣','🍜','🍰','🎂','🍫','🍬','☕','🍷','🥂','🍻','🧃','🥤','🍓','🫐','🥑','🍋',
+  // Activities & objects
+  '💻','📱','🎵','🎶','📸','🎬','🏆','🥇','💰','🎁','💡','🚀','✈️','🏖️','🎉','🎊','📣','🔑','⚡','🌐',
 ]
 
 function getWeeks(year: number, month: number): Date[][] {
@@ -147,8 +160,40 @@ export function ContentPlannerCalendar({
   const [panel, setPanel] = useState<PanelState | null>(null)
   const [viewMedia, setViewMedia] = useState<{ url: string; type: 'image' | 'video' } | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [emojiOpen, setEmojiOpen] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const captionRef = useRef<HTMLTextAreaElement>(null)
+  const emojiRef = useRef<HTMLDivElement>(null)
   const weeks = getWeeks(year, month)
+
+  // Close emoji picker on outside click
+  useEffect(() => {
+    if (!emojiOpen) return
+    function handler(e: MouseEvent) {
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+        setEmojiOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [emojiOpen])
+
+  function insertEmoji(emoji: string) {
+    const ta = captionRef.current
+    if (!ta) {
+      setPanel(s => s ? { ...s, caption: s.caption + emoji } : s)
+      return
+    }
+    const start = ta.selectionStart ?? ta.value.length
+    const end = ta.selectionEnd ?? ta.value.length
+    const next = ta.value.slice(0, start) + emoji + ta.value.slice(end)
+    setPanel(s => s ? { ...s, caption: next } : s)
+    // Restore cursor after state update
+    requestAnimationFrame(() => {
+      ta.selectionStart = ta.selectionEnd = start + emoji.length
+      ta.focus()
+    })
+  }
 
   function navigate(dir: -1 | 1) {
     let m = month + dir, y = year
@@ -208,7 +253,7 @@ export function ContentPlannerCalendar({
         platforms: panel.platforms,
         scheduled_time: panel.scheduled_time || null,
         caption: panel.caption || null,
-        client_comments: panel.client_comments || null,
+        ...(isAdmin ? { client_comments: panel.client_comments || null } : {}),
         media_url: panel.media_url,
         media_type: panel.media_type,
         status: panel.status,
@@ -529,21 +574,64 @@ export function ContentPlannerCalendar({
                 className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49]" />
             </div>
 
-            {/* Caption */}
+            {/* Caption + emoji picker */}
             <div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Caption</p>
-              <textarea rows={5} placeholder="Write the post caption…" value={panel.caption}
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Caption</p>
+                <div className="relative" ref={emojiRef}>
+                  <button
+                    type="button"
+                    onClick={() => setEmojiOpen(o => !o)}
+                    className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
+                    title="Add emoji"
+                  >
+                    <Smile className="w-3.5 h-3.5" />
+                  </button>
+                  {emojiOpen && (
+                    <div className="absolute right-0 bottom-7 z-30 bg-card border border-border rounded-xl shadow-xl p-2" style={{ width: 220 }}>
+                      <div className="grid grid-cols-8 gap-0.5 max-h-48 overflow-y-auto">
+                        {EMOJIS.map(em => (
+                          <button
+                            key={em}
+                            type="button"
+                            onClick={() => insertEmoji(em)}
+                            className="text-base w-7 h-7 flex items-center justify-center rounded hover:bg-muted transition-colors"
+                          >
+                            {em}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <textarea
+                ref={captionRef}
+                rows={5}
+                placeholder="Write the post caption…"
+                value={panel.caption}
                 onChange={e => setPanel(s => s ? { ...s, caption: e.target.value } : s)}
-                className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none leading-relaxed" />
+                className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none leading-relaxed"
+              />
             </div>
 
-            {/* Client Comments — editable */}
-            <div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Client Comments</p>
-              <textarea rows={3} placeholder="client comments about the post and caption" value={panel.client_comments}
-                onChange={e => setPanel(s => s ? { ...s, client_comments: e.target.value } : s)}
-                className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none leading-relaxed" />
-            </div>
+            {/* Client Comments — admin editable, freelancer read-only (shown outside on card) */}
+            {isAdmin ? (
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Client Comments</p>
+                <textarea rows={3} placeholder="Leave a comment for the freelancer…" value={panel.client_comments}
+                  onChange={e => setPanel(s => s ? { ...s, client_comments: e.target.value } : s)}
+                  className="w-full text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none leading-relaxed" />
+              </div>
+            ) : panel.client_comments ? (
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Client Comments</p>
+                <div className="rounded-lg px-3 py-2 text-xs text-foreground/70 leading-relaxed"
+                  style={{ backgroundColor: 'rgba(120,120,128,0.1)', border: '1px solid rgba(120,120,128,0.15)' }}>
+                  {panel.client_comments}
+                </div>
+              </div>
+            ) : null}
 
             {/* Media */}
             <div>
