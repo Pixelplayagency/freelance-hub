@@ -7,11 +7,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { createProject, updateProject } from '@/lib/actions/project.actions'
-import { uploadProjectImage } from '@/lib/actions/upload.actions'
 import { toast } from 'sonner'
 import { ImagePlus, Instagram, Facebook, Loader2 } from 'lucide-react'
 
-// Minimal TikTok SVG
 function TikTokIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -42,6 +40,31 @@ async function compressImage(file: File, maxWidth: number, quality = 0.85): Prom
   })
 }
 
+// Upload directly from the browser to Cloudinary — avoids Next.js server action body size limits
+async function uploadToCloudinary(base64: string, folder: string, publicId: string): Promise<string> {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+  if (!cloudName || !uploadPreset) throw new Error('Cloudinary not configured')
+
+  const form = new FormData()
+  form.append('file', base64)
+  form.append('upload_preset', uploadPreset)
+  form.append('folder', folder)
+  form.append('public_id', publicId)
+  form.append('overwrite', 'true')
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: 'POST',
+    body: form,
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error?.message ?? 'Image upload failed')
+  }
+  const data = await res.json()
+  return data.secure_url as string
+}
+
 interface ProjectFormProps {
   onSuccess?: () => void
   projectId?: string
@@ -70,6 +93,7 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
 
   const [coverPreview, setCoverPreview] = useState<string | null>(initialValues?.cover_image_url ?? null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(initialValues?.avatar_url ?? null)
+  // Store the compressed base64 only until upload; null = no new image selected
   const [coverBase64, setCoverBase64] = useState<string | null>(null)
   const [avatarBase64, setAvatarBase64] = useState<string | null>(null)
 
@@ -96,15 +120,28 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!name.trim()) { toast.error('Project name is required'); return }
     setLoading(true)
     try {
-      let cover_image_url = initialValues?.cover_image_url ?? null
-      let avatar_url = initialValues?.avatar_url ?? null
-
       if (isEditing) {
-        // Upload images first if new ones selected, then update project
-        if (coverBase64) cover_image_url = await uploadProjectImage(coverBase64, projectId, 'cover')
-        if (avatarBase64) avatar_url = await uploadProjectImage(avatarBase64, projectId, 'avatar')
+        // Upload any new images directly from browser to Cloudinary
+        let cover_image_url = initialValues?.cover_image_url ?? null
+        let avatar_url = initialValues?.avatar_url ?? null
+
+        if (coverBase64) {
+          cover_image_url = await uploadToCloudinary(
+            coverBase64,
+            `freelancehub/projects/${projectId}`,
+            'cover'
+          )
+        }
+        if (avatarBase64) {
+          avatar_url = await uploadToCloudinary(
+            avatarBase64,
+            `freelancehub/projects/${projectId}`,
+            'avatar'
+          )
+        }
 
         await updateProject(projectId, {
           name, description, color,
@@ -118,7 +155,7 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
         onSuccess?.()
         router.refresh()
       } else {
-        // Create project first, then upload images with the new project ID
+        // Create the project first to get its ID
         const project = await createProject({
           name, description, color,
           cover_image_url: null,
@@ -128,10 +165,26 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
           tiktok_url: tiktok || null,
         })
 
-        // Upload images now that we have the project ID
-        if (coverBase64 || avatarBase64) {
-          if (coverBase64) cover_image_url = await uploadProjectImage(coverBase64, project.id, 'cover')
-          if (avatarBase64) avatar_url = await uploadProjectImage(avatarBase64, project.id, 'avatar')
+        // Upload images directly from browser now that we have the project ID
+        let cover_image_url: string | null = null
+        let avatar_url: string | null = null
+
+        if (coverBase64) {
+          cover_image_url = await uploadToCloudinary(
+            coverBase64,
+            `freelancehub/projects/${project.id}`,
+            'cover'
+          )
+        }
+        if (avatarBase64) {
+          avatar_url = await uploadToCloudinary(
+            avatarBase64,
+            `freelancehub/projects/${project.id}`,
+            'avatar'
+          )
+        }
+
+        if (cover_image_url || avatar_url) {
           await updateProject(project.id, { cover_image_url, avatar_url })
         }
 
@@ -179,7 +232,6 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
 
       {/* Avatar + Name row */}
       <div className="flex items-center gap-4">
-        {/* Avatar */}
         <div
           className="relative w-16 h-16 rounded-full border-2 border-dashed border-border overflow-hidden cursor-pointer shrink-0 group"
           onClick={() => avatarInputRef.current?.click()}
@@ -200,7 +252,6 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
         </div>
         <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
 
-        {/* Name */}
         <div className="flex-1 space-y-1">
           <Label htmlFor="name">Brand / Project name *</Label>
           <Input
@@ -282,7 +333,12 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
         </div>
       </div>
 
-      <Button type="submit" className="w-full" style={{ backgroundColor: '#f24a49' }} disabled={loading}>
+      <Button
+        type="submit"
+        className="w-full text-white"
+        style={{ backgroundColor: '#f24a49' }}
+        disabled={loading}
+      >
         {loading ? (
           <><Loader2 className="w-4 h-4 animate-spin mr-2" />{isEditing ? 'Saving…' : 'Creating…'}</>
         ) : (
