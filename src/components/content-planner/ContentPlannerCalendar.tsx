@@ -170,9 +170,12 @@ export function ContentPlannerCalendar({
   const [commentEditing, setCommentEditing] = useState<string | null>(null)
   const [commentDraft, setCommentDraft] = useState('')
   const [commentSaving, setCommentSaving] = useState(false)
+  const [commentEmojiOpen, setCommentEmojiOpen] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const captionRef = useRef<HTMLTextAreaElement>(null)
+  const commentRef = useRef<HTMLTextAreaElement>(null)
   const emojiRef = useRef<HTMLDivElement>(null)
+  const commentEmojiRef = useRef<HTMLDivElement>(null)
   const weeks = getWeeks(year, month)
 
   async function saveComment(ds: string, value: string) {
@@ -199,6 +202,31 @@ export function ContentPlannerCalendar({
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [emojiOpen])
+
+  useEffect(() => {
+    if (!commentEmojiOpen) return
+    function handler(e: MouseEvent) {
+      if (commentEmojiRef.current && !commentEmojiRef.current.contains(e.target as Node)) {
+        setCommentEmojiOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [commentEmojiOpen])
+
+  function insertCommentEmoji(emoji: string) {
+    const ta = commentRef.current
+    if (!ta) { setCommentDraft(d => d + emoji); return }
+    const start = ta.selectionStart ?? ta.value.length
+    const end = ta.selectionEnd ?? ta.value.length
+    const next = ta.value.slice(0, start) + emoji + ta.value.slice(end)
+    setCommentDraft(next)
+    requestAnimationFrame(() => {
+      ta.selectionStart = ta.selectionEnd = start + emoji.length
+      ta.focus()
+    })
+    setCommentEmojiOpen(false)
+  }
 
   function insertEmoji(emoji: string) {
     const ta = captionRef.current
@@ -544,16 +572,49 @@ export function ContentPlannerCalendar({
                                 commentEditing === ds ? (
                                   <div className="relative" onClick={e => e.stopPropagation()}>
                                     <textarea
+                                      ref={commentRef}
                                       autoFocus
                                       rows={3}
                                       value={commentDraft}
                                       onChange={e => setCommentDraft(e.target.value)}
-                                      onBlur={() => saveComment(ds, commentDraft)}
+                                      onBlur={e => {
+                                        if (commentEmojiRef.current?.contains(e.relatedTarget as Node)) return
+                                        saveComment(ds, commentDraft)
+                                      }}
                                       onKeyDown={e => { if (e.key === 'Escape') { setCommentEditing(null) } }}
-                                      placeholder="Leave a comment for the freelancer…"
-                                      className="w-full text-[10px] rounded-lg px-2.5 py-2 resize-none leading-snug focus:outline-none focus:ring-1 focus:ring-[#f24a49]"
+                                      placeholder="Leave a comment for the caption…"
+                                      className="w-full text-[10px] rounded-lg px-2.5 py-2 pr-12 resize-none leading-snug focus:outline-none focus:ring-1 focus:ring-[#f24a49]"
                                       style={{ backgroundColor: 'rgba(120,120,128,0.15)', border: '1px solid rgba(120,120,128,0.3)' }}
                                     />
+                                    {/* Emoji picker for comment */}
+                                    <div ref={commentEmojiRef} className="absolute bottom-2 right-6 z-20">
+                                      <button
+                                        type="button"
+                                        tabIndex={-1}
+                                        onClick={() => setCommentEmojiOpen(o => !o)}
+                                        className="p-0.5 rounded text-muted-foreground/50 hover:text-foreground transition-colors"
+                                        title="Add emoji"
+                                      >
+                                        <Smile className="w-3 h-3" />
+                                      </button>
+                                      {commentEmojiOpen && (
+                                        <div className="absolute right-0 bottom-6 z-30 bg-card border border-border rounded-xl shadow-xl p-2" style={{ width: 200 }}>
+                                          <div className="grid grid-cols-8 gap-0.5 max-h-40 overflow-y-auto">
+                                            {EMOJIS.map(em => (
+                                              <button
+                                                key={em}
+                                                type="button"
+                                                tabIndex={-1}
+                                                onClick={() => insertCommentEmoji(em)}
+                                                className="text-sm w-6 h-6 flex items-center justify-center rounded hover:bg-muted transition-colors"
+                                              >
+                                                {em}
+                                              </button>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
                                     {commentSaving && (
                                       <Loader2 className="absolute bottom-2 right-2 w-3 h-3 animate-spin text-muted-foreground" />
                                     )}
@@ -568,7 +629,7 @@ export function ContentPlannerCalendar({
                                       <p className="text-[10px] text-foreground/70 leading-snug line-clamp-3">{entry.client_comments}</p>
                                     ) : (
                                       <p className="text-[10px] italic leading-snug" style={{ color: 'rgba(120,120,128,0.5)' }}>
-                                        Leave a comment for the freelancer…
+                                        Leave a comment for the caption…
                                       </p>
                                     )}
                                   </button>
