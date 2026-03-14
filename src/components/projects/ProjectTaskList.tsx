@@ -97,10 +97,10 @@ export function ProjectTaskList({ tasks, projectId, isAdmin, assigneeMap = {} }:
             {/* Section header — compact */}
             <div className="flex items-center gap-2 px-4 py-2.5">
               <span className={cn('w-2 h-2 rounded-full shrink-0', cfg.dot)} />
-              <span className={cn('text-xs font-bold uppercase tracking-widest', cfg.headerText)}>
+              <span className={cn('text-xs font-semibold', cfg.headerText)}>
                 {cfg.label}
               </span>
-              <span className={cn('ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full tabular-nums', cfg.badge)}>
+              <span className={cn('ml-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full tabular-nums', cfg.badge)}>
                 {counts[s.id]}
               </span>
             </div>
