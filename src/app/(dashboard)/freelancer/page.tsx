@@ -191,41 +191,49 @@ export default async function FreelancerDashboardPage() {
 
       {/* Chart + Due Today */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Activity chart */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-sm font-semibold text-foreground">Task Activity</h2>
-            <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">Last 7 days</span>
+        {/* Activity chart — compact */}
+        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Task Activity</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Last 7 days</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-xl font-bold text-foreground tabular-nums leading-none">{allTasks.length}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">total</p>
+              </div>
+              <div className="w-px h-8 bg-border" />
+              <div className="text-right">
+                <p className="text-xl font-bold text-emerald-500 tabular-nums leading-none">{completed}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">done</p>
+              </div>
+            </div>
           </div>
-          <div className="flex items-end gap-2 sm:gap-3" style={{ height: '160px' }}>
+          <div className="flex items-end gap-1" style={{ height: 80 }}>
             {weeklyData.map((count, i) => {
               const heightPct = (count / maxBar) * 100
               const isToday = i === 6
-              const isHighest = count === maxBar && count > 0
-              const isPrimary = isToday || isHighest
+              const isPrimary = isToday || (count === maxBar && count > 0)
               return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-                  <span
-                    className="text-[10px] font-semibold text-foreground tabular-nums"
-                    style={{ minHeight: '14px', visibility: count > 0 ? 'visible' : 'hidden' }}
-                  >
-                    {count}
-                  </span>
-                  <div className="w-full flex items-end" style={{ height: '108px' }}>
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full flex items-end" style={{ height: 58 }}>
                     <div
-                      className="w-full rounded-lg transition-all duration-500"
+                      className="w-full rounded-t-md transition-all duration-500"
                       style={{
-                        height: `${Math.max(heightPct, 4)}%`,
+                        height: `${Math.max(heightPct, count > 0 ? 8 : 4)}%`,
                         background: isPrimary
                           ? 'linear-gradient(180deg, #f24a49 0%, #c73b3a 100%)'
                           : count > 0
                           ? 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%)'
-                          : '#f1f5f9',
-                        boxShadow: isPrimary ? '0 -3px 10px rgba(242,74,73,0.3)' : count > 0 ? '0 -2px 6px rgba(96,165,250,0.2)' : 'none',
+                          : 'var(--muted)',
+                        boxShadow: isPrimary ? '0 -2px 8px rgba(242,74,73,0.3)' : 'none',
                       }}
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground">{weekLabels[i]}</span>
+                  <span className={`text-[10px] leading-none ${isToday ? 'font-bold text-[#f24a49]' : 'text-muted-foreground'}`}>
+                    {weekLabels[i].slice(0, 2)}
+                  </span>
                 </div>
               )
             })}
@@ -278,8 +286,15 @@ export default async function FreelancerDashboardPage() {
       {/* Active Tasks + Project Progress */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Active Tasks */}
-        <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
-          <h2 className="text-sm font-semibold text-foreground mb-4">Active Tasks</h2>
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-foreground">Active Tasks</h2>
+            {activeTasks.length > 0 && (
+              <span className="text-[11px] font-bold bg-muted text-muted-foreground px-2 py-0.5 rounded-full tabular-nums">
+                {activeTasks.length}
+              </span>
+            )}
+          </div>
           {activeTasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mb-3">
@@ -289,19 +304,25 @@ export default async function FreelancerDashboardPage() {
               <p className="text-xs text-muted-foreground mt-1">No active tasks right now</p>
             </div>
           ) : (
-            <div className="space-y-1">
-              {activeTasks.slice(0, 7).map(task => {
+            <div className="space-y-1.5">
+              {activeTasks.slice(0, 6).map(task => {
                 const project = task.project as { id: string; name: string; color: string } | null
+                const STATUS_LEFT: Record<string, string> = {
+                  todo: 'border-l-slate-300',
+                  in_progress: 'border-l-blue-400',
+                  review: 'border-l-amber-400',
+                  completed: 'border-l-emerald-400',
+                }
                 return (
                   <Link
                     key={task.id}
                     href={`/freelancer/tasks/${task.id}`}
-                    className="flex items-center gap-2.5 py-1.5 hover:bg-muted rounded-xl px-2 -mx-2 group transition-colors"
+                    className={`flex items-center gap-2.5 py-2 px-3 rounded-xl hover:bg-muted border-l-[3px] ${STATUS_LEFT[task.status] ?? 'border-l-border'} bg-muted/40 group transition-colors`}
                   >
                     {project && (
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
                     )}
-                    <span className="text-sm text-foreground group-hover:text-[#f24a49] flex-1 truncate transition-colors">
+                    <span className="text-xs font-medium text-foreground group-hover:text-[#f24a49] flex-1 truncate transition-colors">
                       {task.title}
                     </span>
                     <TaskStatusBadge status={task.status as TaskStatus} />
@@ -312,11 +333,11 @@ export default async function FreelancerDashboardPage() {
           )}
         </div>
 
-        {/* Project Progress — Circular Rings */}
-        <div className="bg-card border border-border rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
-          <div className="flex items-center justify-between mb-5">
+        {/* Project Progress — clean list */}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-foreground">Project Progress</h2>
-            <TrendingUp className="w-4 h-4 text-muted-foreground" />
+            <TrendingUp className="w-4 h-4 text-muted-foreground/50" />
           </div>
           {projectProgress.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -327,18 +348,34 @@ export default async function FreelancerDashboardPage() {
               <p className="text-xs text-muted-foreground mt-1">Tasks will appear here once assigned</p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3">
-              {projectProgress.slice(0, 6).map(p => (
-                <div key={p.id} className="flex flex-col items-center gap-2 p-2 rounded-2xl">
-                  <div className="relative">
-                    <ProgressRing pct={p.pct} color={p.color} />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs font-bold text-foreground tabular-nums">{p.pct}%</span>
-                    </div>
+            <div className="space-y-3">
+              {projectProgress.slice(0, 5).map(p => (
+                <div key={p.id} className="flex items-center gap-3">
+                  <div
+                    className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center text-white text-[11px] font-bold"
+                    style={{ backgroundColor: p.color }}
+                  >
+                    {p.name.charAt(0).toUpperCase()}
                   </div>
-                  <div className="text-center">
-                    <p className="text-[11px] font-medium text-foreground truncate w-[72px]">{p.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{p.done}/{p.total}</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-semibold text-foreground truncate leading-none">{p.name}</span>
+                      <span className={`text-[11px] font-bold tabular-nums ml-2 shrink-0 ${p.pct === 100 ? 'text-emerald-500' : 'text-muted-foreground'}`}>{p.pct}%</span>
+                    </div>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${p.pct}%`,
+                          background: p.pct === 100
+                            ? '#10b981'
+                            : p.pct > 50
+                            ? 'linear-gradient(90deg,#3b82f6,#10b981)'
+                            : p.color,
+                        }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{p.done}/{p.total} tasks done</p>
                   </div>
                 </div>
               ))}

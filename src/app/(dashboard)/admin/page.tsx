@@ -176,60 +176,69 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Chart + Project Progress */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        {/* Task Activity — compact */}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          {/* Header row with summary stats */}
+          <div className="flex items-start justify-between mb-4">
             <div>
               <h2 className="text-sm font-semibold text-foreground">Task Activity</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">{totalWeeklyTasks} task{totalWeeklyTasks !== 1 ? 's' : ''} created this week</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Last 7 days</p>
             </div>
-            <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full border border-border">Last 7 days</span>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-xl font-bold text-foreground tabular-nums leading-none">{totalWeeklyTasks}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">created</p>
+              </div>
+              <div className="w-px h-8 bg-border" />
+              <div className="text-right">
+                <p className="text-xl font-bold text-emerald-500 tabular-nums leading-none">{completedCount}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">done</p>
+              </div>
+            </div>
           </div>
-          <div className="relative" style={{ height: 164 }}>
-            {[0.75, 0.5, 0.25].map(frac => (
-              <div key={frac} className="absolute left-0 right-0 border-t border-dashed border-border/50 pointer-events-none"
-                style={{ bottom: `${frac * 104 + 28}px` }} />
-            ))}
-            <div className="absolute inset-0 flex items-end gap-1.5 sm:gap-2.5 pt-4">
-              {weeklyData.map((count, i) => {
-                const heightPct = (count / maxBar) * 100
-                const isToday = i === 6
-                const isPrimary = isToday || (count === maxBar && count > 0)
-                return (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-                    <span className="text-[10px] font-bold tabular-nums" style={{
-                      color: isPrimary ? '#f24a49' : '#93c5fd',
-                      minHeight: 14,
-                      visibility: count > 0 ? 'visible' : 'hidden',
-                    }}>{count}</span>
-                    <div className="w-full flex items-end" style={{ height: 104 }}>
-                      <div className="w-full rounded-t-md transition-all duration-700" style={{
-                        height: `${Math.max(heightPct, 5)}%`,
+
+          {/* Mini bar chart */}
+          <div className="flex items-end gap-1" style={{ height: 80 }}>
+            {weeklyData.map((count, i) => {
+              const heightPct = (count / maxBar) * 100
+              const isToday = i === 6
+              const isPrimary = isToday || (count === maxBar && count > 0)
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="w-full flex items-end" style={{ height: 58 }}>
+                    <div
+                      className="w-full rounded-t-md transition-all duration-700"
+                      style={{
+                        height: `${Math.max(heightPct, count > 0 ? 8 : 4)}%`,
                         background: isPrimary
                           ? 'linear-gradient(180deg, #f24a49 0%, #c73b3a 100%)'
                           : count > 0
                           ? 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%)'
-                          : '#f1f5f9',
-                        boxShadow: isPrimary ? '0 -3px 10px rgba(242,74,73,0.3)' : count > 0 ? '0 -2px 6px rgba(96,165,250,0.2)' : 'none',
-                      }} />
-                    </div>
-                    <span className={`text-[11px] ${isToday ? 'font-bold text-[#f24a49]' : 'text-muted-foreground'}`}>{weekLabels[i]}</span>
+                          : 'var(--muted)',
+                        boxShadow: isPrimary ? '0 -2px 8px rgba(242,74,73,0.3)' : 'none',
+                      }}
+                    />
                   </div>
-                )
-              })}
-            </div>
+                  <span className={`text-[10px] leading-none ${isToday ? 'font-bold text-[#f24a49]' : 'text-muted-foreground'}`}>
+                    {weekLabels[i].slice(0, 2)}
+                  </span>
+                </div>
+              )
+            })}
           </div>
         </div>
 
         {/* Project Progress */}
-        <div className="bg-card border border-border rounded-2xl p-6">
+        <div className="bg-card border border-border rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-sm font-semibold text-foreground">Project Progress</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{completedProjects.length} of {projectProgress.length} complete</p>
             </div>
-            <Link href="/admin/projects" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-              All <ArrowRight className="w-3 h-3" />
+            <Link href="/admin/projects" className="text-xs text-muted-foreground hover:text-[#f24a49] transition-colors flex items-center gap-1">
+              View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
           {projectProgress.length === 0 ? (
@@ -241,30 +250,39 @@ export default async function AdminDashboardPage() {
               <p className="text-xs text-muted-foreground mt-0.5">Create a project to see progress</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {projectProgress.slice(0, 5).map(p => (
-                <Link key={p.id} href={`/admin/projects/${p.id}`} className="block group">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2 min-w-0">
-                      {(p as any).avatar_url
-                        ? <img src={(p as any).avatar_url} className="w-5 h-5 rounded-full object-cover shrink-0" alt="" />
-                        : <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />}
-                      <span className="text-xs font-medium text-foreground truncate group-hover:text-[#f24a49] transition-colors">{p.name}</span>
+            <div className="space-y-3">
+              {projectProgress.slice(0, 4).map(p => (
+                <Link key={p.id} href={`/admin/projects/${p.id}`} className="flex items-center gap-3 group">
+                  {/* Avatar / color dot */}
+                  <div
+                    className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center text-white text-[11px] font-bold overflow-hidden"
+                    style={{ backgroundColor: p.color }}
+                  >
+                    {(p as any).avatar_url
+                      ? <img src={(p as any).avatar_url} className="w-full h-full object-cover" alt="" />
+                      : p.name.charAt(0).toUpperCase()}
+                  </div>
+                  {/* Bar + labels */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-semibold text-foreground truncate group-hover:text-[#f24a49] transition-colors leading-none">{p.name}</span>
+                      <span className={`text-[11px] font-bold tabular-nums ml-2 shrink-0 ${p.pct === 100 ? 'text-emerald-500' : 'text-muted-foreground'}`}>{p.pct}%</span>
                     </div>
-                    <span className={`text-xs font-bold tabular-nums shrink-0 ml-2 ${p.pct === 100 ? 'text-emerald-500' : 'text-foreground'}`}>{p.pct}%</span>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${p.pct}%`,
+                          background: p.pct === 100
+                            ? '#10b981'
+                            : p.pct > 60
+                            ? 'linear-gradient(90deg,#3b82f6,#10b981)'
+                            : '#3b82f6',
+                        }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{p.done}/{p.total} tasks</p>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden flex gap-px">
-                    {p.pct === 100 ? (
-                      <div className="h-full bg-emerald-500 rounded-full w-full" />
-                    ) : (
-                      <>
-                        <div className="h-full bg-emerald-400" style={{ width: `${(p.done / p.total) * 100}%` }} />
-                        <div className="h-full bg-amber-400" style={{ width: `${(p.rev / p.total) * 100}%` }} />
-                        <div className="h-full bg-blue-400" style={{ width: `${(p.inProg / p.total) * 100}%` }} />
-                      </>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mt-1">{p.done}/{p.total} tasks done</p>
                 </Link>
               ))}
             </div>
