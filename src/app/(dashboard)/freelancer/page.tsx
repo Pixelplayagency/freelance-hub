@@ -87,25 +87,22 @@ export default async function FreelancerDashboardPage() {
 
   const statCards = [
     {
-      label: 'In Progress',
-      value: inProgress,
-      icon: Clock,
-      iconClass: 'bg-blue-50 text-blue-500 dark:bg-blue-900/20 dark:text-blue-400',
-      accent: '#3b82f6',
+      label: 'In Progress', value: inProgress, icon: Clock,
+      bg: 'bg-blue-50 dark:bg-blue-950/40', border: 'border-blue-100 dark:border-blue-900/60',
+      iconBg: 'bg-blue-100 dark:bg-blue-900/60', iconColor: 'text-blue-600 dark:text-blue-400',
+      numColor: 'text-blue-700 dark:text-blue-300', labelColor: 'text-blue-500 dark:text-blue-400',
     },
     {
-      label: 'In Review',
-      value: inReview,
-      icon: AlertTriangle,
-      iconClass: 'bg-amber-50 text-amber-500 dark:bg-amber-900/20 dark:text-amber-400',
-      accent: '#f59e0b',
+      label: 'In Review', value: inReview, icon: AlertTriangle,
+      bg: 'bg-amber-50 dark:bg-amber-950/40', border: 'border-amber-100 dark:border-amber-900/60',
+      iconBg: 'bg-amber-100 dark:bg-amber-900/60', iconColor: 'text-amber-600 dark:text-amber-400',
+      numColor: 'text-amber-700 dark:text-amber-300', labelColor: 'text-amber-500 dark:text-amber-400',
     },
     {
-      label: 'Completed',
-      value: completed,
-      icon: CheckCircle2,
-      iconClass: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/20 dark:text-emerald-400',
-      accent: '#10b981',
+      label: 'Completed', value: completed, icon: CheckCircle2,
+      bg: 'bg-emerald-50 dark:bg-emerald-950/40', border: 'border-emerald-100 dark:border-emerald-900/60',
+      iconBg: 'bg-emerald-100 dark:bg-emerald-900/60', iconColor: 'text-emerald-600 dark:text-emerald-400',
+      numColor: 'text-emerald-700 dark:text-emerald-300', labelColor: 'text-emerald-500 dark:text-emerald-400',
     },
   ]
 
@@ -161,18 +158,17 @@ export default async function FreelancerDashboardPage() {
             <Link
               key={s.label}
               href="/freelancer/tasks"
-              className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-4 min-h-[140px] transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-              style={{ borderTop: `3px solid ${s.accent}`, boxShadow: 'var(--shadow-card)' }}
+              className={`${s.bg} border ${s.border} rounded-2xl p-5 flex flex-col justify-between min-h-[130px] hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200`}
             >
-              <div className="flex items-start justify-between">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.iconClass}`}>
-                  <Icon className="w-5 h-5" />
+              <div className="flex items-center justify-between">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${s.iconBg}`}>
+                  <Icon className={s.iconColor} style={{ width: 18, height: 18 }} />
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-muted-foreground/25" />
+                <ArrowUpRight className={`w-4 h-4 ${s.iconColor} opacity-40`} />
               </div>
               <div>
-                <div className="text-4xl font-bold text-foreground tracking-tight tabular-nums">{s.value}</div>
-                <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
+                <p className={`text-3xl font-bold tabular-nums ${s.numColor}`}>{s.value}</p>
+                <p className={`text-xs mt-1 font-medium ${s.labelColor} opacity-80`}>{s.label}</p>
               </div>
             </Link>
           )
@@ -207,10 +203,11 @@ export default async function FreelancerDashboardPage() {
                       style={{
                         height: `${Math.max(heightPct, 4)}%`,
                         background: isPrimary
-                          ? 'linear-gradient(180deg, #f24a49 0%, #d93d3c 100%)'
+                          ? 'linear-gradient(180deg, #f24a49 0%, #c73b3a 100%)'
                           : count > 0
-                          ? 'linear-gradient(180deg, oklch(0.78 0 0) 0%, oklch(0.70 0 0) 100%)'
-                          : 'oklch(0.93 0 0)',
+                          ? 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%)'
+                          : '#f1f5f9',
+                        boxShadow: isPrimary ? '0 -3px 10px rgba(242,74,73,0.3)' : count > 0 ? '0 -2px 6px rgba(96,165,250,0.2)' : 'none',
                       }}
                     />
                   </div>

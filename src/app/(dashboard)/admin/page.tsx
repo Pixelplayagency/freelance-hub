@@ -33,13 +33,11 @@ export default async function AdminDashboardPage() {
   const completedCount = tasks.filter(t => t.status === 'completed').length
   const overdueCount = tasks.filter(t => isOverdue(t.due_date) && t.status !== 'completed').length
 
-  // Weekly chart data
   const weeklyData = Array(7).fill(0)
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const weekLabels: string[] = []
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(now)
-    d.setDate(d.getDate() - i)
+    const d = new Date(now); d.setDate(d.getDate() - i)
     weekLabels.push(dayNames[d.getDay()])
   }
   tasks.forEach(t => {
@@ -50,7 +48,6 @@ export default async function AdminDashboardPage() {
   const maxBar = Math.max(...weeklyData, 1)
   const totalWeeklyTasks = weeklyData.reduce((a, b) => a + b, 0)
 
-  // Project progress
   const projectProgress = (projectsList ?? []).map(p => {
     const pt = tasks.filter(t => (t.project as any)?.id === p.id)
     const done = pt.filter(t => t.status === 'completed').length
@@ -76,14 +73,38 @@ export default async function AdminDashboardPage() {
   }).sort((a, b) => b.done - a.done)
 
   const statCards = [
-    { label: 'Active Tasks',  value: activeTasks,    icon: Clock,        accent: '#3b82f6', iconBg: 'bg-blue-50 dark:bg-blue-900/30',   iconColor: 'text-blue-500' },
-    { label: 'In Review',     value: inReview,        icon: AlertCircle,  accent: '#f59e0b', iconBg: 'bg-amber-50 dark:bg-amber-900/30', iconColor: 'text-amber-500' },
-    { label: 'Completed',     value: completedCount,  icon: CheckCircle2, accent: '#10b981', iconBg: 'bg-emerald-50 dark:bg-emerald-900/30', iconColor: 'text-emerald-500' },
+    {
+      label: 'Active Tasks', value: activeTasks, icon: Clock, href: '/admin/projects',
+      bg: 'bg-blue-50 dark:bg-blue-950/40',
+      border: 'border-blue-100 dark:border-blue-900/60',
+      iconBg: 'bg-blue-100 dark:bg-blue-900/60',
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      numColor: 'text-blue-700 dark:text-blue-300',
+      labelColor: 'text-blue-500 dark:text-blue-400',
+    },
+    {
+      label: 'In Review', value: inReview, icon: AlertCircle, href: '/admin/projects',
+      bg: 'bg-amber-50 dark:bg-amber-950/40',
+      border: 'border-amber-100 dark:border-amber-900/60',
+      iconBg: 'bg-amber-100 dark:bg-amber-900/60',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      numColor: 'text-amber-700 dark:text-amber-300',
+      labelColor: 'text-amber-500 dark:text-amber-400',
+    },
+    {
+      label: 'Completed', value: completedCount, icon: CheckCircle2, href: '/admin/projects',
+      bg: 'bg-emerald-50 dark:bg-emerald-950/40',
+      border: 'border-emerald-100 dark:border-emerald-900/60',
+      iconBg: 'bg-emerald-100 dark:bg-emerald-900/60',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      numColor: 'text-emerald-700 dark:text-emerald-300',
+      labelColor: 'text-emerald-500 dark:text-emerald-400',
+    },
   ]
 
   return (
     <div className="space-y-5">
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
@@ -96,29 +117,25 @@ export default async function AdminDashboardPage() {
         <Link
           href="/admin/projects/new"
           className="flex items-center gap-2 bg-[#f24a49] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#e03e3d] transition-colors shrink-0"
-          style={{ boxShadow: '0 4px 14px rgba(242,74,73,0.3)' }}
+          style={{ boxShadow: '0 4px 14px rgba(242,74,73,0.30)' }}
         >
-          <Plus className="w-4 h-4" />
-          Add Project
+          <Plus className="w-4 h-4" /> Add Project
         </Link>
       </div>
 
-      {/* ── Stat Cards ── */}
+      {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Featured — Active Projects */}
+        {/* Featured — dark card */}
         <Link
           href="/admin/projects"
-          className="relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between min-h-[130px] hover:opacity-95 transition-all duration-200 col-span-1"
-          style={{
-            background: 'linear-gradient(135deg, #1C1C1E 0%, #2c2c2e 100%)',
-            boxShadow: '0 8px 28px rgba(242,74,73,0.20)',
-          }}
+          className="relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between min-h-[130px] hover:opacity-95 transition-all duration-200"
+          style={{ background: 'linear-gradient(135deg, #1C1C1E 0%, #2c2c2e 100%)', boxShadow: '0 8px 28px rgba(242,74,73,0.22)' }}
         >
-          <div className="absolute inset-0 opacity-[0.15]"
+          <div className="absolute inset-0 opacity-[0.14]"
             style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
           <div className="relative flex items-center justify-between">
-            <div className="w-9 h-9 rounded-xl bg-[#f24a49] flex items-center justify-center shadow-lg">
-              <FolderKanban className="w-4.5 h-4.5 text-white" style={{ width: 18, height: 18 }} />
+            <div className="w-9 h-9 rounded-xl bg-[#f24a49] flex items-center justify-center" style={{ boxShadow: '0 2px 12px rgba(242,74,73,0.5)' }}>
+              <FolderKanban style={{ width: 18, height: 18, color: 'white' }} />
             </div>
             <ArrowUpRight className="w-4 h-4 text-white/30" />
           </div>
@@ -126,96 +143,72 @@ export default async function AdminDashboardPage() {
             <p className="text-3xl font-bold text-white tabular-nums">{activeProjects}</p>
             <p className="text-xs text-white/50 mt-1 font-medium">Active Projects</p>
           </div>
-          {/* Red glow line at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#f24a49]/60 to-transparent" />
+          <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-[#f24a49]/50 to-transparent" />
         </Link>
 
-        {/* Other stat cards */}
+        {/* Colored stat cards */}
         {statCards.map(s => {
           const Icon = s.icon
           return (
             <Link
               key={s.label}
-              href="/admin/projects"
-              className="relative bg-card border border-border rounded-2xl p-5 flex flex-col justify-between min-h-[130px] overflow-hidden hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
+              href={s.href}
+              className={`${s.bg} border ${s.border} rounded-2xl p-5 flex flex-col justify-between min-h-[130px] hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200`}
             >
-              {/* Tinted top-right glow */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-[0.07] pointer-events-none"
-                style={{ backgroundColor: s.accent }} />
-              <div className="relative flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${s.iconBg}`}>
-                  <Icon className={`w-4.5 h-4.5 ${s.iconColor}`} style={{ width: 18, height: 18 }} />
+                  <Icon className={s.iconColor} style={{ width: 18, height: 18 }} />
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-muted-foreground/20" />
+                <ArrowUpRight className={`w-4 h-4 ${s.iconColor} opacity-40`} />
               </div>
-              <div className="relative">
-                <p className="text-3xl font-bold text-foreground tabular-nums">{s.value}</p>
-                <p className="text-xs text-muted-foreground mt-1 font-medium">{s.label}</p>
+              <div>
+                <p className={`text-3xl font-bold tabular-nums ${s.numColor}`}>{s.value}</p>
+                <p className={`text-xs mt-1 font-medium ${s.labelColor} opacity-80`}>{s.label}</p>
               </div>
-              {/* Bottom accent line */}
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] opacity-50 rounded-b-2xl"
-                style={{ backgroundColor: s.accent }} />
             </Link>
           )
         })}
       </div>
 
-      {/* ── Chart + Project Progress ── */}
+      {/* Chart + Project Progress */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Task Activity Bar Chart */}
         <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-sm font-semibold text-foreground">Task Activity</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">{totalWeeklyTasks} tasks created this week</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{totalWeeklyTasks} task{totalWeeklyTasks !== 1 ? 's' : ''} created this week</p>
             </div>
             <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full border border-border">Last 7 days</span>
           </div>
-
-          {/* Chart area */}
           <div className="relative" style={{ height: 164 }}>
-            {/* Horizontal grid lines */}
             {[0.75, 0.5, 0.25].map(frac => (
-              <div
-                key={frac}
-                className="absolute left-0 right-0 border-t border-dashed border-border/60 pointer-events-none"
-                style={{ bottom: `${frac * 104 + 28}px` }}
-              />
+              <div key={frac} className="absolute left-0 right-0 border-t border-dashed border-border/50 pointer-events-none"
+                style={{ bottom: `${frac * 104 + 28}px` }} />
             ))}
-
-            {/* Bars */}
             <div className="absolute inset-0 flex items-end gap-1.5 sm:gap-2.5 pt-4">
               {weeklyData.map((count, i) => {
                 const heightPct = (count / maxBar) * 100
                 const isToday = i === 6
-                const isHighest = count === maxBar && count > 0
-                const isPrimary = isToday || isHighest
+                const isPrimary = isToday || (count === maxBar && count > 0)
                 return (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
                     <span className="text-[10px] font-bold tabular-nums" style={{
-                      color: isPrimary ? '#f24a49' : 'transparent',
+                      color: isPrimary ? '#f24a49' : '#93c5fd',
                       minHeight: 14,
                       visibility: count > 0 ? 'visible' : 'hidden',
-                    }}>
-                      {count}
-                    </span>
+                    }}>{count}</span>
                     <div className="w-full flex items-end" style={{ height: 104 }}>
-                      <div
-                        className="w-full rounded-t-md transition-all duration-700"
-                        style={{
-                          height: `${Math.max(heightPct, 5)}%`,
-                          background: isPrimary
-                            ? 'linear-gradient(180deg, #f24a49 0%, #c73b3a 100%)'
-                            : count > 0
-                            ? 'linear-gradient(180deg, oklch(0.75 0 0) 0%, oklch(0.68 0 0) 100%)'
-                            : 'oklch(0.93 0 0 / 0.5)',
-                          boxShadow: isPrimary ? '0 -2px 8px rgba(242,74,73,0.3)' : 'none',
-                        }}
-                      />
+                      <div className="w-full rounded-t-md transition-all duration-700" style={{
+                        height: `${Math.max(heightPct, 5)}%`,
+                        background: isPrimary
+                          ? 'linear-gradient(180deg, #f24a49 0%, #c73b3a 100%)'
+                          : count > 0
+                          ? 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%)'
+                          : '#f1f5f9',
+                        boxShadow: isPrimary ? '0 -3px 10px rgba(242,74,73,0.3)' : count > 0 ? '0 -2px 6px rgba(96,165,250,0.2)' : 'none',
+                      }} />
                     </div>
-                    <span className={`text-[11px] ${isToday ? 'font-bold text-[#f24a49]' : 'text-muted-foreground'}`}>
-                      {weekLabels[i]}
-                    </span>
+                    <span className={`text-[11px] ${isToday ? 'font-bold text-[#f24a49]' : 'text-muted-foreground'}`}>{weekLabels[i]}</span>
                   </div>
                 )
               })}
@@ -234,7 +227,6 @@ export default async function AdminDashboardPage() {
               All <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-
           {projectProgress.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-2">
@@ -249,28 +241,21 @@ export default async function AdminDashboardPage() {
                 <Link key={p.id} href={`/admin/projects/${p.id}`} className="block group">
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2 min-w-0">
-                      {(p as any).avatar_url ? (
-                        <img src={(p as any).avatar_url} className="w-5 h-5 rounded-full object-cover shrink-0" alt="" />
-                      ) : (
-                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
-                      )}
-                      <span className="text-xs font-medium text-foreground truncate group-hover:text-[#f24a49] transition-colors">
-                        {p.name}
-                      </span>
+                      {(p as any).avatar_url
+                        ? <img src={(p as any).avatar_url} className="w-5 h-5 rounded-full object-cover shrink-0" alt="" />
+                        : <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />}
+                      <span className="text-xs font-medium text-foreground truncate group-hover:text-[#f24a49] transition-colors">{p.name}</span>
                     </div>
-                    <span className={`text-xs font-bold tabular-nums shrink-0 ml-2 ${p.pct === 100 ? 'text-emerald-500' : 'text-foreground'}`}>
-                      {p.pct}%
-                    </span>
+                    <span className={`text-xs font-bold tabular-nums shrink-0 ml-2 ${p.pct === 100 ? 'text-emerald-500' : 'text-foreground'}`}>{p.pct}%</span>
                   </div>
-                  {/* Segmented progress bar */}
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden flex gap-px">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden flex gap-px">
                     {p.pct === 100 ? (
                       <div className="h-full bg-emerald-500 rounded-full w-full" />
                     ) : (
                       <>
-                        <div className="h-full bg-emerald-500 transition-all" style={{ width: `${(p.done / p.total) * 100}%` }} />
-                        <div className="h-full bg-amber-400 transition-all" style={{ width: `${(p.rev / p.total) * 100}%` }} />
-                        <div className="h-full bg-blue-400 transition-all" style={{ width: `${(p.inProg / p.total) * 100}%` }} />
+                        <div className="h-full bg-emerald-400" style={{ width: `${(p.done / p.total) * 100}%` }} />
+                        <div className="h-full bg-amber-400" style={{ width: `${(p.rev / p.total) * 100}%` }} />
+                        <div className="h-full bg-blue-400" style={{ width: `${(p.inProg / p.total) * 100}%` }} />
                       </>
                     )}
                   </div>
@@ -282,7 +267,7 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* ── Team + Delivered Work ── */}
+      {/* Team + Delivered Work */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Team */}
         <div className="bg-card border border-border rounded-2xl p-6">
@@ -291,23 +276,18 @@ export default async function AdminDashboardPage() {
               <h2 className="text-sm font-semibold text-foreground">Team</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{teamData.length} active member{teamData.length !== 1 ? 's' : ''}</p>
             </div>
-            <Link
-              href="/admin/workspace"
-              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted hover:text-foreground transition-colors"
-            >
+            <Link href="/admin/workspace"
+              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted hover:text-foreground transition-colors">
               <Plus className="w-3 h-3" /> Add Member
             </Link>
           </div>
-
           {teamData.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
                 <Users className="w-6 h-6 text-muted-foreground/30" />
               </div>
               <p className="text-sm font-semibold text-foreground">No team members yet</p>
-              <Link href="/admin/workspace" className="text-xs text-[#f24a49] mt-1.5 hover:underline font-medium">
-                Invite a freelancer →
-              </Link>
+              <Link href="/admin/workspace" className="text-xs text-[#f24a49] mt-1.5 hover:underline font-medium">Invite a freelancer →</Link>
             </div>
           ) : (
             <div className="divide-y divide-border">
@@ -322,18 +302,14 @@ export default async function AdminDashboardPage() {
                     <p className="text-sm font-semibold text-foreground truncate">{member.full_name || member.username}</p>
                     <p className="text-xs text-muted-foreground truncate">
                       {member.currentTask
-                        ? <><span className="text-muted-foreground">On </span><span className="font-medium text-foreground">{member.currentTask.title}</span></>
+                        ? <><span>On </span><span className="font-medium text-foreground">{member.currentTask.title}</span></>
                         : <span className="italic">No active task</span>}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    {member.currentTask && (
-                      <TaskStatusBadge status={member.currentTask.status as TaskStatus} />
-                    )}
+                    {member.currentTask && <TaskStatusBadge status={member.currentTask.status as TaskStatus} />}
                     {member.totalCount > 0 && (
-                      <span className="text-[10px] text-muted-foreground tabular-nums">
-                        {member.completedCount}/{member.totalCount} done
-                      </span>
+                      <span className="text-[10px] text-muted-foreground tabular-nums">{member.completedCount}/{member.totalCount} done</span>
                     )}
                   </div>
                 </div>
@@ -349,11 +325,10 @@ export default async function AdminDashboardPage() {
               <h2 className="text-sm font-semibold text-foreground">Delivered Work</h2>
               <p className="text-xs text-muted-foreground mt-0.5">Completion rate per freelancer</p>
             </div>
-            <div className="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
-
           {freelancerOutput.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
@@ -376,24 +351,15 @@ export default async function AdminDashboardPage() {
                       <p className="text-sm font-semibold text-foreground truncate">{f.full_name || f.username}</p>
                       <span className={`text-[11px] font-bold shrink-0 ml-2 px-1.5 py-0.5 rounded-full ${
                         f.done > 0
-                          ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400'
+                          ? 'text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400'
                           : 'text-muted-foreground bg-muted'
-                      }`}>
-                        {f.done} done
-                      </span>
+                      }`}>{f.done} done</span>
                     </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-700"
-                        style={{
-                          width: `${f.pct}%`,
-                          background: f.pct === 100
-                            ? '#10b981'
-                            : f.pct > 50
-                            ? 'linear-gradient(90deg, #10b981, #3b82f6)'
-                            : '#3b82f6',
-                        }}
-                      />
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all duration-700" style={{
+                        width: `${f.pct}%`,
+                        background: f.pct === 100 ? '#10b981' : f.pct > 50 ? 'linear-gradient(90deg,#10b981,#3b82f6)' : '#3b82f6',
+                      }} />
                     </div>
                     <p className="text-[10px] text-muted-foreground mt-1">
                       {f.total > 0 ? `${f.pct}% of ${f.total} assigned` : 'No tasks assigned'}
