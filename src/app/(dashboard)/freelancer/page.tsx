@@ -69,12 +69,33 @@ export default async function FreelancerDashboardPage() {
     pct: p.total > 0 ? Math.round((p.done / p.total) * 100) : 0,
   }))
 
+  const statCards = [
+    {
+      label: 'In Progress',
+      value: inProgress,
+      icon: Clock,
+      iconClass: 'bg-blue-50 text-blue-500 dark:bg-blue-900/20 dark:text-blue-400',
+    },
+    {
+      label: 'In Review',
+      value: inReview,
+      icon: AlertTriangle,
+      iconClass: 'bg-amber-50 text-amber-500 dark:bg-amber-900/20 dark:text-amber-400',
+    },
+    {
+      label: 'Completed',
+      value: completed,
+      icon: CheckCircle2,
+      iconClass: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/20 dark:text-emerald-400',
+    },
+  ]
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 dashboard-page">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">My Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
+        <p className={`text-sm mt-0.5 ${overdueCount > 0 ? 'text-[#f24a49] font-medium' : 'text-muted-foreground'}`}>
           {overdueCount > 0
             ? `${overdueCount} overdue task${overdueCount !== 1 ? 's' : ''} need attention`
             : `${allTasks.length} task${allTasks.length !== 1 ? 's' : ''} assigned to you`}
@@ -86,10 +107,17 @@ export default async function FreelancerDashboardPage() {
         {/* Featured card */}
         <Link
           href="/freelancer/tasks"
-          className="bg-[#1C1C1E] rounded-xl p-5 hover:opacity-90 transition-opacity flex flex-col justify-between min-h-[130px]"
+          className="rounded-xl p-5 hover:opacity-90 transition-all duration-200 flex flex-col justify-between min-h-[130px]"
+          style={{
+            background: 'linear-gradient(135deg, #1C1C1E 0%, #2a2a2c 100%)',
+            boxShadow: '0 4px 14px rgba(242,74,73,0.15)',
+          }}
         >
           <div className="flex items-start justify-between">
-            <div className="w-9 h-9 rounded-lg bg-[#f24a49] flex items-center justify-center">
+            <div
+              className="w-9 h-9 rounded-lg bg-[#f24a49] flex items-center justify-center"
+              style={{ boxShadow: '0 2px 8px rgba(242,74,73,0.4)' }}
+            >
               <ListTodo className="w-4 h-4 text-white" />
             </div>
             <ArrowUpRight className="w-4 h-4 text-white/30" />
@@ -100,21 +128,18 @@ export default async function FreelancerDashboardPage() {
           </div>
         </Link>
 
-        {[
-          { label: 'In Progress', value: inProgress, icon: Clock },
-          { label: 'In Review',   value: inReview,   icon: AlertTriangle },
-          { label: 'Completed',   value: completed,  icon: CheckCircle2 },
-        ].map(s => {
+        {statCards.map(s => {
           const Icon = s.icon
           return (
             <Link
               key={s.label}
               href="/freelancer/tasks"
-              className="bg-card border border-border rounded-xl p-5 hover:shadow-sm transition-shadow flex flex-col justify-between min-h-[130px]"
+              className="bg-card border border-border rounded-xl p-5 flex flex-col justify-between min-h-[130px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              style={{ boxShadow: 'var(--shadow-card)' }}
             >
               <div className="flex items-start justify-between">
-                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-                  <Icon className="w-4 h-4 text-muted-foreground" />
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.iconClass}`}>
+                  <Icon className="w-4 h-4" />
                 </div>
                 <ArrowUpRight className="w-4 h-4 text-muted-foreground/30" />
               </div>
@@ -130,24 +155,34 @@ export default async function FreelancerDashboardPage() {
       {/* Chart + Due Today */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Activity chart */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5">
+        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-sm font-semibold text-foreground">Task Activity</h2>
-            <span className="text-xs text-muted-foreground">Last 7 days</span>
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Last 7 days</span>
           </div>
-          <div className="flex items-end gap-2 sm:gap-3" style={{ height: '120px' }}>
+          <div className="flex items-end gap-2 sm:gap-3" style={{ height: '140px' }}>
             {weeklyData.map((count, i) => {
               const heightPct = (count / maxBar) * 100
               const isToday = i === 6
               const isHighest = count === maxBar && count > 0
+              const isPrimary = isToday || isHighest
               return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                  <div className="w-full flex items-end" style={{ height: '88px' }}>
+                <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+                  <span
+                    className="text-[10px] font-semibold text-foreground"
+                    style={{ minHeight: '14px', visibility: count > 0 ? 'visible' : 'hidden' }}
+                  >
+                    {count}
+                  </span>
+                  <div className="w-full flex items-end" style={{ height: '96px' }}>
                     <div
-                      className="w-full rounded-t-lg transition-all duration-500"
+                      className="w-full rounded-t-md transition-all duration-500"
                       style={{
-                        height: `${Math.max(heightPct, 5)}%`,
-                        backgroundColor: isToday || isHighest ? '#f24a49' : count > 0 ? '#1C1C1E' : '#e5e7eb',
+                        height: `${Math.max(heightPct, 4)}%`,
+                        background: isPrimary
+                          ? 'linear-gradient(180deg, #f24a49 0%, #d93d3c 100%)'
+                          : undefined,
+                        backgroundColor: !isPrimary ? (count > 0 ? 'oklch(0.75 0 0)' : 'oklch(0.93 0 0)') : undefined,
                       }}
                     />
                   </div>
@@ -159,19 +194,22 @@ export default async function FreelancerDashboardPage() {
         </div>
 
         {/* Due Today */}
-        <div className="bg-card border border-border rounded-xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-sm font-semibold text-foreground">Due Today</h2>
             {tasksDueToday.length > 0 && (
-              <span className="text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full">
+              <span className="text-xs font-semibold text-amber-700 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded-full dark:text-amber-400 dark:bg-amber-900/20 dark:border-amber-800">
                 {tasksDueToday.length}
               </span>
             )}
           </div>
           {tasksDueToday.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <CheckCircle2 className="w-8 h-8 text-slate-200 mb-2" />
-              <p className="text-sm text-slate-400">No tasks due today</p>
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mb-3">
+                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+              </div>
+              <p className="text-sm font-medium text-foreground">All clear!</p>
+              <p className="text-xs text-muted-foreground mt-1">No tasks due today</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -201,12 +239,15 @@ export default async function FreelancerDashboardPage() {
       {/* Active Tasks + Project Progress */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Active Tasks */}
-        <div className="bg-card border border-border rounded-xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
           <h2 className="text-sm font-semibold text-foreground mb-4">Active Tasks</h2>
           {activeTasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <CheckCircle2 className="w-8 h-8 text-slate-200 mb-2" />
-              <p className="text-sm text-slate-400">All caught up!</p>
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mb-3">
+                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+              </div>
+              <p className="text-sm font-medium text-foreground">All caught up!</p>
+              <p className="text-xs text-muted-foreground mt-1">No active tasks right now</p>
             </div>
           ) : (
             <div className="space-y-1">
@@ -233,15 +274,18 @@ export default async function FreelancerDashboardPage() {
         </div>
 
         {/* Project Progress */}
-        <div className="bg-card border border-border rounded-xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-foreground">Project Progress</h2>
             <TrendingUp className="w-4 h-4 text-muted-foreground" />
           </div>
           {projectProgress.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <TrendingUp className="w-8 h-8 text-slate-200 mb-2" />
-              <p className="text-sm text-slate-400">No projects yet</p>
+              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-3">
+                <TrendingUp className="w-6 h-6 text-muted-foreground/40" />
+              </div>
+              <p className="text-sm font-medium text-foreground">No projects yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Tasks will appear here once assigned</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -254,7 +298,7 @@ export default async function FreelancerDashboardPage() {
                     </div>
                     <span className="text-xs font-semibold text-muted-foreground ml-2 shrink-0">{p.pct}%</span>
                   </div>
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-2 bg-muted/60 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{ width: `${p.pct}%`, backgroundColor: p.color }}

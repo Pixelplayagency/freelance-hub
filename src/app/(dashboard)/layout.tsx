@@ -47,7 +47,7 @@ export default async function DashboardLayout({
         {/* Main content */}
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
           {/* TopBar with mobile hamburger */}
-          <div className="flex items-center h-14 border-b border-border bg-card shrink-0 px-4 gap-3 shadow-sm">
+          <div className="flex items-center h-14 border-b border-border bg-card shrink-0 px-4 gap-3" style={{ boxShadow: 'var(--shadow-card)' }}>
             <MobileNav role={profile.role as 'admin' | 'freelancer'} userName={profile.full_name} avatarUrl={profile.avatar_url} jobRole={(profile as any).job_role ?? null} />
             <div className="flex-1" />
             <TopBar />
