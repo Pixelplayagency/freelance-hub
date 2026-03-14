@@ -188,7 +188,6 @@ export async function uploadProjectImage(
   form.append('upload_preset', uploadPreset)
   form.append('folder', `freelancehub/projects/${projectId}`)
   form.append('public_id', type)
-  form.append('overwrite', 'true')
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,

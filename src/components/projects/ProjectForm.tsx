@@ -51,7 +51,6 @@ async function uploadToCloudinary(base64: string, folder: string, publicId: stri
   form.append('upload_preset', uploadPreset)
   form.append('folder', folder)
   form.append('public_id', publicId)
-  form.append('overwrite', 'true')
 
   const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
     method: 'POST',
