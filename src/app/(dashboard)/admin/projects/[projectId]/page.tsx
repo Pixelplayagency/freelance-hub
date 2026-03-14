@@ -1,11 +1,12 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import { KanbanBoard } from '@/components/kanban/KanbanBoard'
+import { ProjectTaskList } from '@/components/projects/ProjectTaskList'
 import { CreateTaskButton } from '@/components/tasks/CreateTaskButton'
 import { DeleteProjectButton } from '@/components/projects/DeleteProjectButton'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import type { Task, Profile } from '@/lib/types/app.types'
+type AssigneeMap = Record<string, Pick<Profile, 'id' | 'full_name' | 'avatar_url'>[]>
 
 export default async function ProjectPage({
   params,
@@ -44,10 +45,24 @@ export default async function ProjectPage({
 
   const isAdmin = profile?.role === 'admin'
 
+  // Fetch co-assignees for all tasks in this project
+  const taskIds = (tasks ?? []).map(t => t.id)
+  let assigneeMap: AssigneeMap = {}
+  if (taskIds.length > 0) {
+    const { data: assignments } = await supabase
+      .from('task_assignments')
+      .select('task_id, user:profiles!user_id(id, full_name, avatar_url)')
+      .in('task_id', taskIds)
+    for (const a of assignments ?? []) {
+      if (!assigneeMap[a.task_id]) assigneeMap[a.task_id] = []
+      assigneeMap[a.task_id].push(a.user as unknown as Pick<Profile, 'id' | 'full_name' | 'avatar_url'>)
+    }
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-start gap-3 mb-6">
+      <div className="flex items-start gap-3 mb-6 flex-wrap">
         <div className="flex-1 min-w-0">
           <Link
             href="/admin/projects"
@@ -78,11 +93,12 @@ export default async function ProjectPage({
         )}
       </div>
 
-      {/* Kanban board */}
-      <KanbanBoard
-        initialTasks={(tasks ?? []) as Task[]}
+      {/* Task list */}
+      <ProjectTaskList
+        tasks={(tasks ?? []) as Task[]}
         projectId={projectId}
         isAdmin={isAdmin}
+        assigneeMap={assigneeMap}
       />
     </div>
   )

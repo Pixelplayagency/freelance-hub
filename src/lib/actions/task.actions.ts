@@ -10,7 +10,8 @@ export async function createTask(formData: unknown) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
-  const validated = taskSchema.parse(formData)
+  const { assignee_ids, ...rest } = formData as Record<string, unknown> & { assignee_ids?: string[] }
+  const validated = taskSchema.parse(rest)
 
   const { data, error } = await supabase
     .from('tasks')
@@ -19,6 +20,14 @@ export async function createTask(formData: unknown) {
     .single()
 
   if (error) throw new Error(error.message)
+
+  // Insert all assignees into task_assignments
+  const ids = assignee_ids && assignee_ids.length > 0 ? assignee_ids : (validated.assigned_to ? [validated.assigned_to] : [])
+  if (ids.length > 0) {
+    await supabase.from('task_assignments').insert(
+      ids.map(uid => ({ task_id: data.id, user_id: uid, assigned_by: user.id }))
+    )
+  }
 
   revalidatePath(`/admin/projects/${validated.project_id}`)
   return data
@@ -29,19 +38,32 @@ export async function updateTask(taskId: string, updates: Partial<{
   description: string
   assigned_to: string | null
   due_date: string | null
+  assignee_ids: string[]
 }>) {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
+  const { assignee_ids, ...taskUpdates } = updates
+
   const { data, error } = await supabase
     .from('tasks')
-    .update(updates)
+    .update(taskUpdates)
     .eq('id', taskId)
     .select('project_id')
     .single()
 
   if (error) throw new Error(error.message)
+
+  // Sync task_assignments
+  if (assignee_ids !== undefined) {
+    await supabase.from('task_assignments').delete().eq('task_id', taskId)
+    if (assignee_ids.length > 0) {
+      await supabase.from('task_assignments').insert(
+        assignee_ids.map(uid => ({ task_id: taskId, user_id: uid, assigned_by: user.id }))
+      )
+    }
+  }
 
   revalidatePath(`/admin/projects/${data.project_id}`)
   return data

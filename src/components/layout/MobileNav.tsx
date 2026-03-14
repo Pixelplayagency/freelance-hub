@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Sidebar } from './Sidebar'
-import type { UserRole } from '@/lib/types/app.types'
+import type { UserRole, FreelancerRole } from '@/lib/types/app.types'
 
-export function MobileNav({ role, userName, avatarUrl }: { role: UserRole; userName: string | null; avatarUrl?: string | null }) {
+export function MobileNav({ role, userName, avatarUrl, jobRole }: { role: UserRole; userName: string | null; avatarUrl?: string | null; jobRole?: FreelancerRole | null }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -17,7 +17,7 @@ export function MobileNav({ role, userName, avatarUrl }: { role: UserRole; userN
         </button>
       </SheetTrigger>
       <SheetContent side="left" className="p-0 w-60">
-        <Sidebar role={role} userName={userName} avatarUrl={avatarUrl} />
+        <Sidebar role={role} userName={userName} avatarUrl={avatarUrl} jobRole={jobRole} />
       </SheetContent>
     </Sheet>
   )

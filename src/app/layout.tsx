@@ -1,21 +1,15 @@
 export const dynamic = 'force-dynamic'
 
 import type { Metadata } from 'next'
-import { Plus_Jakarta_Sans, DM_Sans } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { SupabaseProvider } from '@/providers/SupabaseProvider'
 import { ThemeProvider } from 'next-themes'
 import './globals.css'
 
-const plusJakarta = Plus_Jakarta_Sans({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-heading',
-  display: 'swap',
-})
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  variable: '--font-body',
+  variable: '--font-inter',
   display: 'swap',
 })
 
@@ -31,7 +25,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${plusJakarta.variable} ${dmSans.variable}`}>
+      <body className={inter.variable}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <SupabaseProvider>
             {children}

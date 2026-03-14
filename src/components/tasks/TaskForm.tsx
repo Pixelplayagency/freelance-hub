@@ -5,18 +5,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { createTask, updateTask } from '@/lib/actions/task.actions'
 import { getSignedUploadUrl, saveTaskReference } from '@/lib/actions/upload.actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { ExternalLink, ImagePlus, Link2, Loader2, Plus, Trash2, X } from 'lucide-react'
+import { ChevronDown, ExternalLink, ImagePlus, Link2, Loader2, Plus, Trash2, X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { DeadlinePicker } from './DeadlinePicker'
 import type { Profile, Task } from '@/lib/types/app.types'
@@ -36,7 +30,8 @@ interface PendingLink {
 export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
-  const [assignedTo, setAssignedTo] = useState<string>(task?.assigned_to ?? '__none__')
+  const [assignedTo, setAssignedTo] = useState<string[]>(task?.assigned_to ? [task.assigned_to] : [])
+  const [assigneeOpen, setAssigneeOpen] = useState(false)
   // Split stored timestamp into date + time for inputs
   const [dueDate, setDueDate] = useState(() => {
     if (!task?.due_date) return ''
@@ -96,8 +91,9 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
         await updateTask(task.id, {
           title,
           description: description || undefined,
-          assigned_to: assignedTo === '__none__' ? null : assignedTo,
+          assigned_to: assignedTo[0] ?? null,
           due_date: deadlineValue,
+          assignee_ids: assignedTo,
         })
         toast.success('Task updated')
         onSuccess?.()
@@ -110,10 +106,11 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
           project_id: projectId,
           title,
           description: description || undefined,
-          assigned_to: assignedTo === '__none__' ? null : assignedTo,
+          assigned_to: assignedTo[0] ?? null,
           due_date: deadlineValue,
           status: 'todo',
           task_type: taskType,
+          assignee_ids: assignedTo,
         })
 
         // Upload pending files
@@ -185,22 +182,89 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
         />
       </div>
 
-      {/* Assign to */}
+      {/* Assign to — multi-select */}
       <div className="space-y-1.5">
         <Label>Assign to</Label>
-        <Select value={assignedTo} onValueChange={setAssignedTo}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select freelancer" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__none__">Unassigned</SelectItem>
-            {freelancers.map(f => (
-              <SelectItem key={f.id} value={f.id}>
-                {f.full_name ?? f.email}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Popover open={assigneeOpen} onOpenChange={setAssigneeOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between gap-2 border border-input rounded-md px-3 py-2 text-sm bg-background hover:bg-muted transition-colors text-left"
+            >
+              <span className={assignedTo.length === 0 ? 'text-muted-foreground' : 'text-foreground'}>
+                {assignedTo.length === 0
+                  ? 'Select freelancers'
+                  : assignedTo.length === 1
+                    ? (freelancers.find(f => f.id === assignedTo[0])?.full_name ?? freelancers.find(f => f.id === assignedTo[0])?.email ?? '1 selected')
+                    : `${assignedTo.length} selected`}
+              </span>
+              <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64 p-1" align="start">
+            <div className="max-h-48 overflow-y-auto">
+              {freelancers.length === 0 ? (
+                <p className="text-xs text-muted-foreground px-2 py-3 text-center">No freelancers yet</p>
+              ) : (
+                freelancers.map(f => {
+                  const checked = assignedTo.includes(f.id)
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setAssignedTo(prev => checked ? prev.filter(id => id !== f.id) : [...prev, f.id])}
+                      className="w-full flex items-center gap-2.5 px-2 py-2 rounded hover:bg-muted transition-colors text-left"
+                    >
+                      <div className={cn(
+                        'w-4 h-4 rounded border flex items-center justify-center shrink-0',
+                        checked ? 'border-[#f24a49] bg-[#f24a49]' : 'border-border'
+                      )}>
+                        {checked && (
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12">
+                            <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{f.full_name ?? f.email}</p>
+                        {f.full_name && <p className="text-xs text-muted-foreground truncate">{f.email}</p>}
+                      </div>
+                    </button>
+                  )
+                })
+              )}
+            </div>
+            {assignedTo.length > 0 && (
+              <div className="border-t mt-1 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setAssignedTo([])}
+                  className="w-full text-xs text-muted-foreground hover:text-foreground px-2 py-1.5 text-left transition-colors"
+                >
+                  Clear selection
+                </button>
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+
+        {/* Selected pills */}
+        {assignedTo.length > 1 && (
+          <div className="flex flex-wrap gap-1.5 mt-1.5">
+            {assignedTo.map(id => {
+              const f = freelancers.find(f => f.id === id)
+              if (!f) return null
+              return (
+                <span key={id} className="flex items-center gap-1 text-xs bg-muted border border-border rounded-full px-2 py-0.5">
+                  {f.full_name ?? f.email}
+                  <button type="button" onClick={() => setAssignedTo(prev => prev.filter(x => x !== id))}>
+                    <X className="w-3 h-3 text-muted-foreground hover:text-foreground" />
+                  </button>
+                </span>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Deadline */}

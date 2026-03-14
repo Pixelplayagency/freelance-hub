@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
-import type { UserRole } from '@/lib/types/app.types'
+import type { UserRole, FreelancerRole } from '@/lib/types/app.types'
 import {
   LayoutDashboard,
   FolderKanban,
@@ -12,7 +12,7 @@ import {
   CheckSquare,
   LogOut,
   UserCircle,
-  ShieldCheck,
+  CalendarDays,
 } from 'lucide-react'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useRouter } from 'next/navigation'
@@ -26,23 +26,35 @@ interface NavItem {
 const ADMIN_NAV: NavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/admin/freelancers', label: 'Freelancers', icon: Users },
-  { href: '/admin/admins/invite', label: 'Invite Admin', icon: ShieldCheck },
+  { href: '/admin/workspace', label: 'Workspace', icon: Users },
+  { href: '/admin/content-planner', label: 'Content Planner', icon: CalendarDays },
   { href: '/admin/notifications', label: 'Notifications', icon: Bell },
+  { href: '/admin/profile', label: 'Profile', icon: UserCircle },
 ]
 
-const FREELANCER_NAV: NavItem[] = [
+const FREELANCER_NAV_BASE: NavItem[] = [
   { href: '/freelancer', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/freelancer/tasks', label: 'My Tasks', icon: CheckSquare },
   { href: '/freelancer/notifications', label: 'Notifications', icon: Bell },
   { href: '/freelancer/profile', label: 'Profile', icon: UserCircle },
 ]
 
-export function Sidebar({ role, userName, avatarUrl }: { role: UserRole; userName: string | null; avatarUrl?: string | null }) {
+export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole; userName: string | null; avatarUrl?: string | null; jobRole?: FreelancerRole | null }) {
   const pathname = usePathname()
   const supabase = useSupabase()
   const router = useRouter()
-  const nav = role === 'admin' ? ADMIN_NAV : FREELANCER_NAV
+
+  const freelancerNav = jobRole === 'social_media_manager'
+    ? [
+        FREELANCER_NAV_BASE[0],
+        FREELANCER_NAV_BASE[1],
+        { href: '/freelancer/content-planner', label: 'Content Planner', icon: CalendarDays },
+        FREELANCER_NAV_BASE[2],
+        FREELANCER_NAV_BASE[3],
+      ]
+    : FREELANCER_NAV_BASE
+
+  const nav = role === 'admin' ? ADMIN_NAV : freelancerNav
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -75,7 +87,9 @@ export function Sidebar({ role, userName, avatarUrl }: { role: UserRole; userNam
         {nav.map(item => {
           const Icon = item.icon
           const isDashboard = item.href === '/admin' || item.href === '/freelancer'
-          const active = pathname === item.href || (!isDashboard && pathname.startsWith(item.href + '/'))
+          const active = pathname === item.href
+            || (!isDashboard && pathname.startsWith(item.href + '/'))
+            || (item.href === '/admin/workspace' && (pathname.startsWith('/admin/freelancers') || pathname.startsWith('/admin/admins')))
           return (
             <Link
               key={item.href}

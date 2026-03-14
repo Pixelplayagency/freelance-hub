@@ -2,6 +2,15 @@ export type UserRole = 'admin' | 'freelancer'
 
 export type FreelancerStatus = 'pending' | 'active' | 'removed'
 
+export type FreelancerRole = 'video_editor' | 'graphic_designer' | 'social_media_manager' | 'creative_strategy_lead'
+
+export const FREELANCER_ROLE_LABELS: Record<FreelancerRole, string> = {
+  video_editor: 'Video Editor',
+  graphic_designer: 'Graphic Designer',
+  social_media_manager: 'Social Media Manager',
+  creative_strategy_lead: 'Creative & Strategy Lead',
+}
+
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed'
 
 export type TaskType = 'standard' | 'simple'
@@ -34,8 +43,40 @@ export interface Profile {
   avatar_url: string | null
   role: UserRole
   status: FreelancerStatus
+  job_role: FreelancerRole | null
   created_at: string
   updated_at: string
+}
+
+export type ContentPlanStatus = 'scheduled' | 'posted' | 'not_posted'
+export type ContentType = 'post' | 'story' | 'reel'
+
+export interface ContentClient {
+  id: string
+  name: string
+  created_by: string | null
+  created_at: string
+}
+
+export interface ContentPlan {
+  id: string
+  client_id: string | null
+  date: string
+  content_type: ContentType
+  platform: string
+  platforms: string[]
+  scheduled_time: string | null
+  tbc: string | null
+  caption: string | null
+  media_url: string | null
+  media_type: 'image' | 'video' | null
+  caption_approved: boolean
+  post_approved: boolean
+  approval_requested: boolean
+  client_comments: string | null
+  status: ContentPlanStatus
+  created_by: string | null
+  created_at: string
 }
 
 export interface Project {

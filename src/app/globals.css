@@ -24,8 +24,8 @@
   --radius-md: calc(var(--radius) - 1px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: var(--font-body), system-ui, -apple-system, sans-serif;
-  --font-heading: var(--font-heading), system-ui, sans-serif;
+  --font-sans: var(--font-inter), 'Helvetica Neue', Helvetica, system-ui, sans-serif;
+  --font-heading: var(--font-inter), 'Helvetica Neue', Helvetica, system-ui, sans-serif;
 }
 
 :root {
@@ -78,7 +78,10 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-body), system-ui, -apple-system, sans-serif;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
