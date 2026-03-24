@@ -1,6 +1,6 @@
 'use server'
 
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient, createSupabaseServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { ReferenceType } from '@/lib/types/app.types'
 
@@ -230,6 +230,52 @@ export async function uploadClientImage(
   }
   const data = await res.json()
   return data.secure_url as string
+}
+
+export async function uploadClientPdf(
+  base64: string,
+  clientId: string,
+): Promise<void> {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') throw new Error('Unauthorized')
+
+  const base64Data = base64.includes(',') ? base64.split(',')[1] : base64
+  const buffer = Buffer.from(base64Data, 'base64')
+  const path = `clients/${clientId}/content-plan.pdf`
+
+  const serviceClient = createSupabaseServiceClient()
+  const { error } = await serviceClient.storage
+    .from('task-attachments')
+    .upload(path, buffer, { contentType: 'application/pdf', upsert: true })
+
+  if (error) throw new Error(error.message)
+
+  await supabase.from('content_clients').update({ content_plan_pdf_path: path }).eq('id', clientId)
+
+  revalidatePath(`/admin/content-planner/${clientId}`)
+  revalidatePath(`/freelancer/content-planner/${clientId}`)
+}
+
+export async function deleteClientPdf(clientId: string): Promise<void> {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') throw new Error('Unauthorized')
+
+  const path = `clients/${clientId}/content-plan.pdf`
+  const serviceClient = createSupabaseServiceClient()
+  await serviceClient.storage.from('task-attachments').remove([path])
+
+  await supabase.from('content_clients').update({ content_plan_pdf_path: null }).eq('id', clientId)
+
+  revalidatePath(`/admin/content-planner/${clientId}`)
+  revalidatePath(`/freelancer/content-planner/${clientId}`)
 }
 
 export async function uploadProjectMedia(

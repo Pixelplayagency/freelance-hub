@@ -61,6 +61,7 @@ export interface ContentClient {
   instagram_url: string | null
   facebook_url: string | null
   tiktok_url: string | null
+  content_plan_pdf_path: string | null
   created_by: string | null
   created_at: string
 }

@@ -2,8 +2,10 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { ContentPlannerCalendar } from '@/components/content-planner/ContentPlannerCalendar'
 import { ContentPlannerTaskView } from '@/components/content-planner/ContentPlannerTaskView'
+import { ClientPdfSection } from '@/components/content-planner/ClientPdfSection'
 import Link from 'next/link'
 import { ChevronLeft, CalendarDays, CheckSquare, Instagram, Facebook } from 'lucide-react'
+import { createSupabaseServiceClient } from '@/lib/supabase/server'
 import type { ContentPlan, Task, Project } from '@/lib/types/app.types'
 
 type TaskWithProject = Task & {
@@ -70,6 +72,16 @@ export default async function FreelancerClientCalendarPage({
   const postCount  = stats.filter(e => e.content_type === 'post').length
   const reelCount  = stats.filter(e => e.content_type === 'reel').length
   const storyCount = stats.filter(e => e.content_type === 'story').length
+
+  // Generate signed URL for PDF download
+  let pdfSignedUrl: string | null = null
+  if (client.content_plan_pdf_path) {
+    const serviceClient = createSupabaseServiceClient()
+    const { data } = await serviceClient.storage
+      .from('task-attachments')
+      .createSignedUrl(client.content_plan_pdf_path, 3600)
+    pdfSignedUrl = data?.signedUrl ?? null
+  }
 
   const monthName = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' })
   const hasSocials = client.instagram_url || client.facebook_url || client.tiktok_url
@@ -153,11 +165,19 @@ export default async function FreelancerClientCalendarPage({
           </div>
         </div>
 
-        {/* Bottom row: month label + content counts */}
+        {/* Bottom row: month label + PDF + content counts */}
         <div className="border-t border-border flex items-center justify-between px-4 py-2.5 bg-muted/20 flex-wrap gap-3">
-          <p className="text-xs text-muted-foreground font-medium">
-            Monthly content schedule — <span className="text-foreground font-semibold">{monthName}</span>
-          </p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <p className="text-xs text-muted-foreground font-medium">
+              Monthly content schedule — <span className="text-foreground font-semibold">{monthName}</span>
+            </p>
+            <ClientPdfSection
+              clientId={clientId}
+              pdfUrl={pdfSignedUrl}
+              hasPdf={!!client.content_plan_pdf_path}
+              isAdmin={false}
+            />
+          </div>
           <div className="flex items-center gap-px bg-background border border-border rounded-lg overflow-hidden">
             <div className="px-4 py-2 text-center">
               <p className="text-base font-bold text-foreground tabular-nums">{postCount}</p>
