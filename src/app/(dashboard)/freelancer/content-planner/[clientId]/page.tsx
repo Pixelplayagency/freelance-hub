@@ -177,7 +177,7 @@ export default async function FreelancerClientCalendarPage({
               hasPdf={!!client.content_plan_pdf_path}
               hasLink={!!client.content_plan_link}
               linkUrl={client.content_plan_link}
-              canEdit={true}
+              canEdit={false}
             />
           </div>
           <div className="flex items-center gap-px bg-background border border-border rounded-lg overflow-hidden">
