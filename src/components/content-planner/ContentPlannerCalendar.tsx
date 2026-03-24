@@ -171,6 +171,7 @@ export function ContentPlannerCalendar({
   const [commentDraft, setCommentDraft] = useState('')
   const [commentSaving, setCommentSaving] = useState(false)
   const [commentEmojiOpen, setCommentEmojiOpen] = useState(false)
+  const [expandedCaptions, setExpandedCaptions] = useState<Set<string>>(new Set())
   const fileRef = useRef<HTMLInputElement>(null)
   const captionRef = useRef<HTMLTextAreaElement>(null)
   const commentRef = useRef<HTMLTextAreaElement>(null)
@@ -555,7 +556,28 @@ export function ContentPlannerCalendar({
                                     </span>
                                   </div>
                                   {entry.caption && (
-                                    <p className="text-sm leading-snug text-foreground/80 line-clamp-3">{entry.caption}</p>
+                                    <div>
+                                      <p className={`text-sm leading-snug text-foreground/80 whitespace-pre-line ${expandedCaptions.has(entry.id) ? '' : 'line-clamp-3'}`}>
+                                        {entry.caption}
+                                      </p>
+                                      {entry.caption.length > 120 && (
+                                        <button
+                                          onClick={e => {
+                                            e.stopPropagation()
+                                            setExpandedCaptions(prev => {
+                                              const next = new Set(prev)
+                                              if (next.has(entry.id)) next.delete(entry.id)
+                                              else next.add(entry.id)
+                                              return next
+                                            })
+                                          }}
+                                          className="text-[10px] font-semibold mt-0.5 hover:underline"
+                                          style={{ color: '#f24a49' }}
+                                        >
+                                          {expandedCaptions.has(entry.id) ? 'Show less' : 'Show more'}
+                                        </button>
+                                      )}
+                                    </div>
                                   )}
                                   <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
                                     <span className="flex items-center gap-1 text-[11px] text-muted-foreground font-medium">
