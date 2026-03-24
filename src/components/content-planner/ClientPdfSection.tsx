@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from 'react'
 import { FileText, Upload, Trash2, Loader2, Link2, ExternalLink, X, Check } from 'lucide-react'
-import { uploadClientPdf, deleteClientPdf, saveClientLink, deleteClientLink } from '@/lib/actions/upload.actions'
+import { uploadClientPdf, deleteClientPdf, saveClientLink, deleteClientLink } from '@/lib/actions/content-plan.actions'
 
 interface ClientDocsSectionProps {
   clientId: string
