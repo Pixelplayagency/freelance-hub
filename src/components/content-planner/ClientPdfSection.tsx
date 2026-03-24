@@ -19,6 +19,14 @@ export function ClientPdfSection({ clientId, pdfUrl, hasPdf, isAdmin }: ClientPd
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    if (file.type !== 'application/pdf') {
+      alert('Only PDF files are allowed.')
+      return
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      alert('PDF must be under 50 MB.')
+      return
+    }
     setUploading(true)
     const reader = new FileReader()
     reader.onload = async () => {
@@ -26,6 +34,7 @@ export function ClientPdfSection({ clientId, pdfUrl, hasPdf, isAdmin }: ClientPd
         await uploadClientPdf(reader.result as string, clientId)
       } catch (err) {
         console.error(err)
+        alert('Upload failed. Please try again.')
       } finally {
         setUploading(false)
         if (inputRef.current) inputRef.current.value = ''
