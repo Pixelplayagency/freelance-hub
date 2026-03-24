@@ -164,7 +164,9 @@ export default async function AdminClientCalendarPage({
               clientId={clientId}
               pdfUrl={pdfSignedUrl}
               hasPdf={!!client.content_plan_pdf_path}
-              isAdmin={true}
+              hasLink={!!client.content_plan_link}
+              linkUrl={client.content_plan_link}
+              canEdit={false}
             />
           </div>
           <div className="flex items-center gap-px bg-background border border-border rounded-lg overflow-hidden">

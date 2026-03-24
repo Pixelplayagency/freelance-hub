@@ -245,8 +245,9 @@ export async function uploadClientPdf(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
+  // Allow both freelancers and admins
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') throw new Error('Unauthorized')
+  if (!profile) throw new Error('Unauthorized')
 
   // Verify client exists
   const { data: client } = await supabase.from('content_clients').select('id').eq('id', clientId).single()
@@ -255,10 +256,7 @@ export async function uploadClientPdf(
   const base64Data = base64.includes(',') ? base64.split(',')[1] : base64
   const buffer = Buffer.from(base64Data, 'base64')
 
-  // Validate file size
   if (buffer.length > PDF_MAX_BYTES) throw new Error('PDF exceeds 50 MB limit')
-
-  // Validate PDF magic bytes (%PDF)
   if (buffer.toString('binary', 0, 4) !== '%PDF') throw new Error('File is not a valid PDF')
 
   const path = `clients/${clientId}/content-plan.pdf`
@@ -283,18 +281,47 @@ export async function deleteClientPdf(clientId: string): Promise<void> {
   if (!user) throw new Error('Unauthorized')
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') throw new Error('Unauthorized')
+  if (!profile) throw new Error('Unauthorized')
 
   const path = `clients/${clientId}/content-plan.pdf`
   const serviceClient = createSupabaseServiceClient()
   const { error: storageError } = await serviceClient.storage.from('task-attachments').remove([path])
 
-  // Ignore "not found" — file may already be gone; fail on any other storage error
   if (storageError && !storageError.message.toLowerCase().includes('not found')) {
     throw new Error(`Storage delete failed: ${storageError.message}`)
   }
 
   await supabase.from('content_clients').update({ content_plan_pdf_path: null }).eq('id', clientId)
+
+  revalidatePath(`/admin/content-planner/${clientId}`)
+  revalidatePath(`/freelancer/content-planner/${clientId}`)
+}
+
+export async function saveClientLink(clientId: string, url: string): Promise<void> {
+  if (!UUID_RE.test(clientId)) throw new Error('Invalid client ID')
+  try { new URL(url) } catch { throw new Error('Invalid URL') }
+
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: client } = await supabase.from('content_clients').select('id').eq('id', clientId).single()
+  if (!client) throw new Error('Client not found')
+
+  await supabase.from('content_clients').update({ content_plan_link: url }).eq('id', clientId)
+
+  revalidatePath(`/admin/content-planner/${clientId}`)
+  revalidatePath(`/freelancer/content-planner/${clientId}`)
+}
+
+export async function deleteClientLink(clientId: string): Promise<void> {
+  if (!UUID_RE.test(clientId)) throw new Error('Invalid client ID')
+
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  await supabase.from('content_clients').update({ content_plan_link: null }).eq('id', clientId)
 
   revalidatePath(`/admin/content-planner/${clientId}`)
   revalidatePath(`/freelancer/content-planner/${clientId}`)
