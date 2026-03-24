@@ -47,7 +47,6 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
   const freelancerNav = jobRole === 'social_media_manager'
     ? [
         FREELANCER_NAV_BASE[0],
-        FREELANCER_NAV_BASE[1],
         { href: '/freelancer/content-planner', label: 'Content Planner', icon: CalendarDays },
         FREELANCER_NAV_BASE[2],
         FREELANCER_NAV_BASE[3],
