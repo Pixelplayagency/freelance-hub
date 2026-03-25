@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   ChevronLeft, ChevronRight, X, Plus, Eye, Upload,
   Loader2, CheckCircle2, Image as ImageIcon, Check, Trash2, Send, Smile,
+  Film, Layers,
 } from 'lucide-react'
 import {
   createContentPlan, updateContentPlan, deleteContentPlan,
@@ -85,6 +86,22 @@ const EMOJIS = [
   // Activities & objects
   '💻','📱','🎵','🎶','📸','🎬','🏆','🥇','💰','🎁','💡','🚀','✈️','🏖️','🎉','🎊','📣','🔑','⚡','🌐',
 ]
+
+function getDisplayStatus(entry: ContentPlan): { label: string; color: string; bg: string } {
+  if (entry.caption_rejected || entry.post_rejected)
+    return { label: 'REJECTED', color: '#dc2626', bg: '#fef2f2' }
+  if (entry.post_approved && entry.caption_approved)
+    return { label: 'APPROVED', color: '#059669', bg: '#f0fdf4' }
+  if (entry.caption_approved || entry.post_approved)
+    return { label: 'APPROVED', color: '#059669', bg: '#f0fdf4' }
+  if (entry.approval_requested)
+    return { label: 'IN REVIEW', color: '#d97706', bg: '#fffbeb' }
+  if (entry.status === 'posted')
+    return { label: 'PUBLISHED', color: '#f24a49', bg: '#fff1f1' }
+  if (entry.status === 'not_posted')
+    return { label: 'NOT POSTED', color: '#6b7280', bg: '#f3f4f6' }
+  return { label: 'SCHEDULED', color: '#2563eb', bg: '#eff6ff' }
+}
 
 function getWeeks(year: number, month: number): Date[][] {
   const weeks: Date[][] = []
@@ -178,6 +195,7 @@ export function ContentPlannerCalendar({
   const emojiRef = useRef<HTMLDivElement>(null)
   const commentEmojiRef = useRef<HTMLDivElement>(null)
   const weeks = getWeeks(year, month)
+  const todayDS = toDS(new Date())
 
   async function saveComment(ds: string, value: string) {
     const entry = entryMap[ds]
@@ -401,13 +419,22 @@ export function ContentPlannerCalendar({
       {/* ── Calendar ── */}
       <div className="flex-1 min-w-0 space-y-3">
         {/* Month nav */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
             <ChevronLeft className="w-4 h-4 text-muted-foreground" />
           </button>
-          <span className="text-sm font-semibold text-foreground">{MONTH_NAMES[month]} {year}</span>
+          <span className="text-sm font-semibold text-foreground min-w-[130px] text-center">{MONTH_NAMES[month]} {year}</span>
           <button onClick={() => navigate(1)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <div className="flex-1" />
+          <button
+            onClick={() => openPanel(todayDS)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+            style={{ backgroundColor: '#f24a49' }}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add Content
           </button>
         </div>
 
@@ -435,22 +462,34 @@ export function ContentPlannerCalendar({
                       const inMonth = day.getMonth() === month
                       const entry = entryMap[ds] ?? null
                       const active = panel?.date === ds
-                      const dotColor = entry ? STATUS_DOT[entry.status] : null
 
                       return (
                         <td
                           key={ds}
-                          className={`border-b border-r border-border last:border-r-0 p-1.5 align-top transition-colors ${!inMonth ? 'bg-muted/20' : ''}`}
+                          className={`border-b border-r border-border last:border-r-0 p-1.5 align-top transition-colors group ${!inMonth ? 'bg-muted/20' : ds === todayDS ? 'bg-[#f24a49]/[0.03]' : ''}`}
                           style={{ minWidth: 108, width: '14.28%' }}
                         >
                           {/* Date + add button */}
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className={`text-[11px] font-semibold tabular-nums ${active ? 'text-[#f24a49]' : inMonth ? 'text-foreground' : 'text-muted-foreground/30'}`}>
-                              {day.getDate()}
-                            </span>
+                            <div className="flex items-center gap-1">
+                              <span className={`tabular-nums font-bold leading-none flex items-center justify-center ${
+                                ds === todayDS
+                                  ? 'text-[10px] w-5 h-5 rounded-full bg-[#f24a49] text-white'
+                                  : active
+                                  ? 'text-[11px] text-[#f24a49]'
+                                  : inMonth
+                                  ? 'text-[11px] text-foreground'
+                                  : 'text-[11px] text-muted-foreground/30'
+                              }`}>
+                                {day.getDate()}
+                              </span>
+                              {ds === todayDS && inMonth && (
+                                <span className="text-[8px] font-extrabold text-[#f24a49] uppercase tracking-wide leading-none">Today</span>
+                              )}
+                            </div>
                             {inMonth && (
                               <button onClick={() => openPanel(ds)}
-                                className="opacity-0 hover:opacity-100 group-hover:opacity-100 w-4 h-4 rounded flex items-center justify-center text-muted-foreground/40 hover:text-[#f24a49] transition-all"
+                                className="w-4 h-4 rounded flex items-center justify-center text-muted-foreground/25 hover:text-[#f24a49] transition-all opacity-0 group-hover:opacity-100"
                                 style={{ opacity: active ? 1 : undefined }}>
                                 <Plus className="w-3 h-3" />
                               </button>
@@ -462,66 +501,48 @@ export function ContentPlannerCalendar({
                               {/* Main content card */}
                               <button
                                 onClick={() => openPanel(ds)}
-                                className={`w-full text-left rounded-lg overflow-hidden transition-all ${active ? 'ring-1 ring-[#f24a49]' : 'hover:ring-1 hover:ring-border'}`}
-                                style={{ border: '1px solid var(--border)' }}
+                                className={`w-full text-left rounded-xl overflow-hidden transition-all ${active ? 'ring-2 ring-[#f24a49]' : 'hover:ring-1 hover:ring-[#f24a49]/30'}`}
+                                style={{ border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.07)' }}
                               >
-                                {/* Media carousel */}
+                                {/* Card header: type icon + status badge */}
+                                <div className="flex items-center justify-between px-2.5 pt-2 pb-1 bg-card">
+                                  <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                                    style={{ backgroundColor: TYPE_BG[entry.content_type] }}>
+                                    {entry.content_type === 'reel'
+                                      ? <Film className="w-3 h-3" style={{ color: TYPE_COLORS[entry.content_type] }} />
+                                      : entry.content_type === 'story'
+                                      ? <Layers className="w-3 h-3" style={{ color: TYPE_COLORS[entry.content_type] }} />
+                                      : <ImageIcon className="w-3 h-3" style={{ color: TYPE_COLORS[entry.content_type] }} />}
+                                  </div>
+                                  {(() => {
+                                    const st = getDisplayStatus(entry)
+                                    return (
+                                      <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded-full leading-none tracking-wide uppercase"
+                                        style={{ backgroundColor: st.bg, color: st.color }}>
+                                        {st.label}
+                                      </span>
+                                    )
+                                  })()}
+                                </div>
+
+                                {/* Media — compact, first item only */}
                                 {(() => {
                                   const items = entryMediaItems(entry)
-                                  if (!items.length) {
-                                    return (
-                                      <div className="w-full bg-muted flex items-center justify-center" style={{ height: 110 }}>
-                                        <ImageIcon className="w-6 h-6 text-muted-foreground/20" />
-                                      </div>
-                                    )
-                                  }
-                                  const idx = Math.min(carouselIdx[ds] ?? 0, items.length - 1)
-                                  const item = items[idx]
+                                  if (!items.length) return null
+                                  const item = items[0]
                                   return (
-                                    <div className="relative group w-full bg-muted overflow-hidden" style={{ height: 110 }}>
+                                    <div className="relative group/thumb w-full bg-muted overflow-hidden" style={{ height: 80 }}>
                                       {item.type === 'video'
                                         ? <video src={item.url} className="w-full h-full object-cover" muted />
                                         : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
-
-                                      {/* Eye preview */}
                                       <button
                                         onClick={e => { e.stopPropagation(); setViewMedia({ url: item.url, type: item.type }) }}
-                                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <Eye className="w-4 h-4 text-white drop-shadow" />
+                                        className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center">
+                                        <Eye className="w-3.5 h-3.5 text-white drop-shadow" />
                                       </button>
-
-                                      {/* Prev/Next arrows */}
                                       {items.length > 1 && (
-                                        <>
-                                          <button
-                                            onClick={e => { e.stopPropagation(); setCarouselIdx(p => ({ ...p, [ds]: (idx - 1 + items.length) % items.length })) }}
-                                            className="absolute left-1 top-1/2 -translate-y-1/2 bg-black/50 rounded-full p-0.5 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                          >
-                                            <ChevronLeft className="w-3 h-3" />
-                                          </button>
-                                          <button
-                                            onClick={e => { e.stopPropagation(); setCarouselIdx(p => ({ ...p, [ds]: (idx + 1) % items.length })) }}
-                                            className="absolute right-1 top-1/2 -translate-y-1/2 bg-black/50 rounded-full p-0.5 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                          >
-                                            <ChevronRight className="w-3 h-3" />
-                                          </button>
-                                          {/* Dots */}
-                                          <div className="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1 z-10">
-                                            {items.map((_, i) => (
-                                              <button
-                                                key={i}
-                                                onClick={e => { e.stopPropagation(); setCarouselIdx(p => ({ ...p, [ds]: i })) }}
-                                                className={`w-1.5 h-1.5 rounded-full transition-all ${i === idx ? 'bg-white' : 'bg-white/40'}`}
-                                              />
-                                            ))}
-                                          </div>
-                                        </>
-                                      )}
-
-                                      {/* Count badge */}
-                                      {items.length > 1 && (
-                                        <div className="absolute top-1.5 right-1.5 bg-black/50 rounded-full px-1.5 py-0.5 text-[9px] text-white font-semibold z-10">
-                                          {idx + 1}/{items.length}
+                                        <div className="absolute top-1 right-1 bg-black/60 rounded-full px-1.5 py-0.5 text-[8px] text-white font-bold z-10">
+                                          1/{items.length}
                                         </div>
                                       )}
                                     </div>
@@ -529,35 +550,28 @@ export function ContentPlannerCalendar({
                                 })()}
 
                                 {/* Card body */}
-                                <div className="p-2 space-y-1.5 bg-background">
-                                  {entry.platforms?.length > 0 && (
-                                    <div className="flex gap-1.5 items-center">
-                                      {entry.platforms.map(pid => {
+                                <div className="px-2.5 pb-2.5 pt-1.5 space-y-1.5 bg-card">
+                                  {(entry.platforms?.length > 0 || entry.scheduled_time) && (
+                                    <div className="flex items-center gap-1 flex-wrap">
+                                      {entry.platforms?.map(pid => {
                                         const p = PLATFORMS.find(x => x.id === pid)
                                         if (!p) return null
                                         return (
-                                          <span key={pid} className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
-                                            {p.icon(16)}
+                                          <span key={pid} className="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
+                                            {p.icon(14)}
                                           </span>
                                         )
                                       })}
                                       {entry.scheduled_time && (
-                                        <span className="text-sm font-semibold text-foreground ml-auto tabular-nums">{to12h(entry.scheduled_time)}</span>
+                                        <span className="text-[10px] text-muted-foreground font-medium ml-auto tabular-nums leading-none">
+                                          {to12h(entry.scheduled_time)}
+                                        </span>
                                       )}
                                     </div>
                                   )}
-                                  {!entry.platforms?.length && entry.scheduled_time && (
-                                    <p className="text-sm font-semibold text-foreground tabular-nums">{to12h(entry.scheduled_time)}</p>
-                                  )}
-                                  <div>
-                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                                      style={{ backgroundColor: TYPE_BG[entry.content_type], color: TYPE_COLORS[entry.content_type] }}>
-                                      {TYPE_LABELS[entry.content_type]}
-                                    </span>
-                                  </div>
                                   {entry.caption && (
                                     <div>
-                                      <p className={`text-sm leading-snug text-foreground/80 whitespace-pre-line ${expandedCaptions.has(entry.id) ? '' : 'line-clamp-3'}`}>
+                                      <p className={`text-[11px] leading-snug text-foreground/80 whitespace-pre-line ${expandedCaptions.has(entry.id) ? '' : 'line-clamp-2'}`}>
                                         {entry.caption}
                                       </p>
                                       {entry.caption.length > 120 && (
@@ -571,7 +585,7 @@ export function ContentPlannerCalendar({
                                               return next
                                             })
                                           }}
-                                          className="text-[10px] font-semibold mt-0.5 hover:underline"
+                                          className="text-[9px] font-bold mt-0.5 hover:underline"
                                           style={{ color: '#f24a49' }}
                                         >
                                           {expandedCaptions.has(entry.id) ? 'Show less' : 'Show more'}
@@ -579,13 +593,6 @@ export function ContentPlannerCalendar({
                                       )}
                                     </div>
                                   )}
-                                  <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                                    <span className="flex items-center gap-1 text-[11px] text-muted-foreground font-medium">
-                                      <span className="w-2 h-2 rounded-full inline-block shrink-0" style={{ backgroundColor: dotColor! }} />
-                                      {STATUS_LABELS[entry.status]}
-                                    </span>
-                                    <ApprovalBadge entry={entry} />
-                                  </div>
                                 </div>
                               </button>
 
@@ -673,11 +680,11 @@ export function ContentPlannerCalendar({
                             </div>
                           )}
 
-                          {/* Empty cell — show faint + on hover */}
+                          {/* Empty cell — subtle + on hover */}
                           {inMonth && !entry && (
                             <button onClick={() => openPanel(ds)}
-                              className="w-full h-16 rounded-lg border border-dashed border-border/40 flex items-center justify-center text-muted-foreground/20 hover:text-muted-foreground/40 hover:border-border transition-all">
-                              <Plus className="w-3.5 h-3.5" />
+                              className="w-full h-20 rounded-xl flex items-center justify-center text-muted-foreground/15 hover:text-[#f24a49]/50 hover:bg-[#f24a49]/[0.04] transition-all">
+                              <Plus className="w-4 h-4" />
                             </button>
                           )}
                         </td>
