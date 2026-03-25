@@ -505,19 +505,19 @@ export function ContentPlannerCalendar({
                                 style={{ border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.07)' }}
                               >
                                 {/* Card header: type icon + status badge */}
-                                <div className="flex items-center justify-between px-2.5 pt-2 pb-1 bg-card">
-                                  <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                                <div className="flex items-center justify-between px-2 pt-1.5 pb-1 bg-card">
+                                  <div className="w-5 h-5 rounded flex items-center justify-center shrink-0"
                                     style={{ backgroundColor: TYPE_BG[entry.content_type] }}>
                                     {entry.content_type === 'reel'
-                                      ? <Film className="w-3 h-3" style={{ color: TYPE_COLORS[entry.content_type] }} />
+                                      ? <Film className="w-2.5 h-2.5" style={{ color: TYPE_COLORS[entry.content_type] }} />
                                       : entry.content_type === 'story'
-                                      ? <Layers className="w-3 h-3" style={{ color: TYPE_COLORS[entry.content_type] }} />
-                                      : <ImageIcon className="w-3 h-3" style={{ color: TYPE_COLORS[entry.content_type] }} />}
+                                      ? <Layers className="w-2.5 h-2.5" style={{ color: TYPE_COLORS[entry.content_type] }} />
+                                      : <ImageIcon className="w-2.5 h-2.5" style={{ color: TYPE_COLORS[entry.content_type] }} />}
                                   </div>
                                   {(() => {
                                     const st = getDisplayStatus(entry)
                                     return (
-                                      <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded-full leading-none tracking-wide uppercase"
+                                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none tracking-wide uppercase"
                                         style={{ backgroundColor: st.bg, color: st.color }}>
                                         {st.label}
                                       </span>
@@ -531,7 +531,7 @@ export function ContentPlannerCalendar({
                                   if (!items.length) return null
                                   const item = items[0]
                                   return (
-                                    <div className="relative group/thumb w-full bg-muted overflow-hidden" style={{ height: 80 }}>
+                                    <div className="relative group/thumb w-full bg-muted overflow-hidden" style={{ height: 68 }}>
                                       {item.type === 'video'
                                         ? <video src={item.url} className="w-full h-full object-cover" muted />
                                         : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
@@ -550,20 +550,20 @@ export function ContentPlannerCalendar({
                                 })()}
 
                                 {/* Card body */}
-                                <div className="px-2.5 pb-2.5 pt-1.5 space-y-1.5 bg-card">
+                                <div className="px-2 pb-2 pt-1 space-y-1 bg-card">
                                   {(entry.platforms?.length > 0 || entry.scheduled_time) && (
                                     <div className="flex items-center gap-1 flex-wrap">
                                       {entry.platforms?.map(pid => {
                                         const p = PLATFORMS.find(x => x.id === pid)
                                         if (!p) return null
                                         return (
-                                          <span key={pid} className="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
-                                            {p.icon(14)}
+                                          <span key={pid} className="w-3 h-3 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
+                                            {p.icon(12)}
                                           </span>
                                         )
                                       })}
                                       {entry.scheduled_time && (
-                                        <span className="text-[10px] text-muted-foreground font-medium ml-auto tabular-nums leading-none">
+                                        <span className="text-[9px] text-muted-foreground font-medium ml-auto tabular-nums leading-none">
                                           {to12h(entry.scheduled_time)}
                                         </span>
                                       )}
@@ -571,10 +571,10 @@ export function ContentPlannerCalendar({
                                   )}
                                   {entry.caption && (
                                     <div>
-                                      <p className={`text-[11px] leading-snug text-foreground/80 whitespace-pre-line ${expandedCaptions.has(entry.id) ? '' : 'line-clamp-2'}`}>
+                                      <p className={`text-[10px] leading-relaxed text-foreground/75 whitespace-pre-line ${expandedCaptions.has(entry.id) ? '' : 'line-clamp-2'}`}>
                                         {entry.caption}
                                       </p>
-                                      {entry.caption.length > 120 && (
+                                      {entry.caption.length > 70 && (
                                         <button
                                           onClick={e => {
                                             e.stopPropagation()
@@ -585,10 +585,10 @@ export function ContentPlannerCalendar({
                                               return next
                                             })
                                           }}
-                                          className="text-[9px] font-bold mt-0.5 hover:underline"
+                                          className="text-[9px] font-semibold mt-0.5 hover:underline"
                                           style={{ color: 'var(--primary)' }}
                                         >
-                                          {expandedCaptions.has(entry.id) ? 'Show less' : 'Show more'}
+                                          {expandedCaptions.has(entry.id) ? 'Less' : 'More'}
                                         </button>
                                       )}
                                     </div>
@@ -612,7 +612,7 @@ export function ContentPlannerCalendar({
                                       }}
                                       onKeyDown={e => { if (e.key === 'Escape') { setCommentEditing(null) } }}
                                       placeholder="Leave a comment for the caption…"
-                                      className="w-full text-[10px] rounded-lg px-2.5 py-2 pr-12 resize-none leading-snug focus:outline-none focus:ring-1 focus:ring-primary"
+                                      className="w-full text-[10px] rounded-lg px-2 py-1.5 pr-10 resize-none leading-snug focus:outline-none focus:ring-1 focus:ring-primary"
                                       style={{ backgroundColor: 'rgba(120,120,128,0.15)', border: '1px solid rgba(120,120,128,0.3)' }}
                                     />
                                     {/* Emoji picker for comment */}
