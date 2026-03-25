@@ -160,7 +160,7 @@ export function ProjectCard({ project, readOnly = false }: ProjectCardProps) {
             ) : (
               <span />
             )}
-            <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all" style={{ color: '#f24a49' }}>
+            <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all" style={{ color: 'var(--primary)' }}>
               Open <ArrowRight className="w-3 h-3" />
             </span>
           </div>

@@ -19,7 +19,7 @@ function TikTokIcon({ className }: { className?: string }) {
 }
 
 const COLOR_OPTIONS = [
-  '#f24a49', '#8b5cf6', '#ec4899', '#f59e0b',
+  'var(--primary)', '#8b5cf6', '#ec4899', '#f59e0b',
   '#10b981', '#3b82f6', '#ef4444', '#14b8a6',
 ]
 
@@ -85,7 +85,7 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
 
   const [name, setName] = useState(initialValues?.name ?? '')
   const [description, setDescription] = useState(initialValues?.description ?? '')
-  const [color, setColor] = useState(initialValues?.color ?? '#f24a49')
+  const [color, setColor] = useState(initialValues?.color ?? 'var(--primary)')
   const [instagram, setInstagram] = useState(initialValues?.instagram_url ?? '')
   const [facebook, setFacebook] = useState(initialValues?.facebook_url ?? '')
   const [tiktok, setTiktok] = useState(initialValues?.tiktok_url ?? '')
@@ -335,7 +335,7 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
       <Button
         type="submit"
         className="w-full text-white"
-        style={{ backgroundColor: '#f24a49' }}
+        style={{ backgroundColor: 'var(--primary)' }}
         disabled={loading}
       >
         {loading ? (

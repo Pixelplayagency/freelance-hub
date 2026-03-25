@@ -170,7 +170,7 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
           <button key={key} onClick={() => setFilter(key)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
               filter === key
-                ? 'bg-[#f24a49] text-white border-[#f24a49]'
+                ? 'bg-primary text-white border-primary'
                 : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground/20'
             }`}>
             {label}

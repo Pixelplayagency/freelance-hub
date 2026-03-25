@@ -86,7 +86,7 @@ export function InviteFreelancerForm({ role = 'freelancer' }: Props) {
       <Button
         onClick={handleGenerate}
         className="w-full"
-        style={{ backgroundColor: '#f24a49' }}
+        style={{ backgroundColor: 'var(--primary)' }}
         disabled={loading}
       >
         {loading ? (

@@ -83,7 +83,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
       client,
       name: client.name,
       description: client.description ?? '',
-      color: client.color ?? '#f24a49',
+      color: client.color ?? 'var(--primary)',
       instagram_url: client.instagram_url ?? '',
       facebook_url: client.facebook_url ?? '',
       tiktok_url: client.tiktok_url ?? '',
@@ -160,7 +160,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
           <button
             onClick={() => setAdding(true)}
             className="flex items-center gap-2 text-sm font-medium text-white px-4 py-2 rounded-lg transition-colors"
-            style={{ backgroundColor: '#f24a49' }}
+            style={{ backgroundColor: 'var(--primary)' }}
           >
             <Plus className="w-4 h-4" /> Add Client
           </button>
@@ -177,13 +177,13 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
             value={newName}
             onChange={e => setNewName(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleCreate(); if (e.key === 'Escape') setAdding(false) }}
-            className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49]"
+            className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <button
             onClick={handleCreate}
             disabled={isPending || !newName.trim()}
             className="text-xs text-white px-3 py-2 rounded-lg disabled:opacity-50 transition-colors"
-            style={{ backgroundColor: '#f24a49' }}
+            style={{ backgroundColor: 'var(--primary)' }}
           >
             {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Create'}
           </button>
@@ -203,7 +203,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {clients.map(client => {
-            const color = client.color || '#f24a49'
+            const color = client.color || 'var(--primary)'
             const initial = client.name.charAt(0).toUpperCase()
             const hasSocials = client.instagram_url || client.facebook_url || client.tiktok_url
             return (
@@ -255,7 +255,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
 
                   {/* Name + socials */}
                   <div className="flex items-start justify-between gap-2 mb-1.5">
-                    <h3 className="font-semibold text-foreground leading-snug flex-1 min-w-0 truncate group-hover:text-[#f24a49] transition-colors">
+                    <h3 className="font-semibold text-foreground leading-snug flex-1 min-w-0 truncate group-hover:text-primary transition-colors">
                       {client.name}
                     </h3>
                     {hasSocials && (
@@ -316,7 +316,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     )}
-                    <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all" style={{ color: '#f24a49' }}>
+                    <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all" style={{ color: 'var(--primary)' }}>
                       Open <ArrowRight className="w-3 h-3" />
                     </span>
                   </div>
@@ -347,7 +347,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Cover Image</label>
                 <div
-                  className="relative h-32 rounded-xl overflow-hidden cursor-pointer border border-dashed border-border hover:border-[#f24a49] transition-colors"
+                  className="relative h-32 rounded-xl overflow-hidden cursor-pointer border border-dashed border-border hover:border-primary transition-colors"
                   onClick={() => coverInputRef.current?.click()}
                 >
                   {edit.coverPreview || edit.client.cover_image_url ? (
@@ -391,7 +391,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
                   <button
                     type="button"
                     onClick={() => avatarInputRef.current?.click()}
-                    className="text-xs text-muted-foreground border border-border rounded-lg px-3 py-1.5 hover:border-[#f24a49] hover:text-foreground transition-colors"
+                    className="text-xs text-muted-foreground border border-border rounded-lg px-3 py-1.5 hover:border-primary hover:text-foreground transition-colors"
                   >
                     Upload logo
                   </button>
@@ -406,7 +406,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
                   type="text"
                   value={edit.name}
                   onChange={e => setEdit(s => s ? { ...s, name: e.target.value } : s)}
-                  className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49]"
+                  className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -418,7 +418,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
                   value={edit.description}
                   onChange={e => setEdit(s => s ? { ...s, description: e.target.value } : s)}
                   placeholder="Short brand description…"
-                  className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49] resize-none"
+                  className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                 />
               </div>
 
@@ -446,7 +446,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
                     value={edit.instagram_url}
                     onChange={e => setEdit(s => s ? { ...s, instagram_url: e.target.value } : s)}
                     placeholder="https://instagram.com/…"
-                    className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49]"
+                    className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -456,7 +456,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
                     value={edit.facebook_url}
                     onChange={e => setEdit(s => s ? { ...s, facebook_url: e.target.value } : s)}
                     placeholder="https://facebook.com/…"
-                    className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49]"
+                    className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -466,7 +466,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
                     value={edit.tiktok_url}
                     onChange={e => setEdit(s => s ? { ...s, tiktok_url: e.target.value } : s)}
                     placeholder="https://tiktok.com/@…"
-                    className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49]"
+                    className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -484,7 +484,7 @@ export function ClientListPage({ clients: initial, isAdmin }: { clients: Content
                 onClick={handleSaveEdit}
                 disabled={saving}
                 className="flex items-center gap-2 text-sm font-medium text-white px-4 py-2 rounded-lg disabled:opacity-50 transition-colors"
-                style={{ backgroundColor: '#f24a49' }}
+                style={{ backgroundColor: 'var(--primary)' }}
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                 {saving ? 'Saving…' : 'Save Changes'}

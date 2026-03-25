@@ -83,19 +83,19 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-20 h-20 rounded-full border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden hover:border-[#f24a49]/50 transition-colors group"
+            className="w-20 h-20 rounded-full border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden hover:border-primary/50 transition-colors group"
           >
             {avatarPreview ? (
               <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-xl font-bold" style={{ color: '#f24a49' }}>{initials}</span>
+              <span className="text-xl font-bold" style={{ color: 'var(--primary)' }}>{initials}</span>
             )}
           </button>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center text-white shadow-sm"
-            style={{ backgroundColor: '#f24a49' }}
+            style={{ backgroundColor: 'var(--primary)' }}
           >
             <Camera className="w-3.5 h-3.5" />
           </button>
@@ -139,7 +139,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
 
       <Button
         type="submit"
-        style={{ backgroundColor: '#f24a49' }}
+        style={{ backgroundColor: 'var(--primary)' }}
         disabled={loading || !fullName.trim()}
       >
         {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving…</> : 'Save changes'}

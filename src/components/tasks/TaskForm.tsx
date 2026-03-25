@@ -217,7 +217,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
                     >
                       <div className={cn(
                         'w-4 h-4 rounded border flex items-center justify-center shrink-0',
-                        checked ? 'border-[#f24a49] bg-[#f24a49]' : 'border-border'
+                        checked ? 'border-primary bg-primary' : 'border-border'
                       )}>
                         {checked && (
                           <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12">
@@ -322,7 +322,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
                   size="sm"
                   onClick={addPendingLink}
                   disabled={!linkUrl}
-                  style={{ backgroundColor: '#f24a49' }}
+                  style={{ backgroundColor: 'var(--primary)' }}
                   className="text-white"
                 >
                   Add
@@ -398,7 +398,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
             onClick={() => fileInputRef.current?.click()}
             className={cn(
               'w-full border-2 border-dashed border-border rounded-lg py-5 text-center transition-colors',
-              'hover:border-[#f24a49]/40 hover:bg-[#f24a49]/5'
+              'hover:border-primary/40 hover:bg-primary/5'
             )}
           >
             <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
@@ -423,7 +423,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
                 className={cn(
                   'flex flex-col items-start gap-0.5 px-3 py-2.5 rounded-lg border text-left transition-all text-sm',
                   taskType === type
-                    ? 'border-[#f24a49] bg-[#f24a49]/10 text-[#f24a49]'
+                    ? 'border-primary bg-primary/10 text-primary'
                     : 'border-border text-foreground hover:border-muted-foreground'
                 )}
               >
@@ -437,7 +437,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
         </div>
       )}
 
-      <Button type="submit" className="w-full text-white" style={{ backgroundColor: '#f24a49' }} disabled={loading}>
+      <Button type="submit" className="w-full text-white" style={{ backgroundColor: 'var(--primary)' }} disabled={loading}>
         {loading ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />

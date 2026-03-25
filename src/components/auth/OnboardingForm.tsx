@@ -114,22 +114,22 @@ export function OnboardingForm({ email }: OnboardingFormProps) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-20 h-20 rounded-full border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden hover:border-[#f24a49]/50 transition-colors group"
+            className="w-20 h-20 rounded-full border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden hover:border-primary/50 transition-colors group"
             style={avatarPreview ? {} : { backgroundColor: '#fff3f3' }}
           >
             {avatarPreview ? (
               <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
             ) : initials ? (
-              <span className="text-xl font-bold" style={{ color: '#f24a49' }}>{initials}</span>
+              <span className="text-xl font-bold" style={{ color: 'var(--primary)' }}>{initials}</span>
             ) : (
-              <User className="w-8 h-8 text-gray-300 group-hover:text-[#f24a49]/60 transition-colors" />
+              <User className="w-8 h-8 text-gray-300 group-hover:text-primary/60 transition-colors" />
             )}
           </button>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center text-white shadow-sm"
-            style={{ backgroundColor: '#f24a49' }}
+            style={{ backgroundColor: 'var(--primary)' }}
           >
             <Camera className="w-3.5 h-3.5" />
           </button>
@@ -185,7 +185,7 @@ export function OnboardingForm({ email }: OnboardingFormProps) {
       <div className="space-y-1.5">
         <Label>Role</Label>
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: '#f24a49' }}>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold text-white" style={{ backgroundColor: 'var(--primary)' }}>
             Freelancer
           </span>
           <span className="text-xs text-slate-400 ml-1">assigned by admin</span>
@@ -249,7 +249,7 @@ export function OnboardingForm({ email }: OnboardingFormProps) {
       <Button
         type="submit"
         className="w-full"
-        style={{ backgroundColor: '#f24a49' }}
+        style={{ backgroundColor: 'var(--primary)' }}
         disabled={loading || !fullName || !username || !password || !confirmPassword}
       >
         {loading ? (

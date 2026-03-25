@@ -159,7 +159,7 @@ export function ProjectTaskList({ tasks, projectId, isAdmin, assigneeMap = {} }:
                                 <div
                                   key={a.id ?? i}
                                   className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white ring-2 ring-card shrink-0 overflow-hidden"
-                                  style={{ backgroundColor: '#f24a49' }}
+                                  style={{ backgroundColor: 'var(--primary)' }}
                                   title={a.full_name ?? undefined}
                                 >
                                   {a.avatar_url

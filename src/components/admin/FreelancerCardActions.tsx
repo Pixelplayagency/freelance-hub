@@ -43,7 +43,7 @@ export function FreelancerCardActions({ id, mode }: Props) {
           onClick={handleApprove}
           disabled={approvePending || removePending}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ backgroundColor: '#f24a49' }}
+          style={{ backgroundColor: 'var(--primary)' }}
         >
           {approvePending
             ? <Loader2 className="w-3.5 h-3.5 animate-spin" />

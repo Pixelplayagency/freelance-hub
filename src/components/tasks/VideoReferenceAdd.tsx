@@ -85,7 +85,7 @@ export function VideoReferenceAdd({ taskId, references, isAdmin }: VideoReferenc
                 />
               </div>
               <div className="flex gap-2">
-                <Button type="submit" size="sm" style={{ backgroundColor: '#f24a49' }} disabled={adding}>
+                <Button type="submit" size="sm" style={{ backgroundColor: 'var(--primary)' }} disabled={adding}>
                   {adding ? 'Adding…' : 'Add video'}
                 </Button>
                 <Button type="button" size="sm" variant="ghost" onClick={() => setShowForm(false)}>

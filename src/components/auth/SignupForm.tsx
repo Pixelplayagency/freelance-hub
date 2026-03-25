@@ -84,7 +84,7 @@ export function SignupForm() {
           autoComplete="new-password"
         />
       </div>
-      <Button type="submit" className="w-full" style={{ backgroundColor: '#f24a49' }} disabled={loading}>
+      <Button type="submit" className="w-full" style={{ backgroundColor: 'var(--primary)' }} disabled={loading}>
         {loading ? 'Creating account…' : 'Create account'}
       </Button>
     </form>

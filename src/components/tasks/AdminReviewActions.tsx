@@ -248,7 +248,7 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
           onClick={handleApprove}
           disabled={loading !== null}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ backgroundColor: '#f24a49' }}
+          style={{ backgroundColor: 'var(--primary)' }}
         >
           {loading === 'approve'
             ? <Loader2 className="w-4 h-4 animate-spin" />

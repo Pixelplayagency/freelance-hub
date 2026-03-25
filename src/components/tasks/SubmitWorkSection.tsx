@@ -159,7 +159,7 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
     <div className="rounded-xl border border-border overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 bg-muted border-b border-border flex items-center gap-2">
-        <Send className="w-4 h-4" style={{ color: '#f24a49' }} />
+        <Send className="w-4 h-4" style={{ color: 'var(--primary)' }} />
         <span className="text-sm font-semibold text-foreground">
           Submit your work
           {pendingFiles.length > 0 && (
@@ -205,7 +205,7 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
                   <div className="mt-1 h-1 rounded-full bg-muted overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-150"
-                      style={{ width: `${uploadProgress[i] ?? 0}%`, backgroundColor: '#f24a49' }}
+                      style={{ width: `${uploadProgress[i] ?? 0}%`, backgroundColor: 'var(--primary)' }}
                     />
                   </div>
                 )}
@@ -236,12 +236,12 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
           className={cn(
             'w-full border-2 border-dashed rounded-lg py-4 transition-colors disabled:opacity-50',
             dragOver
-              ? 'border-[#f24a49] bg-[#f24a49]/10'
-              : 'border-border hover:border-[#f24a49]/40 hover:bg-[#f24a49]/5'
+              ? 'border-primary bg-primary/10'
+              : 'border-border hover:border-primary/40 hover:bg-primary/5'
           )}
         >
           <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
-            <Upload className={cn('w-5 h-5', dragOver && 'text-[#f24a49]')} />
+            <Upload className={cn('w-5 h-5', dragOver && 'text-primary')} />
             <span className="text-xs font-medium">{dragOver ? 'Drop to add' : 'Upload final file'}</span>
             <span className="text-[10px]">Image or video · drag & drop or click</span>
           </div>
@@ -256,7 +256,7 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
             value={finalLink}
             onChange={e => setFinalLink(e.target.value)}
             disabled={submitting}
-            className="flex-1 text-sm border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#f24a49]/20 focus:border-[#f24a49] placeholder:text-muted-foreground bg-background text-foreground disabled:opacity-50"
+            className="flex-1 text-sm border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-muted-foreground bg-background text-foreground disabled:opacity-50"
           />
           {finalLink && (
             <button type="button" onClick={() => setFinalLink('')} className="text-muted-foreground hover:text-foreground">
@@ -274,7 +274,7 @@ export function SubmitWorkSection({ taskId, status }: SubmitWorkSectionProps) {
             'w-full py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity',
             !hasContent ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-90'
           )}
-          style={{ backgroundColor: '#f24a49' }}
+          style={{ backgroundColor: 'var(--primary)' }}
         >
           {submitting ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</>

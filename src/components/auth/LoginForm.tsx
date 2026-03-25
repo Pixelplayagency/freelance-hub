@@ -95,7 +95,7 @@ export function LoginForm() {
           </button>
         </div>
       </div>
-      <Button type="submit" className="w-full" style={{ backgroundColor: '#f24a49' }} disabled={loading}>
+      <Button type="submit" className="w-full" style={{ backgroundColor: 'var(--primary)' }} disabled={loading}>
         {loading ? 'Signing in…' : 'Sign in'}
       </Button>
     </form>

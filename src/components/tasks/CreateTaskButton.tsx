@@ -25,7 +25,7 @@ export function CreateTaskButton({ projectId, freelancers }: CreateTaskButtonPro
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="text-white shadow-sm shrink-0" style={{ backgroundColor: '#f24a49' }}>
+        <Button size="sm" className="text-white shadow-sm shrink-0" style={{ backgroundColor: 'var(--primary)' }}>
           <Plus className="w-4 h-4 mr-1.5" />
           Add task
         </Button>

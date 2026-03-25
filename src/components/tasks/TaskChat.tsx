@@ -103,7 +103,7 @@ export function TaskChat({
                     ? 'rounded-br-sm text-white'
                     : 'rounded-bl-sm bg-gray-900 text-white'
                 )}
-                style={isOwn ? { backgroundColor: '#f24a49' } : undefined}
+                style={isOwn ? { backgroundColor: 'var(--primary)' } : undefined}
               >
                 {body}
               </div>
@@ -122,7 +122,7 @@ export function TaskChat({
 
       {/* Input */}
       {canEdit && (
-        <div className="mt-3 flex items-end gap-2 border border-border rounded-2xl bg-muted px-3 py-2 focus-within:border-[#f24a49] transition-colors">
+        <div className="mt-3 flex items-end gap-2 border border-border rounded-2xl bg-muted px-3 py-2 focus-within:border-primary transition-colors">
           <textarea
             value={text}
             onChange={e => setText(e.target.value)}
@@ -142,7 +142,7 @@ export function TaskChat({
             onClick={handleSend}
             disabled={sending || !text.trim()}
             className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-opacity disabled:opacity-30"
-            style={{ backgroundColor: '#f24a49' }}
+            style={{ backgroundColor: 'var(--primary)' }}
           >
             <Send className="w-3.5 h-3.5 text-white" />
           </button>

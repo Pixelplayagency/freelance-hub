@@ -29,7 +29,7 @@ export default async function ProjectsPage() {
           <h1 className="text-2xl font-bold text-foreground">Projects</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{projectsWithCount.length} active project{projectsWithCount.length !== 1 ? 's' : ''}</p>
         </div>
-        <Button asChild className="text-white shadow-sm" style={{ backgroundColor: '#f24a49' }}>
+        <Button asChild className="text-white shadow-sm" style={{ backgroundColor: 'var(--primary)' }}>
           <Link href="/admin/projects/new">
             <Plus className="w-4 h-4 mr-1.5" />
             New project
@@ -40,11 +40,11 @@ export default async function ProjectsPage() {
       {projectsWithCount.length === 0 ? (
         <div className="bg-card rounded-lg border border-border flex flex-col items-center justify-center py-20 text-center">
           <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 accent-tint">
-            <Plus className="w-6 h-6" style={{ color: '#f24a49' }} />
+            <Plus className="w-6 h-6" style={{ color: 'var(--primary)' }} />
           </div>
           <p className="text-sm font-medium text-muted-foreground mb-1">No projects yet</p>
           <p className="text-xs text-muted-foreground mb-5">Create your first project to get started</p>
-          <Button asChild className="text-white shadow-sm" style={{ backgroundColor: '#f24a49' }}>
+          <Button asChild className="text-white shadow-sm" style={{ backgroundColor: 'var(--primary)' }}>
             <Link href="/admin/projects/new">Create your first project</Link>
           </Button>
         </div>

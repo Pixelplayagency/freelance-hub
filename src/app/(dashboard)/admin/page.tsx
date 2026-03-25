@@ -99,7 +99,7 @@ export default async function AdminDashboardPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-          <p className={`text-sm mt-0.5 ${overdueCount > 0 ? 'text-[#f24a49] font-medium' : 'text-muted-foreground'}`}>
+          <p className={`text-sm mt-0.5 ${overdueCount > 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
             {overdueCount > 0
               ? `⚠ ${overdueCount} overdue task${overdueCount !== 1 ? 's' : ''} need attention`
               : 'Plan, prioritize, and accomplish your tasks with ease.'}
@@ -107,8 +107,8 @@ export default async function AdminDashboardPage() {
         </div>
         <Link
           href="/admin/projects/new"
-          className="flex items-center gap-2 bg-[#f24a49] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#e03e3d] transition-colors shrink-0"
-          style={{ boxShadow: '0 4px 14px rgba(242,74,73,0.30)' }}
+          className="flex items-center gap-2 bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#e03e3d] transition-colors shrink-0"
+          style={{ boxShadow: '0 4px 14px oklch(0.585 0.233 13.3 / 0.30)' }}
         >
           <Plus className="w-4 h-4" /> Add Project
         </Link>
@@ -120,12 +120,12 @@ export default async function AdminDashboardPage() {
         <Link
           href="/admin/projects"
           className="relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between min-h-[130px] hover:opacity-95 transition-all duration-200"
-          style={{ background: 'linear-gradient(135deg, #1C1C1E 0%, #2c2c2e 100%)', boxShadow: '0 8px 28px rgba(242,74,73,0.22)' }}
+          style={{ background: 'linear-gradient(135deg, #1C1C1E 0%, #2c2c2e 100%)', boxShadow: '0 8px 28px oklch(0.585 0.233 13.3 / 0.22)' }}
         >
           <div className="absolute inset-0 opacity-[0.14]"
             style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
           <div className="relative flex items-center justify-between">
-            <div className="w-9 h-9 rounded-xl bg-[#f24a49] flex items-center justify-center" style={{ boxShadow: '0 2px 12px rgba(242,74,73,0.5)' }}>
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center" style={{ boxShadow: '0 2px 12px oklch(0.585 0.233 13.3 / 0.5)' }}>
               <FolderKanban style={{ width: 18, height: 18, color: 'white' }} />
             </div>
             <ArrowUpRight className="w-4 h-4 text-white/30" />
@@ -134,7 +134,7 @@ export default async function AdminDashboardPage() {
             <p className="text-3xl font-bold text-white tabular-nums">{activeProjects}</p>
             <p className="text-xs text-white/50 mt-1 font-medium">Active Projects</p>
           </div>
-          <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-[#f24a49]/50 to-transparent" />
+          <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-[var(--primary)]/50 to-transparent" />
         </Link>
 
         {/* Colored stat cards */}
@@ -213,15 +213,15 @@ export default async function AdminDashboardPage() {
                       style={{
                         height: `${Math.max(heightPct, count > 0 ? 8 : 4)}%`,
                         background: isPrimary
-                          ? 'linear-gradient(180deg, #f24a49 0%, #c73b3a 100%)'
+                          ? 'linear-gradient(180deg, var(--primary) 0%, oklch(0.50 0.22 13.3) 100%)'
                           : count > 0
                           ? 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%)'
                           : 'var(--muted)',
-                        boxShadow: isPrimary ? '0 -2px 8px rgba(242,74,73,0.3)' : 'none',
+                        boxShadow: isPrimary ? '0 -2px 8px oklch(0.585 0.233 13.3 / 0.3)' : 'none',
                       }}
                     />
                   </div>
-                  <span className={`text-[10px] leading-none ${isToday ? 'font-bold text-[#f24a49]' : 'text-muted-foreground'}`}>
+                  <span className={`text-[10px] leading-none ${isToday ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
                     {weekLabels[i].slice(0, 2)}
                   </span>
                 </div>
@@ -237,7 +237,7 @@ export default async function AdminDashboardPage() {
               <h2 className="text-sm font-semibold text-foreground">Project Progress</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{completedProjects.length} of {projectProgress.length} complete</p>
             </div>
-            <Link href="/admin/projects" className="text-xs text-muted-foreground hover:text-[#f24a49] transition-colors flex items-center gap-1">
+            <Link href="/admin/projects" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -265,7 +265,7 @@ export default async function AdminDashboardPage() {
                   {/* Bar + labels */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-semibold text-foreground truncate group-hover:text-[#f24a49] transition-colors leading-none">{p.name}</span>
+                      <span className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors leading-none">{p.name}</span>
                       <span className={`text-[11px] font-bold tabular-nums ml-2 shrink-0 ${p.pct === 100 ? 'text-emerald-500' : 'text-muted-foreground'}`}>{p.pct}%</span>
                     </div>
                     <div className="h-1.5 bg-muted rounded-full overflow-hidden">
@@ -310,13 +310,13 @@ export default async function AdminDashboardPage() {
                 <Users className="w-6 h-6 text-muted-foreground/30" />
               </div>
               <p className="text-sm font-semibold text-foreground">No team members yet</p>
-              <Link href="/admin/workspace" className="text-xs text-[#f24a49] mt-1.5 hover:underline font-medium">Invite a freelancer →</Link>
+              <Link href="/admin/workspace" className="text-xs text-primary mt-1.5 hover:underline font-medium">Invite a freelancer →</Link>
             </div>
           ) : (
             <div className="divide-y divide-border">
               {teamData.map(member => (
                 <div key={member.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                  <div className="w-9 h-9 rounded-full bg-[#f24a49] flex items-center justify-center shrink-0 text-xs font-bold text-white overflow-hidden ring-2 ring-card">
+                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0 text-xs font-bold text-white overflow-hidden ring-2 ring-card">
                     {(member as any).avatar_url
                       ? <img src={(member as any).avatar_url} alt={member.full_name ?? ''} className="w-full h-full object-cover" />
                       : (member.full_name || member.username || 'U').charAt(0).toUpperCase()}
@@ -364,7 +364,7 @@ export default async function AdminDashboardPage() {
             <div className="divide-y divide-border">
               {freelancerOutput.map(f => (
                 <div key={f.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                  <div className="w-9 h-9 rounded-full bg-[#f24a49] flex items-center justify-center text-xs font-bold text-white shrink-0 overflow-hidden ring-2 ring-card">
+                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-white shrink-0 overflow-hidden ring-2 ring-card">
                     {(f as any).avatar_url
                       ? <img src={(f as any).avatar_url} alt={f.full_name ?? ''} className="w-full h-full object-cover" />
                       : (f.full_name || f.username || 'U').charAt(0).toUpperCase()}

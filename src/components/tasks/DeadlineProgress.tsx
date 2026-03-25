@@ -44,7 +44,7 @@ export function DeadlineProgress({ createdAt, dueDate }: DeadlineProgressProps) 
     statusColor = 'text-muted-foreground'
   }
 
-  const barColor = overdue ? '#f24a49' : pct > 80 ? '#f59e0b' : pct > 50 ? '#f59e0b' : '#22c55e'
+  const barColor = overdue ? 'var(--primary)' : pct > 80 ? '#f59e0b' : pct > 50 ? '#f59e0b' : '#22c55e'
 
   return (
     <div className="space-y-2.5">

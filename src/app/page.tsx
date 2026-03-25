@@ -10,7 +10,7 @@ export default function Home() {
         <Link
           href="/login"
           className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
-          style={{ backgroundColor: '#f24a49' }}
+          style={{ backgroundColor: 'var(--primary)' }}
         >
           Sign in
         </Link>
@@ -28,7 +28,7 @@ export default function Home() {
           <Link
             href="/login"
             className="px-6 py-3 rounded-xl text-sm font-semibold text-white"
-            style={{ backgroundColor: '#f24a49' }}
+            style={{ backgroundColor: 'var(--primary)' }}
           >
             Get started
           </Link>

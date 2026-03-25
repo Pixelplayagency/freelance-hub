@@ -119,11 +119,11 @@ export default function WorkspacePage() {
               {active.length === 0 && pending.length === 0 ? (
                 <div className="bg-card rounded-lg border border-border flex flex-col items-center justify-center py-20 text-center">
                   <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 accent-tint">
-                    <UserPlus className="w-6 h-6" style={{ color: '#f24a49' }} />
+                    <UserPlus className="w-6 h-6" style={{ color: 'var(--primary)' }} />
                   </div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">No freelancers yet</p>
                   <p className="text-xs text-muted-foreground mb-5">Invite freelancers to assign tasks to them</p>
-                  <Button onClick={() => setTab('invite')} className="text-white shadow-sm" style={{ backgroundColor: '#f24a49' }}>
+                  <Button onClick={() => setTab('invite')} className="text-white shadow-sm" style={{ backgroundColor: 'var(--primary)' }}>
                     Invite your first freelancer
                   </Button>
                 </div>
@@ -136,7 +136,7 @@ export default function WorkspacePage() {
                     {active.map(profile => (
                       <div key={profile.id} className="bg-card rounded-lg border border-border p-5">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-white shrink-0" style={{ backgroundColor: '#f24a49' }}>
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-white shrink-0" style={{ backgroundColor: 'var(--primary)' }}>
                             {getInitials(profile)}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -156,7 +156,7 @@ export default function WorkspacePage() {
                               const val = e.target.value as FreelancerRole | ''
                               await assignJobRole(profile.id, val === '' ? null : val)
                             }}
-                            className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-[#f24a49]"
+                            className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                           >
                             <option value="">No role assigned</option>
                             {(Object.entries(FREELANCER_ROLE_LABELS) as [FreelancerRole, string][]).map(([val, label]) => (
@@ -187,7 +187,7 @@ export default function WorkspacePage() {
                 className={cn(
                   'flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all',
                   inviteRole === id
-                    ? 'border-[#f24a49] bg-[#f24a49]/10 text-[#f24a49]'
+                    ? 'border-primary bg-primary/10 text-primary'
                     : 'border-border text-muted-foreground hover:text-foreground'
                 )}
               >

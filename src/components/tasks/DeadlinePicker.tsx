@@ -80,12 +80,12 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
           type="button"
           className={cn(
             'flex items-center gap-2.5 w-full rounded-lg border px-3 py-2.5 text-sm transition-all text-left',
-            'border-input bg-background hover:border-[#f24a49]/50 focus:outline-none',
-            open && 'border-[#f24a49]/60 ring-2 ring-[#f24a49]/10',
+            'border-input bg-background hover:border-primary/50 focus:outline-none',
+            open && 'border-primary/60 ring-2 ring-primary/10',
             displayLabel ? 'text-foreground' : 'text-muted-foreground'
           )}
         >
-          <CalendarDays className="w-4 h-4 shrink-0" style={{ color: '#f24a49' }} />
+          <CalendarDays className="w-4 h-4 shrink-0" style={{ color: 'var(--primary)' }} />
           <span className="flex-1 font-medium">{displayLabel ?? 'Pick a deadline'}</span>
           {displayLabel && (
             <span
@@ -134,7 +134,7 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
               dropdowns: 'flex items-center gap-1',
               dropdown: cn(
                 'text-sm font-semibold text-foreground bg-background border border-border rounded-lg px-2 py-1',
-                'hover:border-[#f24a49]/40 focus:outline-none cursor-pointer'
+                'hover:border-primary/40 focus:outline-none cursor-pointer'
               ),
               weekdays: 'grid grid-cols-7 mb-1',
               weekday: 'text-[11px] font-medium text-muted-foreground text-center py-1',
@@ -143,11 +143,11 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
               day: 'flex items-center justify-center p-0',
               day_button: cn(
                 'w-9 h-9 rounded-lg text-sm font-medium transition-all text-foreground',
-                'hover:bg-[#f24a49]/10 hover:text-[#f24a49]',
-                'focus:outline-none focus:ring-2 focus:ring-[#f24a49]/30'
+                'hover:bg-primary/10 hover:text-primary',
+                'focus:outline-none focus:ring-2 focus:ring-primary/30'
               ),
-              selected: '[&>button]:bg-[#f24a49] [&>button]:text-white [&>button]:hover:bg-[#e03938] [&>button]:hover:text-white',
-              today: '[&>button]:border [&>button]:border-[#f24a49]/40 [&>button]:text-[#f24a49]',
+              selected: '[&>button]:bg-primary [&>button]:text-white [&>button]:hover:bg-[#e03938] [&>button]:hover:text-white',
+              today: '[&>button]:border [&>button]:border-primary/40 [&>button]:text-primary',
               outside: '[&>button]:text-muted-foreground/40 [&>button]:hover:text-muted-foreground [&>button]:hover:bg-transparent',
               disabled: '[&>button]:opacity-30 [&>button]:cursor-not-allowed',
             }}
@@ -181,10 +181,10 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
                         'h-7 rounded-md text-xs font-medium transition-all',
                         hour12 === h
                           ? 'text-white'
-                          : 'text-foreground bg-background border border-border hover:border-[#f24a49]/40 hover:text-[#f24a49]',
+                          : 'text-foreground bg-background border border-border hover:border-primary/40 hover:text-primary',
                         !selected && 'opacity-40 cursor-not-allowed'
                       )}
-                      style={hour12 === h ? { backgroundColor: '#f24a49' } : undefined}
+                      style={hour12 === h ? { backgroundColor: 'var(--primary)' } : undefined}
                     >
                       {h}
                     </button>
@@ -206,10 +206,10 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
                         'h-7 rounded-md text-xs font-medium transition-all',
                         minStr === m
                           ? 'text-white'
-                          : 'text-foreground bg-background border border-border hover:border-[#f24a49]/40 hover:text-[#f24a49]',
+                          : 'text-foreground bg-background border border-border hover:border-primary/40 hover:text-primary',
                         !selected && 'opacity-40 cursor-not-allowed'
                       )}
-                      style={minStr === m ? { backgroundColor: '#f24a49' } : undefined}
+                      style={minStr === m ? { backgroundColor: 'var(--primary)' } : undefined}
                     >
                       :{m}
                     </button>
@@ -231,10 +231,10 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
                         'h-7 rounded-md text-xs font-semibold transition-all',
                         ampm === val && time
                           ? 'text-white'
-                          : 'text-foreground bg-background border border-border hover:border-[#f24a49]/40 hover:text-[#f24a49]',
+                          : 'text-foreground bg-background border border-border hover:border-primary/40 hover:text-primary',
                         (!selected || !time) && 'opacity-40 cursor-not-allowed'
                       )}
-                      style={ampm === val && time ? { backgroundColor: '#f24a49' } : undefined}
+                      style={ampm === val && time ? { backgroundColor: 'var(--primary)' } : undefined}
                     >
                       {val}
                     </button>
@@ -264,7 +264,7 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
             type="button"
             onClick={() => setOpen(false)}
             className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: '#f24a49' }}
+            style={{ backgroundColor: 'var(--primary)' }}
           >
             Confirm
           </button>

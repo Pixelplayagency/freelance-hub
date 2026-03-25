@@ -44,7 +44,7 @@ export async function TopBar() {
         {(unreadCount ?? 0) > 0 && (
           <span
             className="absolute top-1 right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full text-[10px] font-semibold text-white leading-none"
-            style={{ backgroundColor: '#f24a49', boxShadow: '0 0 0 2px rgba(242,74,73,0.25)' }}
+            style={{ backgroundColor: 'var(--primary)', boxShadow: '0 0 0 2px oklch(0.585 0.233 13.3 / 0.25)' }}
           >
             {(unreadCount ?? 0) > 9 ? '9+' : unreadCount}
           </span>
@@ -55,8 +55,8 @@ export async function TopBar() {
       <div
         className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-white select-none shrink-0 ml-1"
         style={{
-          backgroundColor: '#f24a49',
-          boxShadow: '0 0 0 2px rgba(242,74,73,0.25), 0 0 0 3px var(--color-background)',
+          backgroundColor: 'var(--primary)',
+          boxShadow: '0 0 0 2px oklch(0.585 0.233 13.3 / 0.25), 0 0 0 3px var(--color-background)',
         }}
       >
         {profile?.avatar_url

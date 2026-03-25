@@ -111,7 +111,7 @@ export default async function FreelancerDashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">My Dashboard</h1>
-        <p className={`text-sm mt-0.5 ${overdueCount > 0 ? 'text-[#f24a49] font-medium' : 'text-muted-foreground'}`}>
+        <p className={`text-sm mt-0.5 ${overdueCount > 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
           {overdueCount > 0
             ? `${overdueCount} overdue task${overdueCount !== 1 ? 's' : ''} need attention`
             : `${allTasks.length} task${allTasks.length !== 1 ? 's' : ''} assigned to you`}
@@ -126,7 +126,7 @@ export default async function FreelancerDashboardPage() {
           className="relative overflow-hidden rounded-2xl p-6 hover:opacity-90 transition-all duration-200 flex flex-col gap-4 min-h-[140px]"
           style={{
             background: 'linear-gradient(135deg, #1C1C1E 0%, #2a2a2c 100%)',
-            boxShadow: '0 4px 24px rgba(242,74,73,0.18)',
+            boxShadow: '0 4px 24px oklch(0.585 0.233 13.3 / 0.18)',
           }}
         >
           {/* Dot grid overlay */}
@@ -139,8 +139,8 @@ export default async function FreelancerDashboardPage() {
           />
           <div className="relative flex items-start justify-between">
             <div
-              className="w-10 h-10 rounded-xl bg-[#f24a49] flex items-center justify-center"
-              style={{ boxShadow: '0 2px 10px rgba(242,74,73,0.5)' }}
+              className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center"
+              style={{ boxShadow: '0 2px 10px oklch(0.585 0.233 13.3 / 0.5)' }}
             >
               <ListTodo className="w-5 h-5 text-white" />
             </div>
@@ -223,15 +223,15 @@ export default async function FreelancerDashboardPage() {
                       style={{
                         height: `${Math.max(heightPct, count > 0 ? 8 : 4)}%`,
                         background: isPrimary
-                          ? 'linear-gradient(180deg, #f24a49 0%, #c73b3a 100%)'
+                          ? 'linear-gradient(180deg, var(--primary) 0%, oklch(0.50 0.22 13.3) 100%)'
                           : count > 0
                           ? 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%)'
                           : 'var(--muted)',
-                        boxShadow: isPrimary ? '0 -2px 8px rgba(242,74,73,0.3)' : 'none',
+                        boxShadow: isPrimary ? '0 -2px 8px oklch(0.585 0.233 13.3 / 0.3)' : 'none',
                       }}
                     />
                   </div>
-                  <span className={`text-[10px] leading-none ${isToday ? 'font-bold text-[#f24a49]' : 'text-muted-foreground'}`}>
+                  <span className={`text-[10px] leading-none ${isToday ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
                     {weekLabels[i].slice(0, 2)}
                   </span>
                 </div>
@@ -269,7 +269,7 @@ export default async function FreelancerDashboardPage() {
                     className="flex items-center gap-2 py-1 group"
                   >
                     <TaskStatusBadge status={task.status as TaskStatus} />
-                    <span className="text-sm text-foreground flex-1 truncate group-hover:text-[#f24a49] transition-colors">
+                    <span className="text-sm text-foreground flex-1 truncate group-hover:text-primary transition-colors">
                       {task.title}
                     </span>
                     {project && (
@@ -322,7 +322,7 @@ export default async function FreelancerDashboardPage() {
                     {project && (
                       <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
                     )}
-                    <span className="text-xs font-medium text-foreground group-hover:text-[#f24a49] flex-1 truncate transition-colors">
+                    <span className="text-xs font-medium text-foreground group-hover:text-primary flex-1 truncate transition-colors">
                       {task.title}
                     </span>
                     <TaskStatusBadge status={task.status as TaskStatus} />

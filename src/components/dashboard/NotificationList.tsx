@@ -9,7 +9,7 @@ import { Bell, CheckCheck, ClipboardList, Pencil, Clock } from 'lucide-react'
 import type { Notification } from '@/lib/types/app.types'
 
 const TYPE_META: Record<Notification['type'], { icon: React.ElementType; bg: string; color: string }> = {
-  task_assigned: { icon: ClipboardList, bg: 'accent-tint', color: 'text-[#f24a49]' },
+  task_assigned: { icon: ClipboardList, bg: 'accent-tint', color: 'text-primary' },
   task_updated: { icon: Pencil, bg: 'bg-blue-100', color: 'text-blue-600' },
   task_due_soon: { icon: Clock, bg: 'bg-amber-100', color: 'text-amber-600' },
 }
@@ -69,7 +69,7 @@ export function NotificationList({
                   'flex items-start gap-3.5 p-4 rounded-xl border shadow-sm transition-all',
                   notif.read
                     ? 'bg-card border-border opacity-60'
-                    : 'accent-tint border-[#f24a49]/20 cursor-pointer hover:border-[#f24a49]/40 hover:shadow-sm'
+                    : 'accent-tint border-primary/20 cursor-pointer hover:border-primary/40 hover:shadow-sm'
                 )}
               >
                 <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', meta.bg)}>
@@ -87,7 +87,7 @@ export function NotificationList({
                   <p className="text-xs text-muted-foreground mt-1">{formatRelative(notif.created_at)}</p>
                 </div>
                 {!notif.read && (
-                  <div className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: '#f24a49' }} />
+                  <div className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: 'var(--primary)' }} />
                 )}
               </div>
             )

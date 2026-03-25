@@ -74,7 +74,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
         <div className="flex items-start gap-1 mb-1.5">
           <Link
             href={taskHref}
-            className="flex-1 text-sm font-semibold text-foreground hover:text-[#f24a49] leading-snug line-clamp-2 transition-colors"
+            className="flex-1 text-sm font-semibold text-foreground hover:text-primary leading-snug line-clamp-2 transition-colors"
             onClick={e => e.stopPropagation()}
           >
             {task.title}
@@ -97,7 +97,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
         <div className="flex items-center justify-between mt-2">
           {/* Assignee avatar */}
           {task.assignee ? (
-            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white shrink-0" style={{ backgroundColor: '#f24a49' }}>
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white shrink-0" style={{ backgroundColor: 'var(--primary)' }}>
               {initials}
             </div>
           ) : (

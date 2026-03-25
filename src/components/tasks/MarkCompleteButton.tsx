@@ -28,7 +28,7 @@ export function MarkCompleteButton({ taskId }: { taskId: string }) {
       onClick={handleComplete}
       disabled={loading}
       className="w-full text-white gap-2"
-      style={{ backgroundColor: '#f24a49' }}
+      style={{ backgroundColor: 'var(--primary)' }}
     >
       {loading
         ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating…</>

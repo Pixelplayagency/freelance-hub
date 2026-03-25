@@ -8,14 +8,14 @@ import type { Task, TaskStatus } from '@/lib/types/app.types'
 
 const STATUS_ACCENT: Record<string, string> = {
   todo: 'border-l-[#d4d4d4]',
-  in_progress: 'border-l-[#f24a49]',
+  in_progress: 'border-l-primary',
   review: 'border-l-[#1C1C1E]',
   completed: 'border-l-emerald-400',
 }
 
 const STATUS_DOT: Record<string, string> = {
   todo: 'bg-[#d4d4d4]',
-  in_progress: 'bg-[#f24a49]',
+  in_progress: 'bg-primary',
   review: 'bg-[#1C1C1E]',
   completed: 'bg-emerald-500',
 }
@@ -58,7 +58,7 @@ export function KanbanColumn({ column, tasks, projectId, isAdmin }: KanbanColumn
         className={cn(
           'flex-1 rounded-lg p-2 min-h-[120px] transition-all border border-border border-l-4 bg-card/60',
           accent,
-          isOver && 'ring-2 ring-[#f24a49]/40 ring-offset-1 bg-[#f24a49]/5'
+          isOver && 'ring-2 ring-primary/40 ring-offset-1 bg-primary/5'
         )}
       >
         <SortableContext

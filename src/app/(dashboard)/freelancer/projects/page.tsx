@@ -89,7 +89,7 @@ export default async function FreelancerProjectsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Projects</h1>
-        <p className={cn('text-sm mt-0.5', overdueCount > 0 ? 'text-[#f24a49] font-medium' : 'text-muted-foreground')}>
+        <p className={cn('text-sm mt-0.5', overdueCount > 0 ? 'text-primary font-medium' : 'text-muted-foreground')}>
           {overdueCount > 0
             ? `${overdueCount} overdue task${overdueCount !== 1 ? 's' : ''} need attention`
             : `${totalTasks} task${totalTasks !== 1 ? 's' : ''} across ${projectEntries.length} project${projectEntries.length !== 1 ? 's' : ''}`}
@@ -102,7 +102,7 @@ export default async function FreelancerProjectsPage() {
           {[
             { label: 'Total', value: totalTasks, icon: ListTodo, color: 'text-foreground', bg: 'bg-muted' },
             { label: 'In Progress', value: inProgressCount, icon: Clock, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-            { label: 'Overdue', value: overdueCount, icon: AlertCircle, color: 'text-[#f24a49]', bg: 'bg-red-50 dark:bg-red-900/20' },
+            { label: 'Overdue', value: overdueCount, icon: AlertCircle, color: 'text-primary', bg: 'bg-red-50 dark:bg-red-900/20' },
             { label: 'Completed', value: completedCount, icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
           ].map(s => {
             const Icon = s.icon
@@ -244,12 +244,12 @@ export default async function FreelancerProjectsPage() {
                                 'bg-blue-400': task.status === 'in_progress',
                                 'bg-amber-400': task.status === 'review',
                               })} />
-                              <span className="flex-1 min-w-0 text-xs text-foreground group-hover:text-[#f24a49] truncate transition-colors">
+                              <span className="flex-1 min-w-0 text-xs text-foreground group-hover:text-primary truncate transition-colors">
                                 {task.title}
                               </span>
                               {task.due_date && (
                                 <span className={cn('text-[10px] shrink-0', {
-                                  'text-[#f24a49] font-semibold': overdue,
+                                  'text-primary font-semibold': overdue,
                                   'text-amber-500': !overdue && dueSoon,
                                   'text-muted-foreground': !overdue && !dueSoon,
                                 })}>
@@ -277,7 +277,7 @@ export default async function FreelancerProjectsPage() {
                   <Link
                     href={`/freelancer/projects/${project.id}`}
                     className="text-xs font-semibold flex items-center gap-1 hover:gap-2 transition-all"
-                    style={{ color: '#f24a49' }}
+                    style={{ color: 'var(--primary)' }}
                   >
                     Open <ArrowRight className="w-3 h-3" />
                   </Link>
