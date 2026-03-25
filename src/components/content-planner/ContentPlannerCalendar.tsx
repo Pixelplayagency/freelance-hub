@@ -420,17 +420,17 @@ export function ContentPlannerCalendar({
       <div className="flex-1 min-w-0 space-y-3">
         {/* Month nav */}
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+          <button onClick={() => navigate(-1)} className="p-1.5 rounded-[var(--radius)] border border-border hover:bg-muted transition-colors">
             <ChevronLeft className="w-4 h-4 text-muted-foreground" />
           </button>
-          <span className="text-sm font-semibold text-foreground min-w-[130px] text-center">{MONTH_NAMES[month]} {year}</span>
-          <button onClick={() => navigate(1)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+          <span className="text-base font-bold text-foreground min-w-[140px] text-center" style={{ fontFamily: 'Outfit, sans-serif' }}>{MONTH_NAMES[month]} {year}</span>
+          <button onClick={() => navigate(1)} className="p-1.5 rounded-[var(--radius)] border border-border hover:bg-muted transition-colors">
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
           <div className="flex-1" />
           <button
             onClick={() => openPanel(todayDS)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius)] text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-95"
             style={{ backgroundColor: 'var(--primary)' }}
           >
             <Plus className="w-3.5 h-3.5" />
@@ -466,7 +466,7 @@ export function ContentPlannerCalendar({
                       return (
                         <td
                           key={ds}
-                          className={`border-b border-r border-border last:border-r-0 p-1.5 align-top transition-colors group ${!inMonth ? 'bg-muted/20' : ds === todayDS ? 'bg-primary/[0.03]' : ''}`}
+                          className={`border-b border-r border-border last:border-r-0 p-1.5 align-top transition-colors group ${!inMonth ? 'bg-muted/20' : ds === todayDS ? 'bg-primary/5' : ''}`}
                           style={{ minWidth: 108, width: '14.28%' }}
                         >
                           {/* Date + add button */}
@@ -489,7 +489,7 @@ export function ContentPlannerCalendar({
                             </div>
                             {inMonth && (
                               <button onClick={() => openPanel(ds)}
-                                className="w-4 h-4 rounded flex items-center justify-center text-muted-foreground/25 hover:text-primary transition-all opacity-0 group-hover:opacity-100"
+                                className="w-4 h-4 rounded flex items-center justify-center text-primary/30 hover:text-primary transition-all opacity-0 group-hover:opacity-100"
                                 style={{ opacity: active ? 1 : undefined }}>
                                 <Plus className="w-3 h-3" />
                               </button>
@@ -501,7 +501,7 @@ export function ContentPlannerCalendar({
                               {/* Main content card */}
                               <button
                                 onClick={() => openPanel(ds)}
-                                className={`w-full text-left rounded-xl overflow-hidden transition-all ${active ? 'ring-2 ring-primary' : 'hover:ring-1 hover:ring-primary/30'}`}
+                                className={`w-full text-left rounded-[var(--radius)] overflow-hidden transition-all ${active ? 'ring-2 ring-primary' : 'hover:ring-1 hover:ring-primary/40'}`}
                                 style={{ border: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.07)' }}
                               >
                                 {/* Card header: type icon + status badge */}
@@ -683,7 +683,7 @@ export function ContentPlannerCalendar({
                           {/* Empty cell — subtle + on hover */}
                           {inMonth && !entry && (
                             <button onClick={() => openPanel(ds)}
-                              className="w-full h-20 rounded-xl flex items-center justify-center text-muted-foreground/15 hover:text-primary/50 hover:bg-primary/[0.04] transition-all">
+                              className="w-full h-20 rounded-[var(--radius)] flex items-center justify-center text-primary/20 hover:text-primary/50 hover:bg-primary/[0.04] transition-all">
                               <Plus className="w-4 h-4" />
                             </button>
                           )}

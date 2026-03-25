@@ -95,107 +95,108 @@ export default async function FreelancerClientCalendarPage({
 
       {/* Hero header card */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        {/* Rose accent bar */}
+        <div className="h-1 w-full bg-primary/20" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, color-mix(in oklch, var(--primary), transparent 60%) 100%)' }} />
+
         {/* Top row: avatar + name + socials + toggle */}
-        <div className="flex items-center justify-between gap-4 px-4 pt-4 pb-3 flex-wrap">
+        <div className="flex items-center justify-between gap-4 px-4 pt-3.5 pb-3 flex-wrap">
           <div className="flex items-center gap-3">
             {/* Avatar */}
             {client.avatar_url ? (
-              <img src={client.avatar_url} alt="" className="w-11 h-11 rounded-xl object-cover border border-border shrink-0" />
+              <img src={client.avatar_url} alt="" className="w-12 h-12 rounded-[var(--radius)] object-cover border border-border shrink-0" />
             ) : (
               <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-base shrink-0"
+                className="w-12 h-12 rounded-[var(--radius)] flex items-center justify-center text-white font-bold text-lg shrink-0"
                 style={{ background: client.color }}
               >
                 {client.name.charAt(0).toUpperCase()}
               </div>
             )}
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-lg font-bold text-foreground leading-tight">{client.name}</h1>
-                {hasSocials && (
-                  <div className="flex items-center gap-1">
-                    {client.instagram_url && (
-                      <a href={client.instagram_url} target="_blank" rel="noopener noreferrer"
-                        className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
-                        <Instagram className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                    {client.facebook_url && (
-                      <a href={client.facebook_url} target="_blank" rel="noopener noreferrer"
-                        className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
-                        <Facebook className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                    {client.tiktok_url && (
-                      <a href={client.tiktok_url} target="_blank" rel="noopener noreferrer"
-                        className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
-                        <TikTokIcon className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
+              <h1 className="text-xl font-bold text-foreground leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>{client.name}</h1>
+              {hasSocials && (
+                <div className="flex items-center gap-0.5 mt-1 bg-muted rounded-md px-1.5 py-1 w-fit">
+                  {client.instagram_url && (
+                    <a href={client.instagram_url} target="_blank" rel="noopener noreferrer"
+                      className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+                      <Instagram className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {client.facebook_url && (
+                    <a href={client.facebook_url} target="_blank" rel="noopener noreferrer"
+                      className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+                      <Facebook className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {client.tiktok_url && (
+                    <a href={client.tiktok_url} target="_blank" rel="noopener noreferrer"
+                      className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+                      <TikTokIcon className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* View toggle */}
-          <div className="flex items-center gap-1 p-1 bg-muted rounded-xl border border-border shrink-0">
-            <Link
-              href={`${basePath}?view=calendar&month=${month}&year=${year}`}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                view === 'calendar'
-                  ? 'bg-card text-foreground shadow-sm border border-border'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <CalendarDays className="w-3.5 h-3.5" />
-              Calendar
-            </Link>
-            <Link
-              href={`${basePath}?view=task`}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                view === 'task'
-                  ? 'bg-card text-foreground shadow-sm border border-border'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <CheckSquare className="w-3.5 h-3.5" />
-              Task
-            </Link>
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Stats mini-cards */}
+            <div className="flex items-center gap-2">
+              <div className="flex flex-col items-center px-4 py-2 rounded-[var(--radius)] bg-background border border-border">
+                <span className="text-xl font-bold tabular-nums text-foreground leading-none" style={{ fontFamily: 'Outfit, sans-serif' }}>{postCount}</span>
+                <span className="text-[10px] text-muted-foreground mt-0.5">Posts</span>
+              </div>
+              <div className="flex flex-col items-center px-4 py-2 rounded-[var(--radius)] bg-background border border-border">
+                <span className="text-xl font-bold tabular-nums text-foreground leading-none" style={{ fontFamily: 'Outfit, sans-serif' }}>{reelCount}</span>
+                <span className="text-[10px] text-muted-foreground mt-0.5">Reels</span>
+              </div>
+              <div className="flex flex-col items-center px-4 py-2 rounded-[var(--radius)] bg-background border border-border">
+                <span className="text-xl font-bold tabular-nums text-foreground leading-none" style={{ fontFamily: 'Outfit, sans-serif' }}>{storyCount}</span>
+                <span className="text-[10px] text-muted-foreground mt-0.5">Stories</span>
+              </div>
+            </div>
+
+            {/* View toggle */}
+            <div className="flex items-center gap-1 p-1 bg-muted rounded-xl border border-border shrink-0">
+              <Link
+                href={`${basePath}?view=calendar&month=${month}&year=${year}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  view === 'calendar'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <CalendarDays className="w-3.5 h-3.5" />
+                Calendar
+              </Link>
+              <Link
+                href={`${basePath}?view=task`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  view === 'task'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <CheckSquare className="w-3.5 h-3.5" />
+                Task
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* Bottom row: month label + PDF + content counts */}
-        <div className="border-t border-border flex items-center justify-between px-4 py-2.5 bg-muted/20 flex-wrap gap-3">
-          <div className="flex items-center gap-3 flex-wrap">
-            <p className="text-xs text-muted-foreground font-medium">
-              Monthly content schedule — <span className="text-foreground font-semibold">{monthName}</span>
-            </p>
-            <ClientPdfSection
-              clientId={clientId}
-              pdfUrl={pdfSignedUrl}
-              hasPdf={!!client.content_plan_pdf_path}
-              hasLink={!!client.content_plan_link}
-              linkUrl={client.content_plan_link}
-              canEdit={false}
-            />
-          </div>
-          <div className="flex items-center gap-px bg-background border border-border rounded-lg overflow-hidden">
-            <div className="px-4 py-2 text-center">
-              <p className="text-base font-bold text-foreground tabular-nums">{postCount}</p>
-              <p className="text-[10px] text-muted-foreground leading-none mt-0.5">Posts</p>
-            </div>
-            <div className="w-px h-8 bg-border" />
-            <div className="px-4 py-2 text-center">
-              <p className="text-base font-bold text-foreground tabular-nums">{reelCount}</p>
-              <p className="text-[10px] text-muted-foreground leading-none mt-0.5">Reels</p>
-            </div>
-            <div className="w-px h-8 bg-border" />
-            <div className="px-4 py-2 text-center">
-              <p className="text-base font-bold text-foreground tabular-nums">{storyCount}</p>
-              <p className="text-[10px] text-muted-foreground leading-none mt-0.5">Stories</p>
-            </div>
-          </div>
+        {/* Bottom row: month label + PDF */}
+        <div className="border-t border-border flex items-center gap-3 px-4 py-2.5 bg-muted/30 flex-wrap">
+          <p className="text-xs text-muted-foreground font-medium">
+            Monthly content schedule — <span className="text-foreground font-semibold">{monthName}</span>
+          </p>
+          <ClientPdfSection
+            clientId={clientId}
+            pdfUrl={pdfSignedUrl}
+            hasPdf={!!client.content_plan_pdf_path}
+            hasLink={!!client.content_plan_link}
+            linkUrl={client.content_plan_link}
+            canEdit={false}
+          />
         </div>
       </div>
 
