@@ -113,7 +113,7 @@ export default async function FreelancerClientCalendarPage({
               </div>
             )}
             <div>
-              <h1 className="text-xl font-bold text-foreground leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>{client.name}</h1>
+              <h1 className="text-xl font-bold text-foreground leading-tight font-heading">{client.name}</h1>
               {hasSocials && (
                 <div className="flex items-center gap-0.5 mt-1 bg-muted rounded-md px-1.5 py-1 w-fit">
                   {client.instagram_url && (
@@ -143,15 +143,15 @@ export default async function FreelancerClientCalendarPage({
             {/* Stats mini-cards */}
             <div className="flex items-center gap-2">
               <div className="flex flex-col items-center px-4 py-2 rounded-[var(--radius)] bg-background border border-border">
-                <span className="text-xl font-bold tabular-nums text-foreground leading-none" style={{ fontFamily: 'Outfit, sans-serif' }}>{postCount}</span>
+                <span className="text-xl font-bold tabular-nums text-foreground leading-none font-heading">{postCount}</span>
                 <span className="text-[10px] text-muted-foreground mt-0.5">Posts</span>
               </div>
               <div className="flex flex-col items-center px-4 py-2 rounded-[var(--radius)] bg-background border border-border">
-                <span className="text-xl font-bold tabular-nums text-foreground leading-none" style={{ fontFamily: 'Outfit, sans-serif' }}>{reelCount}</span>
+                <span className="text-xl font-bold tabular-nums text-foreground leading-none font-heading">{reelCount}</span>
                 <span className="text-[10px] text-muted-foreground mt-0.5">Reels</span>
               </div>
               <div className="flex flex-col items-center px-4 py-2 rounded-[var(--radius)] bg-background border border-border">
-                <span className="text-xl font-bold tabular-nums text-foreground leading-none" style={{ fontFamily: 'Outfit, sans-serif' }}>{storyCount}</span>
+                <span className="text-xl font-bold tabular-nums text-foreground leading-none font-heading">{storyCount}</span>
                 <span className="text-[10px] text-muted-foreground mt-0.5">Stories</span>
               </div>
             </div>

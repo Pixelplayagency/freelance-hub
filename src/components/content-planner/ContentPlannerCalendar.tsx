@@ -423,7 +423,7 @@ export function ContentPlannerCalendar({
           <button onClick={() => navigate(-1)} className="p-1.5 rounded-[var(--radius)] border border-border hover:bg-muted transition-colors">
             <ChevronLeft className="w-4 h-4 text-muted-foreground" />
           </button>
-          <span className="text-base font-bold text-foreground min-w-[140px] text-center" style={{ fontFamily: 'Outfit, sans-serif' }}>{MONTH_NAMES[month]} {year}</span>
+          <span className="text-base font-bold text-foreground min-w-[140px] text-center font-heading">{MONTH_NAMES[month]} {year}</span>
           <button onClick={() => navigate(1)} className="p-1.5 rounded-[var(--radius)] border border-border hover:bg-muted transition-colors">
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
