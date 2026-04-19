@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useRef } from 'react'
+import { useState, useTransition, useId } from 'react'
 import { Plus, Trash2, GripVertical, Eye, Save, RotateCcw, ChevronDown, ChevronUp, Monitor, Smartphone, Upload, X } from 'lucide-react'
 import type { DiscoveryConfig, DiscoveryQuestion, DiscoveryQuestionType } from '@/lib/types/app.types'
 import { DEFAULT_DISCOVERY_CONFIG } from '@/lib/types/app.types'
@@ -198,19 +198,31 @@ function ImageUploader({
   height: number
   onChange: (url: string | null) => void
 }) {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputId = useId()
   const [uploading, setUploading] = useState(false)
 
-  async function handleFile(file: File) {
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
     setUploading(true)
-    const fd = new FormData()
-    fd.append('file', file)
-    fd.append('slot', slot)
-    const res = await fetch('/api/discovery/upload', { method: 'POST', body: fd })
-    const data = await res.json()
-    setUploading(false)
-    if (data.url) onChange(data.url)
-    else alert('Upload failed: ' + (data.error ?? 'unknown error'))
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('slot', slot)
+      const res = await fetch('/api/discovery/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (data.url) {
+        onChange(data.url)
+        toast.success('Image uploaded')
+      } else {
+        toast.error('Upload failed: ' + (data.error ?? 'unknown'))
+      }
+    } catch (err) {
+      toast.error('Upload error: ' + String(err))
+    } finally {
+      setUploading(false)
+    }
   }
 
   const preview = value || null
@@ -218,30 +230,35 @@ function ImageUploader({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</label>
-      <div
-        className={`relative overflow-hidden flex items-center justify-center cursor-pointer group border-2 border-dashed transition-colors hover:border-primary/50 ${isCircle ? 'rounded-full mx-auto' : 'rounded-xl w-full'}`}
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+
+      {/* Hidden file input — triggered via label htmlFor */}
+      <input id={inputId} type="file" accept="image/*" className="sr-only" disabled={uploading} onChange={handleFile} />
+
+      <label
+        htmlFor={inputId}
+        className={`relative flex items-center justify-center cursor-pointer group border-2 border-dashed transition-colors hover:border-primary/50 ${isCircle ? 'rounded-full mx-auto' : 'rounded-xl w-full'} ${uploading ? 'opacity-60 pointer-events-none' : ''}`}
         style={{
           width: isCircle ? height : undefined,
           height,
+          overflow: 'hidden',
           borderColor: 'var(--border)',
           backgroundColor: 'var(--muted)',
+          display: 'flex',
         }}
-        onClick={() => inputRef.current?.click()}
       >
         {preview
           ? <img src={preview} alt={label} className="w-full h-full object-cover" />
           : (
-            <div className="flex flex-col items-center gap-1.5 pointer-events-none select-none">
+            <div className="flex flex-col items-center gap-1.5 select-none">
               {slot === 'cover'
                 ? <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 : <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
               }
-              <span className="text-[11px] text-muted-foreground">{uploading ? 'Uploading…' : 'Click to upload'}</span>
+              <span className="text-[11px] text-muted-foreground">Click to upload</span>
             </div>
           )
         }
-        {/* Hover overlay on existing image */}
         {preview && !uploading && (
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <div className="flex items-center gap-1 text-white text-xs font-medium">
@@ -254,11 +271,10 @@ function ImageUploader({
             <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
           </div>
         )}
-        <input ref={inputRef} type="file" accept="image/*" className="hidden"
-          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = '' }} />
-      </div>
-      {preview && (
-        <button onClick={() => onChange(null)}
+      </label>
+
+      {preview && !uploading && (
+        <button type="button" onClick={() => onChange(null)}
           className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-red-500 transition-colors mx-auto">
           <X className="w-3 h-3" /> Remove image
         </button>
