@@ -9,10 +9,10 @@ import {
   FolderKanban,
   Users,
   Bell,
-  CheckSquare,
   LogOut,
   UserCircle,
   CalendarDays,
+  ClipboardList,
 } from 'lucide-react'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useRouter } from 'next/navigation'
@@ -28,6 +28,7 @@ const ADMIN_NAV: NavItem[] = [
   { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
   { href: '/admin/workspace', label: 'Workspace', icon: Users },
   { href: '/admin/content-planner', label: 'Content Planner', icon: CalendarDays },
+  { href: '/admin/discovery', label: 'Discovery', icon: ClipboardList },
   { href: '/admin/notifications', label: 'Notifications', icon: Bell },
   { href: '/admin/profile', label: 'Profile', icon: UserCircle },
 ]

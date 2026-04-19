@@ -143,6 +143,44 @@ export interface TaskReference {
   created_at: string
 }
 
+export interface DiscoveryToken {
+  id: string
+  token: string
+  label: string | null
+  created_by: string | null
+  used_at: string | null
+  expires_at: string | null
+  created_at: string
+  submission?: DiscoverySubmission | null
+}
+
+export interface DiscoverySubmission {
+  id: string
+  token_id: string | null
+  first_name: string
+  last_name: string
+  email: string
+  contact_number: string | null
+  business_role: string | null
+  brand_name: string
+  industry: string | null
+  business_description: string | null
+  brand_presence: string | null
+  worked_with_agency: string | null
+  start_timeline: string | null
+  instagram_handle: string | null
+  facebook_handle: string | null
+  tiktok_handle: string | null
+  website_url: string | null
+  support_types: string[] | null
+  content_types: string[] | null
+  posts_per_month: string | null
+  reels_per_month: string | null
+  site_visits_ok: string | null
+  monthly_budget: string | null
+  submitted_at: string
+}
+
 export interface Notification {
   id: string
   user_id: string
