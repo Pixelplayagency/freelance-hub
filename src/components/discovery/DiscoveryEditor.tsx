@@ -355,22 +355,6 @@ export function DiscoveryEditor({ initialConfig }: Props) {
           <ImageUploader label="Profile / Logo Image" value={config.profileImageUrl} slot="profile" shape="circle" height={100}
             onChange={url => setConfig({ ...config, profileImageUrl: url })} />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tagline (on banner)</label>
-            <input type="text" value={config.tagline ?? ''} onChange={e => setConfig({ ...config, tagline: e.target.value || null })}
-              placeholder="WHY FIT IN? WHEN YOU CAN STAND OUT"
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Agency handle</label>
-            <input type="text" value={config.agencyHandle ?? ''} onChange={e => setConfig({ ...config, agencyHandle: e.target.value || null })}
-              placeholder="PIXELPLAY.AGENCY"
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-            />
-          </div>
-        </div>
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Form title</label>
           <input type="text" value={config.formTitle ?? ''} onChange={e => setConfig({ ...config, formTitle: e.target.value || null })}

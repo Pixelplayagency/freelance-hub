@@ -263,36 +263,28 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'white' }}>
       {/* Hero banner */}
-      <div className="relative overflow-hidden" style={{ height: 210, backgroundColor: '#111' }}>
+      <div className="relative" style={{ height: 220, backgroundColor: '#111' }}>
         {config.coverImageUrl
-          ? <img src={config.coverImageUrl} alt="" className="w-full h-full object-cover" style={{ opacity: 0.75 }} />
+          ? <img src={config.coverImageUrl} alt="" className="w-full h-full object-cover" style={{ opacity: 0.9 }} />
           : <div className="w-full h-full" style={{ background: 'linear-gradient(160deg, #1c1410 0%, #2e1f1a 50%, #1a1410 100%)' }} />
         }
-        <div className="absolute inset-0 flex flex-col justify-end p-5"
-          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 65%)' }}>
-          <div className="flex items-end justify-between gap-4">
-            <p className="text-white font-black text-xl uppercase leading-tight" style={{ maxWidth: '60%', textShadow: '0 1px 6px rgba(0,0,0,0.5)' }}>
-              {config.tagline || 'CLIENT DISCOVERY'}
-            </p>
-            <div className="text-right shrink-0 space-y-0.5">
-              <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>#CREATIVEAGENCY</p>
-              <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>{config.agencyHandle || 'PIXELPLAY.AGENCY'}</p>
-            </div>
+        {/* Subtle bottom fade */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%)' }} />
+        {/* Logo hovering at bottom-center of banner */}
+        <div className="absolute left-1/2" style={{ bottom: -48, transform: 'translateX(-50%)' }}>
+          <div className="rounded-full border-4 overflow-hidden flex items-center justify-center"
+            style={{ width: 96, height: 96, borderColor: 'white', backgroundColor: '#f24a49', boxShadow: '0 8px 32px rgba(0,0,0,0.28)' }}>
+            {config.profileImageUrl
+              ? <img src={config.profileImageUrl} alt="logo" className="w-full h-full object-cover" />
+              : <span className="text-white font-black text-2xl tracking-tight">PP</span>
+            }
           </div>
         </div>
       </div>
 
       <div className="max-w-xl mx-auto px-4 pb-10">
-        {/* Profile pic overlapping hero */}
-        <div style={{ marginTop: -44 }} className="mb-5">
-          <div className="rounded-full border-4 overflow-hidden flex items-center justify-center"
-            style={{ width: 88, height: 88, borderColor: 'white', backgroundColor: '#f24a49', boxShadow: '0 4px 20px rgba(0,0,0,0.22)' }}>
-            {config.profileImageUrl
-              ? <img src={config.profileImageUrl} alt="logo" className="w-full h-full object-cover" />
-              : <span className="text-white font-black text-xl tracking-tight">PP</span>
-            }
-          </div>
-        </div>
+        {/* Spacer for logo overlap */}
+        <div style={{ height: 64 }} />
 
         {/* Title + description */}
         <div className="mb-6">
