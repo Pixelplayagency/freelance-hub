@@ -157,6 +157,7 @@ export interface DiscoveryQuestion {
 export interface DiscoveryConfig {
   questions: DiscoveryQuestion[]
   coverImageUrl?: string | null
+  coverImagePosition?: number | null
   profileImageUrl?: string | null
   tagline?: string | null
   agencyHandle?: string | null

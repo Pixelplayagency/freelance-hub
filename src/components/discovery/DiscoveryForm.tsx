@@ -265,18 +265,18 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
       {/* Hero banner */}
       <div className="relative" style={{ height: 220, backgroundColor: '#111' }}>
         {config.coverImageUrl
-          ? <img src={config.coverImageUrl} alt="" className="w-full h-full object-cover" style={{ opacity: 0.9 }} />
+          ? <img src={config.coverImageUrl} alt="" className="w-full h-full object-cover"
+              style={{ opacity: 0.9, objectPosition: `center ${config.coverImagePosition ?? 50}%` }} />
           : <div className="w-full h-full" style={{ background: 'linear-gradient(160deg, #1c1410 0%, #2e1f1a 50%, #1a1410 100%)' }} />
         }
-        {/* Subtle bottom fade */}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%)' }} />
-        {/* Logo hovering at bottom-center of banner */}
-        <div className="absolute left-1/2" style={{ bottom: -48, transform: 'translateX(-50%)' }}>
+        {/* Logo hovering at bottom-left of banner */}
+        <div className="absolute" style={{ bottom: -28, left: 24 }}>
           <div className="rounded-full border-4 overflow-hidden flex items-center justify-center"
-            style={{ width: 96, height: 96, borderColor: 'white', backgroundColor: '#f24a49', boxShadow: '0 8px 32px rgba(0,0,0,0.28)' }}>
+            style={{ width: 64, height: 64, borderColor: 'white', backgroundColor: '#f24a49', boxShadow: '0 6px 20px rgba(0,0,0,0.28)' }}>
             {config.profileImageUrl
               ? <img src={config.profileImageUrl} alt="logo" className="w-full h-full object-cover" />
-              : <span className="text-white font-black text-2xl tracking-tight">PP</span>
+              : <span className="text-white font-black text-lg tracking-tight">PP</span>
             }
           </div>
         </div>
@@ -284,7 +284,7 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
 
       <div className="max-w-xl mx-auto px-4 pb-10">
         {/* Spacer for logo overlap */}
-        <div style={{ height: 64 }} />
+        <div style={{ height: 44 }} />
 
         {/* Title + description */}
         <div className="mb-6">

@@ -294,25 +294,25 @@ export function DiscoveryEditor({ initialConfig }: Props) {
   const updateQuestion = (i: number, q: DiscoveryQuestion) => {
     const next = [...questions]
     next[i] = q
-    setConfig({ questions: next })
+    setConfig(c => ({ ...c, questions: next }))
   }
 
   const deleteQuestion = (i: number) => {
-    setConfig({ questions: questions.filter((_, idx) => idx !== i) })
+    setConfig(c => ({ ...c, questions: questions.filter((_, idx) => idx !== i) }))
   }
 
   const moveUp = (i: number) => {
     if (i === 0) return
     const next = [...questions]
     ;[next[i - 1], next[i]] = [next[i], next[i - 1]]
-    setConfig({ questions: next })
+    setConfig(c => ({ ...c, questions: next }))
   }
 
   const moveDown = (i: number) => {
     if (i === questions.length - 1) return
     const next = [...questions]
     ;[next[i], next[i + 1]] = [next[i + 1], next[i]]
-    setConfig({ questions: next })
+    setConfig(c => ({ ...c, questions: next }))
   }
 
   const addQuestion = () => {
@@ -323,7 +323,7 @@ export function DiscoveryEditor({ initialConfig }: Props) {
       type: 'single_choice',
       options: ['Option 1', 'Option 2'],
     }
-    setConfig({ questions: [...questions, newQ] })
+    setConfig(c => ({ ...c, questions: [...questions, newQ] }))
   }
 
   const resetToDefault = () => {
@@ -355,6 +355,21 @@ export function DiscoveryEditor({ initialConfig }: Props) {
           <ImageUploader label="Profile / Logo Image" value={config.profileImageUrl} slot="profile" shape="circle" height={100}
             onChange={url => setConfig({ ...config, profileImageUrl: url })} />
         </div>
+        {config.coverImageUrl && (
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Wallpaper vertical position</label>
+              <span className="text-xs text-muted-foreground tabular-nums">{config.coverImagePosition ?? 50}%</span>
+            </div>
+            <input type="range" min={0} max={100} value={config.coverImagePosition ?? 50}
+              onChange={e => setConfig({ ...config, coverImagePosition: Number(e.target.value) })}
+              className="w-full accent-red-500 cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>Top</span><span>Center</span><span>Bottom</span>
+            </div>
+          </div>
+        )}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Form title</label>
           <input type="text" value={config.formTitle ?? ''} onChange={e => setConfig({ ...config, formTitle: e.target.value || null })}
