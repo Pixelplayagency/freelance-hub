@@ -252,19 +252,46 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
   const page1Valid = firstName && lastName && email && brandName
 
   return (
-    <div className="min-h-screen py-10 px-4">
-      <div className="max-w-xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: '#f24a49', boxShadow: '0 4px 14px rgba(242,74,73,0.35)' }}>
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
+    <div className="min-h-screen" style={{ backgroundColor: '#f8f7f4' }}>
+      {/* Hero banner */}
+      <div className="relative overflow-hidden" style={{ height: 210, backgroundColor: '#111' }}>
+        {config.coverImageUrl
+          ? <img src={config.coverImageUrl} alt="" className="w-full h-full object-cover" style={{ opacity: 0.75 }} />
+          : <div className="w-full h-full" style={{ background: 'linear-gradient(160deg, #1c1410 0%, #2e1f1a 50%, #1a1410 100%)' }} />
+        }
+        <div className="absolute inset-0 flex flex-col justify-end p-5"
+          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 65%)' }}>
+          <div className="flex items-end justify-between gap-4">
+            <p className="text-white font-black text-xl uppercase leading-tight" style={{ maxWidth: '60%', textShadow: '0 1px 6px rgba(0,0,0,0.5)' }}>
+              {config.tagline || 'CLIENT DISCOVERY'}
+            </p>
+            <div className="text-right shrink-0 space-y-0.5">
+              <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>#CREATIVEAGENCY</p>
+              <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.65)' }}>{config.agencyHandle || 'PIXELPLAY.AGENCY'}</p>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#1a1714' }}>CLIENT DISCOVERY</h1>
-          <p className="text-sm mt-1.5" style={{ color: '#8c8278' }}>
-            This form helps us understand your brand and build a custom content system tailored to your needs.
+        </div>
+      </div>
+
+      <div className="max-w-xl mx-auto px-4 pb-10">
+        {/* Profile pic overlapping hero */}
+        <div style={{ marginTop: -28 }} className="mb-4">
+          <div className="rounded-full border-4 overflow-hidden flex items-center justify-center"
+            style={{ width: 60, height: 60, borderColor: '#f8f7f4', backgroundColor: '#f24a49', boxShadow: '0 2px 12px rgba(0,0,0,0.18)' }}>
+            {config.profileImageUrl
+              ? <img src={config.profileImageUrl} alt="logo" className="w-full h-full object-cover" />
+              : <span className="text-white font-black text-sm tracking-tight">PP</span>
+            }
+          </div>
+        </div>
+
+        {/* Title + description */}
+        <div className="mb-6">
+          <h1 className="text-xl font-bold leading-snug" style={{ color: '#1a1714' }}>
+            {config.formTitle || 'Client Discovery Survey'}
+          </h1>
+          <p className="text-sm mt-1.5 leading-relaxed" style={{ color: '#8c8278' }}>
+            {config.formDescription || 'This form helps us understand your brand and build a custom content system tailored to your needs.'}
           </p>
           {label && <p className="text-xs mt-1 font-medium" style={{ color: '#f24a49' }}>{label}</p>}
         </div>

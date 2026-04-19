@@ -242,10 +242,84 @@ export function DiscoveryEditor({ initialConfig }: Props) {
 
   return (
     <div className="space-y-5">
+      {/* Branding */}
+      <div className="rounded-xl border bg-card p-5 space-y-4">
+        <h2 className="text-sm font-semibold text-foreground">Branding</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Cover image */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cover / Wallpaper Image URL</label>
+            <div className="relative rounded-xl border-2 border-dashed overflow-hidden" style={{ borderColor: 'var(--border)', height: 90 }}>
+              {config.coverImageUrl
+                ? <img src={config.coverImageUrl} alt="cover" className="w-full h-full object-cover" />
+                : <div className="w-full h-full flex flex-col items-center justify-center gap-1" style={{ backgroundColor: 'var(--muted)' }}>
+                    <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <span className="text-xs text-muted-foreground">Wallpaper</span>
+                  </div>
+              }
+            </div>
+            <input type="url" value={config.coverImageUrl ?? ''} onChange={e => setConfig({ ...config, coverImageUrl: e.target.value || null })}
+              placeholder="https://... (paste image URL)"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            />
+          </div>
+          {/* Profile image */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Profile / Logo Image URL</label>
+            <div className="flex justify-center">
+              <div className="rounded-full border-2 border-dashed overflow-hidden flex items-center justify-center"
+                style={{ width: 90, height: 90, borderColor: 'var(--border)', backgroundColor: 'var(--muted)' }}>
+                {config.profileImageUrl
+                  ? <img src={config.profileImageUrl} alt="profile" className="w-full h-full object-cover" />
+                  : <div className="flex flex-col items-center gap-1">
+                      <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                      <span className="text-xs text-muted-foreground">Logo</span>
+                    </div>
+                }
+              </div>
+            </div>
+            <input type="url" value={config.profileImageUrl ?? ''} onChange={e => setConfig({ ...config, profileImageUrl: e.target.value || null })}
+              placeholder="https://... (paste image URL)"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tagline (on banner)</label>
+            <input type="text" value={config.tagline ?? ''} onChange={e => setConfig({ ...config, tagline: e.target.value || null })}
+              placeholder="WHY FIT IN? WHEN YOU CAN STAND OUT"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Agency handle</label>
+            <input type="text" value={config.agencyHandle ?? ''} onChange={e => setConfig({ ...config, agencyHandle: e.target.value || null })}
+              placeholder="PIXELPLAY.AGENCY"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Form title</label>
+          <input type="text" value={config.formTitle ?? ''} onChange={e => setConfig({ ...config, formTitle: e.target.value || null })}
+            placeholder="Client Discovery Survey By PixelPlay Creative Agency"
+            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Form description</label>
+          <textarea value={config.formDescription ?? ''} onChange={e => setConfig({ ...config, formDescription: e.target.value || null })}
+            rows={2} placeholder="Short intro paragraph shown under the title..."
+            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all resize-none"
+          />
+        </div>
+      </div>
+
       {/* Toolbar */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Edit Form Questions</h2>
+          <h2 className="text-base font-semibold text-foreground">Form Questions</h2>
           <p className="text-xs text-muted-foreground mt-0.5">{questions.length} questions · changes apply to all future submissions</p>
         </div>
         <div className="flex items-center gap-2">
