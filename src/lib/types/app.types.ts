@@ -151,6 +151,7 @@ export interface DiscoveryQuestion {
   text: string
   type: DiscoveryQuestionType
   options: string[]
+  required?: boolean
 }
 
 export interface DiscoveryConfig {

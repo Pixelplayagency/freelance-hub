@@ -58,6 +58,7 @@ function QuestionEditor({
             </span>
             <span className="text-[11px] text-muted-foreground">{TYPE_LABELS[q.type]}</span>
             {q.options.length > 0 && <span className="text-[11px] text-muted-foreground">{q.options.length} options</span>}
+            {q.required && <span className="text-[11px] font-semibold" style={{ color: '#f24a49' }}>Required</span>}
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
@@ -69,6 +70,13 @@ function QuestionEditor({
             className="p-1.5 rounded-lg hover:bg-muted transition-colors disabled:opacity-20" title="Move down">
             <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
+          <label className="flex items-center gap-1 cursor-pointer select-none" title="Require this question to be answered before proceeding">
+            <input type="checkbox" checked={q.required ?? false}
+              onChange={e => onChange({ ...q, required: e.target.checked })}
+              className="w-3.5 h-3.5 rounded accent-red-500 cursor-pointer"
+            />
+            <span className="text-[11px] font-medium text-muted-foreground">Required</span>
+          </label>
           <button onClick={() => setOpen(o => !o)}
             className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground text-xs font-medium px-2">
             {open ? 'Done' : 'Edit'}

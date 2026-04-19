@@ -100,9 +100,10 @@ function QuestionBlock({ q, num, answers, setAnswer }: {
   const val = answers[q.id] ?? []
 
   const title = (
-    <h3 className="text-sm font-semibold mb-3" style={{ color: '#3a3530' }}>
+    <h3 className="text-sm font-semibold mb-4" style={{ color: '#3a3530' }}>
       <span className="font-bold mr-1.5" style={{ color: '#f24a49' }}>{num}.</span>
       {q.text}
+      {q.required && <span className="ml-1" style={{ color: '#f24a49' }}>*</span>}
     </h3>
   )
 
@@ -249,10 +250,18 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
     }
   }
 
-  const page1Valid = firstName && lastName && email && brandName
+  const isAnswered = (q: DiscoveryQuestion) => {
+    const val = answers[q.id] ?? []
+    if (q.type === 'social_handles') return val.some(v => v?.trim())
+    return val.length > 0 && val.some(v => v?.trim())
+  }
+
+  const page1RequiredOk = page1Questions.filter(q => q.required).every(isAnswered)
+  const page1Valid = !!(firstName && lastName && email && brandName) && page1RequiredOk
+  const page2RequiredOk = page2Questions.filter(q => q.required).every(isAnswered)
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f8f7f4' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'white' }}>
       {/* Hero banner */}
       <div className="relative overflow-hidden" style={{ height: 210, backgroundColor: '#111' }}>
         {config.coverImageUrl
@@ -275,12 +284,12 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
 
       <div className="max-w-xl mx-auto px-4 pb-10">
         {/* Profile pic overlapping hero */}
-        <div style={{ marginTop: -28 }} className="mb-4">
+        <div style={{ marginTop: -44 }} className="mb-5">
           <div className="rounded-full border-4 overflow-hidden flex items-center justify-center"
-            style={{ width: 60, height: 60, borderColor: '#f8f7f4', backgroundColor: '#f24a49', boxShadow: '0 2px 12px rgba(0,0,0,0.18)' }}>
+            style={{ width: 88, height: 88, borderColor: 'white', backgroundColor: '#f24a49', boxShadow: '0 4px 20px rgba(0,0,0,0.22)' }}>
             {config.profileImageUrl
               ? <img src={config.profileImageUrl} alt="logo" className="w-full h-full object-cover" />
-              : <span className="text-white font-black text-sm tracking-tight">PP</span>
+              : <span className="text-white font-black text-xl tracking-tight">PP</span>
             }
           </div>
         </div>
@@ -360,10 +369,10 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
               </section>
             </>
           ) : (
-            <section className="space-y-6">
+            <section className="space-y-8">
               {page2Questions.map((q, i) => (
                 <div key={q.id}>
-                  {i > 0 && <div className="h-px" style={{ backgroundColor: '#f0ece6' }} />}
+                  {i > 0 && <div className="h-px mb-8" style={{ backgroundColor: '#f0ece6' }} />}
                   <QuestionBlock q={q} num={String(page1Questions.length + i + 1).padStart(2, '0')} answers={answers} setAnswer={setAnswer} />
                 </div>
               ))}
@@ -394,7 +403,7 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
               Next <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
-            <button type="button" onClick={isPreview ? () => setPage(1) : handleSubmit} disabled={submitting}
+            <button type="button" onClick={isPreview ? () => setPage(1) : handleSubmit} disabled={submitting || (!isPreview && !page2RequiredOk)}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-60"
               style={{ backgroundColor: '#f24a49', boxShadow: '0 4px 14px rgba(242,74,73,0.30)' }}
             >
