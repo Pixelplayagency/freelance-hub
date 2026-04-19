@@ -15,6 +15,7 @@ const TYPE_LABELS: Record<DiscoveryQuestionType, string> = {
   single_choice: 'Single choice',
   multi_choice: 'Multiple choice',
   social_handles: 'Social handles',
+  dropdown: 'Dropdown',
 }
 
 function QuestionEditor({
@@ -98,6 +99,7 @@ function QuestionEditor({
                 className="w-full px-3 py-2 rounded-xl border border-border bg-background text-foreground text-sm outline-none cursor-pointer">
                 <option value="single_choice">Single choice</option>
                 <option value="multi_choice">Multiple choice</option>
+                <option value="dropdown">Dropdown</option>
                 <option value="social_handles">Social handles</option>
               </select>
             </div>

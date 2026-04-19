@@ -143,7 +143,7 @@ export interface TaskReference {
   created_at: string
 }
 
-export type DiscoveryQuestionType = 'single_choice' | 'multi_choice' | 'social_handles'
+export type DiscoveryQuestionType = 'single_choice' | 'multi_choice' | 'social_handles' | 'dropdown'
 
 export interface DiscoveryQuestion {
   id: string
@@ -159,9 +159,9 @@ export interface DiscoveryConfig {
 
 export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
   questions: [
-    { id: 'q1', page: 1, text: 'How would you describe your current brand presence?', type: 'single_choice', options: ["We don't have any branding yet and would like support", 'We have a logo but need help building full branding', 'We have a complete brand kit (visuals, fonts, colors, and tone of voice)'] },
-    { id: 'q2', page: 1, text: 'Have you worked with an agency before?', type: 'single_choice', options: ['Yes', 'No'] },
-    { id: 'q3', page: 1, text: 'When are you looking to start?', type: 'single_choice', options: ['Immediately', 'Within 1 month', '2–3 months', '5 months +'] },
+    { id: 'q1', page: 1, text: 'How would you describe your current brand presence?', type: 'dropdown', options: ["We don't have any branding yet and would like support", 'We have a logo but need help building full branding', 'We have a complete brand kit (visuals, fonts, colors, and tone of voice)'] },
+    { id: 'q2', page: 1, text: 'Have you worked with an agency before?', type: 'dropdown', options: ['Yes', 'No'] },
+    { id: 'q3', page: 1, text: 'When are you looking to start?', type: 'dropdown', options: ['Immediately', 'Within 1 month', '2–3 months', '5 months +'] },
     { id: 'q4_note', page: 1, text: 'Please add all of your social media account @username', type: 'social_handles', options: [] },
     { id: 'q5', page: 2, text: 'What kind of support do you expect from us?', type: 'multi_choice', options: ['Social Media Strategy & Management', 'Campaign Strategy & Production', 'Brand Development & Identity Design', 'Paid Media Strategy & Management'] },
     { id: 'q6', page: 2, text: 'What type of content do you need us to create?', type: 'multi_choice', options: ['Photography', 'Videography', 'Graphic Design', 'Short-Form Video Production', 'Product & Lifestyle Content Production'] },

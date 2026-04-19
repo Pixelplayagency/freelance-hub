@@ -91,17 +91,25 @@ function FormSelect({ label, value, onChange, options, required }: {
   )
 }
 
-function QuestionBlock({ q, answers, setAnswer }: {
+function QuestionBlock({ q, num, answers, setAnswer }: {
   q: DiscoveryQuestion
+  num: string
   answers: Record<string, string[]>
   setAnswer: (id: string, val: string[]) => void
 }) {
   const val = answers[q.id] ?? []
 
+  const title = (
+    <h3 className="text-sm font-semibold mb-3" style={{ color: '#3a3530' }}>
+      <span className="font-bold mr-1.5" style={{ color: '#f24a49' }}>{num}.</span>
+      {q.text}
+    </h3>
+  )
+
   if (q.type === 'social_handles') {
     return (
       <div>
-        <h3 className="text-sm font-semibold mb-3" style={{ color: '#3a3530' }}>{q.text}</h3>
+        {title}
         <div className="grid grid-cols-2 gap-3">
           {['Instagram', 'Facebook', 'TikTok', 'Website'].map((platform, i) => (
             <FormInput key={platform} label={platform} value={val[i] ?? ''} placeholder={platform === 'Website' ? 'https://...' : '@username'}
@@ -113,9 +121,28 @@ function QuestionBlock({ q, answers, setAnswer }: {
     )
   }
 
+  if (q.type === 'dropdown') {
+    return (
+      <div>
+        {title}
+        <select
+          value={val[0] ?? ''}
+          onChange={e => setAnswer(q.id, e.target.value ? [e.target.value] : [])}
+          className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all appearance-none cursor-pointer"
+          style={{ borderColor: '#e5e0d8', backgroundColor: 'white', color: val[0] ? '#1a1714' : '#a09690' }}
+          onFocus={e => { e.target.style.borderColor = '#f24a49' }}
+          onBlur={e => { e.target.style.borderColor = '#e5e0d8' }}
+        >
+          <option value="" disabled>Select an option</option>
+          {q.options.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </div>
+    )
+  }
+
   return (
     <div>
-      <h3 className="text-sm font-semibold mb-3" style={{ color: '#3a3530' }}>{q.text}</h3>
+      {title}
       <CheckboxGroup options={q.options} selected={val} onChange={v => setAnswer(q.id, v)} single={q.type === 'single_choice'} />
     </div>
   )
@@ -300,7 +327,7 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
                 {page1Questions.map((q, i) => (
                   <div key={q.id}>
                     {i > 0 && <div className="h-px mb-5" style={{ backgroundColor: '#f0ece6' }} />}
-                    <QuestionBlock q={q} answers={answers} setAnswer={setAnswer} />
+                    <QuestionBlock q={q} num={String(i + 1).padStart(2, '0')} answers={answers} setAnswer={setAnswer} />
                   </div>
                 ))}
               </section>
@@ -310,7 +337,7 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
               {page2Questions.map((q, i) => (
                 <div key={q.id}>
                   {i > 0 && <div className="h-px" style={{ backgroundColor: '#f0ece6' }} />}
-                  <QuestionBlock q={q} answers={answers} setAnswer={setAnswer} />
+                  <QuestionBlock q={q} num={String(page1Questions.length + i + 1).padStart(2, '0')} answers={answers} setAnswer={setAnswer} />
                 </div>
               ))}
             </section>
