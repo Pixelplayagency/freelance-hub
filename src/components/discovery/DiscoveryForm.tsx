@@ -284,10 +284,10 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
 
       <div className="max-w-xl mx-auto px-4 pb-10">
         {/* Spacer for logo overlap */}
-        <div style={{ height: 44 }} />
+        <div style={{ height: 40 }} />
 
         {/* Title + description */}
-        <div className="mb-6">
+        <div className="mb-5">
           <h1 className="text-xl font-bold leading-snug" style={{ color: '#1a1714' }}>
             {config.formTitle || 'Client Discovery Survey'}
           </h1>
