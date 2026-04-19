@@ -266,12 +266,12 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
       <div className="relative" style={{ height: 220, backgroundColor: '#111' }}>
         {config.coverImageUrl
           ? <img src={config.coverImageUrl} alt="" className="w-full h-full object-cover"
-              style={{ opacity: 0.9, objectPosition: `center ${config.coverImagePosition ?? 50}%` }} />
+              style={{ opacity: 0.9, objectPosition: `center ${config.coverImagePosition ?? 70}%` }} />
           : <div className="w-full h-full" style={{ background: 'linear-gradient(160deg, #1c1410 0%, #2e1f1a 50%, #1a1410 100%)' }} />
         }
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%)' }} />
-        {/* Logo hovering at bottom-left of banner */}
-        <div className="absolute" style={{ bottom: -28, left: 24 }}>
+        {/* Logo hovering at bottom-center of banner */}
+        <div className="absolute left-1/2" style={{ bottom: -32, transform: 'translateX(-50%)' }}>
           <div className="rounded-full border-4 overflow-hidden flex items-center justify-center"
             style={{ width: 64, height: 64, borderColor: 'white', backgroundColor: '#f24a49', boxShadow: '0 6px 20px rgba(0,0,0,0.28)' }}>
             {config.profileImageUrl
