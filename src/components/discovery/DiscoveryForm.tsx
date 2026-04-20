@@ -84,8 +84,8 @@ function FormSelect({ label, value, onChange, options, required }: {
         onFocus={e => { e.target.style.borderColor = '#f24a49' }}
         onBlur={e => { e.target.style.borderColor = '#e5e0d8' }}
       >
-        <option value="" disabled>Select an option</option>
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
+        <option value="" disabled style={{ color: '#a09690', backgroundColor: 'white' }}>Select an option</option>
+        {options.map(o => <option key={o} value={o} style={{ color: '#1a1714', backgroundColor: 'white' }}>{o}</option>)}
       </select>
     </div>
   )
