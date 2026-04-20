@@ -100,6 +100,7 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
 
   const coverInputRef = useRef<HTMLInputElement>(null)
   const avatarInputRef = useRef<HTMLInputElement>(null)
+  const colorPickerRef = useRef<HTMLInputElement>(null)
 
   async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -278,7 +279,7 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
       {/* Color */}
       <div className="space-y-2">
         <Label className="text-sm">Accent color</Label>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
           {COLOR_OPTIONS.map(c => (
             <button
               key={c}
@@ -292,6 +293,27 @@ export function ProjectForm({ onSuccess, projectId, initialValues }: ProjectForm
               }}
             />
           ))}
+          {/* Custom color swatch — shows the picked color and opens the picker */}
+          <button
+            type="button"
+            onClick={() => colorPickerRef.current?.click()}
+            className="w-7 h-7 rounded-full border-2 border-dashed border-border hover:scale-110 transition-transform focus:outline-none flex items-center justify-center text-xs text-muted-foreground font-bold overflow-hidden"
+            style={
+              !COLOR_OPTIONS.includes(color)
+                ? { backgroundColor: color, outline: `3px solid ${color}`, outlineOffset: '2px', border: 'none', color: 'transparent' }
+                : {}
+            }
+            title="Pick custom color"
+          >
+            +
+          </button>
+          <input
+            ref={colorPickerRef}
+            type="color"
+            className="sr-only"
+            value={COLOR_OPTIONS.includes(color) ? '#000000' : color}
+            onChange={e => setColor(e.target.value)}
+          />
         </div>
       </div>
 
