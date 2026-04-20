@@ -193,7 +193,7 @@ function ImageUploader({
 }: {
   label: string
   value: string | null | undefined
-  slot: 'cover' | 'profile'
+  slot: 'cover' | 'profile' | 'thankyou-logo'
   shape: 'rect' | 'circle'
   height: number
   onChange: (url: string | null) => void
@@ -362,6 +362,30 @@ export function DiscoveryEditor({ initialConfig }: Props) {
             className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all resize-none"
           />
         </div>
+      </div>
+
+      {/* Thank You Footer */}
+      <div className="rounded-xl border bg-card p-5 space-y-4">
+        <h2 className="text-sm font-semibold text-foreground">Thank You Screen</h2>
+        <p className="text-xs text-muted-foreground -mt-2">Shown after the client submits the form. Use <code className="bg-muted px-1 rounded">{'{firstName}'}</code> to insert their name.</p>
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Message</label>
+          <textarea
+            value={config.thankYouMessage ?? ''}
+            onChange={e => setConfig({ ...config, thankYouMessage: e.target.value || null })}
+            rows={4}
+            placeholder="Thank you for taking the time to complete our Client Discovery Survey {firstName}!..."
+            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all resize-none"
+          />
+        </div>
+        <ImageUploader
+          label="Company Logo (shown below the message)"
+          value={config.thankYouLogoUrl}
+          slot="thankyou-logo"
+          shape="rect"
+          height={80}
+          onChange={url => setConfig({ ...config, thankYouLogoUrl: url })}
+        />
       </div>
 
       {/* Toolbar */}

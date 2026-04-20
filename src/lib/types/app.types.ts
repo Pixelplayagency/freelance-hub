@@ -163,6 +163,8 @@ export interface DiscoveryConfig {
   agencyHandle?: string | null
   formTitle?: string | null
   formDescription?: string | null
+  thankYouMessage?: string | null
+  thankYouLogoUrl?: string | null
 }
 
 export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
@@ -172,6 +174,8 @@ export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
   agencyHandle: 'PIXELPLAY.AGENCY',
   formTitle: 'Client Discovery Survey By PixelPlay Creative Agency',
   formDescription: 'This form helps us understand your brand and the kind of marketing and creative support you\'re looking for. It takes only a few minutes to complete.',
+  thankYouMessage: 'Thank you for taking the time to complete our Client Discovery Survey {firstName}! This helps us prepare a tailored proposal, which we\'ll share with you within a week for your review. We look forward to collaborating with you soon.',
+  thankYouLogoUrl: null,
   questions: [
     { id: 'q1', page: 1, text: 'How would you describe your current brand presence?', type: 'dropdown', options: ["We don't have any branding yet and would like support", 'We have a logo but need help building full branding', 'We have a complete brand kit (visuals, fonts, colors, and tone of voice)'] },
     { id: 'q2', page: 1, text: 'Have you worked with an agency before?', type: 'dropdown', options: ['Yes', 'No'] },

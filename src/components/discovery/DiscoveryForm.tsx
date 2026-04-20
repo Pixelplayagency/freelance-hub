@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ChevronRight, ChevronLeft, CheckCircle2, AlertCircle, ChevronDown } from 'lucide-react'
+import { ChevronRight, ChevronLeft, AlertCircle, ChevronDown } from 'lucide-react'
 import type { DiscoveryConfig, DiscoveryQuestion } from '@/lib/types/app.types'
 import { DEFAULT_DISCOVERY_CONFIG } from '@/lib/types/app.types'
 
@@ -213,16 +213,20 @@ export function DiscoveryForm({ tokenId, token, isExpired, isUsed, previewConfig
   }
 
   if (!isPreview && submitted) {
+    const message = (config.thankYouMessage ?? 'Thank you {firstName}! We\'ll be in touch soon.')
+      .replace('{firstName}', firstName || 'there')
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center max-w-sm">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'rgba(242,74,73,0.1)' }}>
-            <CheckCircle2 className="w-10 h-10" style={{ color: '#f24a49' }} />
-          </div>
-          <h1 className="text-2xl font-bold mb-3" style={{ color: '#1a1714' }}>Thank you!</h1>
-          <p className="text-sm leading-relaxed" style={{ color: '#8c8278' }}>
-            We've received your discovery form. Our team will review your information and reach out to you shortly.
-          </p>
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-16 text-center" style={{ backgroundColor: 'white' }}>
+        <div className="max-w-lg w-full">
+          <p className="text-base font-semibold leading-relaxed mb-10" style={{ color: '#1a1714' }}>{message}</p>
+          {config.thankYouLogoUrl
+            ? <img src={config.thankYouLogoUrl} alt="logo" className="mx-auto max-h-24 object-contain" />
+            : (
+              <div className="mx-auto flex items-center justify-center rounded-2xl border-2 border-dashed" style={{ width: 200, height: 80, borderColor: '#e5e0d8' }}>
+                <span className="text-xs" style={{ color: '#c0b8b0' }}>Company logo</span>
+              </div>
+            )
+          }
         </div>
       </div>
     )
