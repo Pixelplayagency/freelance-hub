@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ChevronRight, ChevronLeft, CheckCircle2, AlertCircle } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { ChevronRight, ChevronLeft, CheckCircle2, AlertCircle, ChevronDown } from 'lucide-react'
 import type { DiscoveryConfig, DiscoveryQuestion } from '@/lib/types/app.types'
 import { DEFAULT_DISCOVERY_CONFIG } from '@/lib/types/app.types'
 
@@ -73,20 +73,45 @@ function FormInput({ label, value, onChange, placeholder, type = 'text', require
 function FormSelect({ label, value, onChange, options, required }: {
   label: string; value: string; onChange: (v: string) => void; options: string[]; required?: boolean
 }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5" ref={ref}>
       <label className="block text-xs font-semibold uppercase tracking-wider" style={{ color: '#8c8278' }}>
         {label}{required && <span style={{ color: '#f24a49' }}> *</span>}
       </label>
-      <select value={value} onChange={e => onChange(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all appearance-none cursor-pointer"
-        style={{ borderColor: '#e5e0d8', backgroundColor: 'white', color: value ? '#1a1714' : '#a09690' }}
-        onFocus={e => { e.target.style.borderColor = '#f24a49' }}
-        onBlur={e => { e.target.style.borderColor = '#e5e0d8' }}
-      >
-        <option value="" disabled style={{ color: '#a09690', backgroundColor: 'white' }}>Select an option</option>
-        {options.map(o => <option key={o} value={o} style={{ color: '#1a1714', backgroundColor: 'white' }}>{o}</option>)}
-      </select>
+      <div className="relative">
+        <button type="button" onClick={() => setOpen(o => !o)}
+          className="w-full px-4 py-3 rounded-xl border-2 text-sm text-left flex items-center justify-between transition-all"
+          style={{ borderColor: open ? '#f24a49' : '#e5e0d8', backgroundColor: 'white', color: value ? '#1a1714' : '#a09690' }}
+        >
+          <span>{value || 'Select an option'}</span>
+          <ChevronDown className="w-4 h-4 shrink-0 transition-transform" style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', color: '#a09690' }} />
+        </button>
+        {open && (
+          <div className="absolute z-50 mt-1 w-full rounded-xl border overflow-hidden shadow-lg"
+            style={{ borderColor: '#e5e0d8', backgroundColor: 'white' }}>
+            {options.map(o => (
+              <button key={o} type="button"
+                onClick={() => { onChange(o); setOpen(false) }}
+                className="w-full px-4 py-3 text-sm text-left transition-colors hover:bg-red-50"
+                style={{ color: '#1a1714', borderBottom: '1px solid #f5f0eb' }}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
