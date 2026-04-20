@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
 import type { UserRole, FreelancerRole } from '@/lib/types/app.types'
+import { FREELANCER_ROLE_LABELS } from '@/lib/types/app.types'
 import {
   LayoutDashboard,
   FolderKanban,
@@ -131,7 +132,9 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">{userName ?? 'User'}</p>
-            <p className="text-xs capitalize" style={{ color: 'rgba(255,255,255,0.45)' }}>{role}</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              {jobRole ? FREELANCER_ROLE_LABELS[jobRole] : role}
+            </p>
           </div>
           <button
             onClick={handleSignOut}

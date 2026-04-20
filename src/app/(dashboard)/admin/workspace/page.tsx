@@ -25,6 +25,7 @@ export default function WorkspacePage() {
   const [inviteRole, setInviteRole] = useState<InviteRole>('freelancer')
   const [pending, setPending] = useState<Profile[]>([])
   const [active, setActive] = useState<Profile[]>([])
+  const [admins, setAdmins] = useState<Profile[]>([])
   const [countMap, setCountMap] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
 
@@ -34,8 +35,9 @@ export default function WorkspacePage() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
     async function load() {
-      const [{ data: freelancers }, { data: taskCounts }] = await Promise.all([
+      const [{ data: freelancers }, { data: adminProfiles }, { data: taskCounts }] = await Promise.all([
         supabase.from('profiles').select('*').eq('role', 'freelancer').in('status', ['pending', 'active']).order('full_name'),
+        supabase.from('profiles').select('*').eq('role', 'admin').order('full_name'),
         supabase.from('tasks').select('assigned_to, status').neq('status', 'completed'),
       ])
       const map = ((taskCounts ?? []) as { assigned_to: string | null }[]).reduce<Record<string, number>>((acc, t) => {
@@ -45,6 +47,7 @@ export default function WorkspacePage() {
       setCountMap(map)
       setPending(((freelancers ?? []) as Profile[]).filter(f => f.status === 'pending'))
       setActive(((freelancers ?? []) as Profile[]).filter(f => f.status === 'active'))
+      setAdmins((adminProfiles ?? []) as Profile[])
       setLoading(false)
     }
     load()
@@ -85,6 +88,37 @@ export default function WorkspacePage() {
             <div className="text-sm text-muted-foreground py-8 text-center">Loading…</div>
           ) : (
             <>
+              {/* Admins */}
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldCheck className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                  <h2 className="text-sm font-semibold text-foreground">Admins ({admins.length})</h2>
+                </div>
+                {admins.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No admins found.</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {admins.map(profile => (
+                      <div key={profile.id} className="bg-card rounded-lg border border-border p-5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-white shrink-0" style={{ backgroundColor: 'var(--primary)' }}>
+                            {getInitials(profile)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-foreground truncate">{profile.full_name ?? 'Unnamed'}</p>
+                            <p className="text-xs text-muted-foreground truncate">{profile.email}</p>
+                            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: 'var(--primary)', backgroundColor: 'oklch(0.585 0.233 13.3 / 0.1)' }}>
+                              <ShieldCheck className="w-2.5 h-2.5" />
+                              Admin
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Pending */}
               {pending.length > 0 && (
                 <div className="mb-8">
@@ -115,23 +149,24 @@ export default function WorkspacePage() {
                 </div>
               )}
 
-              {/* Active */}
-              {active.length === 0 && pending.length === 0 ? (
-                <div className="bg-card rounded-lg border border-border flex flex-col items-center justify-center py-20 text-center">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 accent-tint">
-                    <UserPlus className="w-6 h-6" style={{ color: 'var(--primary)' }} />
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">No freelancers yet</p>
-                  <p className="text-xs text-muted-foreground mb-5">Invite freelancers to assign tasks to them</p>
-                  <Button onClick={() => setTab('invite')} className="text-white shadow-sm" style={{ backgroundColor: 'var(--primary)' }}>
-                    Invite your first freelancer
-                  </Button>
+              {/* Members */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                  <h2 className="text-sm font-semibold text-foreground">Members ({active.length})</h2>
                 </div>
-              ) : active.length > 0 ? (
-                <div>
-                  {pending.length > 0 && (
-                    <h2 className="text-sm font-semibold text-muted-foreground mb-3">Active ({active.length})</h2>
-                  )}
+                {active.length === 0 ? (
+                  <div className="bg-card rounded-lg border border-border flex flex-col items-center justify-center py-16 text-center">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 accent-tint">
+                      <UserPlus className="w-6 h-6" style={{ color: 'var(--primary)' }} />
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">No members yet</p>
+                    <p className="text-xs text-muted-foreground mb-5">Invite freelancers to assign tasks to them</p>
+                    <Button onClick={() => setTab('invite')} className="text-white shadow-sm" style={{ backgroundColor: 'var(--primary)' }}>
+                      Invite your first freelancer
+                    </Button>
+                  </div>
+                ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {active.map(profile => (
                       <div key={profile.id} className="bg-card rounded-lg border border-border p-5">
@@ -148,7 +183,6 @@ export default function WorkspacePage() {
                             <div className="text-[10px] text-muted-foreground uppercase tracking-wide">tasks</div>
                           </div>
                         </div>
-                        {/* Job role selector */}
                         <div className="mt-3">
                           <select
                             defaultValue={profile.job_role ?? ''}
@@ -168,8 +202,8 @@ export default function WorkspacePage() {
                       </div>
                     ))}
                   </div>
-                </div>
-              ) : null}
+                )}
+              </div>
             </>
           )}
         </div>
