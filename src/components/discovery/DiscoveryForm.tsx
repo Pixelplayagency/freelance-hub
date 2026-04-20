@@ -402,7 +402,7 @@ export function DiscoveryForm({ tokenId, token, isExpired, isUsed, previewConfig
             </button>
           )}
         </div>
-        <p className="text-center text-xs mt-6" style={{ color: '#c0b8b0' }}>Powered by PixelFlow</p>
+        <p className="text-center text-xs mt-6" style={{ color: '#c0b8b0' }}>©PixelPlay Agency 2026</p>
       </div>
     </div>
   )

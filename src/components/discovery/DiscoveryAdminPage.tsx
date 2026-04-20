@@ -116,7 +116,9 @@ function TokenCard({ token, onDelete }: { token: DiscoveryToken; onDelete: (id: 
             )}
             {token.label && <span className="text-sm font-semibold truncate" style={{ color: '#1a1714' }}>{token.label}</span>}
           </div>
-          <p className="text-xs truncate" style={{ color: '#8c8278' }}>{url}</p>
+          <p className="text-xs truncate" style={{ color: '#8c8278' }}>
+            {origin}/discovery/<span className="font-mono">{token.token.slice(0, 8)}…</span>
+          </p>
           <p className="text-xs mt-1" style={{ color: '#c0b8b0' }}>
             Created {new Date(token.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
             {token.expires_at && ` · Expires ${new Date(token.expires_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
