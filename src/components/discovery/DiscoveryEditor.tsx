@@ -355,28 +355,6 @@ export function DiscoveryEditor({ initialConfig }: Props) {
           <ImageUploader label="Profile / Logo Image" value={config.profileImageUrl} slot="profile" shape="circle" height={100}
             onChange={url => setConfig({ ...config, profileImageUrl: url })} />
         </div>
-        {config.coverImageUrl && (
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Wallpaper vertical position</label>
-              <span className="text-xs text-muted-foreground tabular-nums">{config.coverImagePosition ?? 50}%</span>
-            </div>
-            <input type="range" min={0} max={100} value={config.coverImagePosition ?? 50}
-              onChange={e => setConfig({ ...config, coverImagePosition: Number(e.target.value) })}
-              className="w-full accent-red-500 cursor-pointer"
-            />
-            <div className="flex justify-between text-[10px] text-muted-foreground">
-              <span>Top</span><span>Center</span><span>Bottom</span>
-            </div>
-          </div>
-        )}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Form title</label>
-          <input type="text" value={config.formTitle ?? ''} onChange={e => setConfig({ ...config, formTitle: e.target.value || null })}
-            placeholder="Client Discovery Survey By PixelPlay Creative Agency"
-            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-          />
-        </div>
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Form description</label>
           <textarea value={config.formDescription ?? ''} onChange={e => setConfig({ ...config, formDescription: e.target.value || null })}
