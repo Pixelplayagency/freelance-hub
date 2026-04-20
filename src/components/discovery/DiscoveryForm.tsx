@@ -86,9 +86,9 @@ function FormSelect({ label, value, onChange, options, required }: {
 
   return (
     <div className="space-y-1.5" ref={ref}>
-      <label className="block text-xs font-semibold uppercase tracking-wider" style={{ color: '#8c8278' }}>
+      {label && <label className="block text-xs font-semibold uppercase tracking-wider" style={{ color: '#8c8278' }}>
         {label}{required && <span style={{ color: '#f24a49' }}> *</span>}
-      </label>
+      </label>}
       <div className="relative">
         <button type="button" onClick={() => setOpen(o => !o)}
           className="w-full px-4 py-3 rounded-xl border-2 text-sm text-left flex items-center justify-between transition-all"
@@ -151,17 +151,7 @@ function QuestionBlock({ q, num, answers, setAnswer }: {
     return (
       <div>
         {title}
-        <select
-          value={val[0] ?? ''}
-          onChange={e => setAnswer(q.id, e.target.value ? [e.target.value] : [])}
-          className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all appearance-none cursor-pointer"
-          style={{ borderColor: '#e5e0d8', backgroundColor: 'white', color: val[0] ? '#1a1714' : '#a09690' }}
-          onFocus={e => { e.target.style.borderColor = '#f24a49' }}
-          onBlur={e => { e.target.style.borderColor = '#e5e0d8' }}
-        >
-          <option value="" disabled>Select an option</option>
-          {q.options.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
+        <FormSelect label="" value={val[0] ?? ''} onChange={v => setAnswer(q.id, v ? [v] : [])} options={q.options} />
       </div>
     )
   }
