@@ -15,6 +15,11 @@ export async function POST(req: NextRequest) {
 
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
 
+  const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  if (!ALLOWED_MIME.includes(file.type)) {
+    return NextResponse.json({ error: 'Only JPEG, PNG, WebP, and GIF images are allowed.' }, { status: 400 })
+  }
+
   const ext = file.name.split('.').pop() ?? 'jpg'
   const path = `discovery/${slot ?? 'image'}-${Date.now()}.${ext}`
 

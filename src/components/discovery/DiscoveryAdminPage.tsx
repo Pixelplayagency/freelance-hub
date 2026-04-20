@@ -9,7 +9,6 @@ import { toast } from 'sonner'
 
 interface Props {
   tokens: DiscoveryToken[]
-  adminId: string
   initialConfig: DiscoveryConfig
 }
 
@@ -152,7 +151,7 @@ function TokenCard({ token, onDelete }: { token: DiscoveryToken; onDelete: (id: 
   )
 }
 
-export function DiscoveryAdminPage({ tokens: initialTokens, adminId, initialConfig }: Props) {
+export function DiscoveryAdminPage({ tokens: initialTokens, initialConfig }: Props) {
   const [tokens, setTokens] = useState(initialTokens)
   const [label, setLabel] = useState('')
   const [expiry, setExpiry] = useState('')
@@ -164,7 +163,7 @@ export function DiscoveryAdminPage({ tokens: initialTokens, adminId, initialConf
 
   async function handleCreate() {
     startCreate(async () => {
-      const result = await createDiscoveryToken({ label: label || null, adminId, expiresAt: expiry || null })
+      const result = await createDiscoveryToken({ label: label || null, expiresAt: expiry || null })
       if (result.token) {
         setTokens(prev => [result.token!, ...prev])
         setLabel(''); setExpiry(''); setShowCreate(false)

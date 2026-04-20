@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = createSupabaseServiceClient()
 
-    // Re-validate token is still valid
+    // Validate token exists and is not expired (read-only check)
     const { data: tokenRow } = await supabase
       .from('client_discovery_tokens')
       .select('id, used_at, expires_at')
@@ -32,6 +32,22 @@ export async function POST(req: NextRequest) {
     if (tokenRow.used_at) return NextResponse.json({ error: 'Form already submitted' }, { status: 409 })
     if (tokenRow.expires_at && new Date(tokenRow.expires_at) < new Date()) {
       return NextResponse.json({ error: 'Link has expired' }, { status: 410 })
+    }
+
+    // Atomically claim the token — only one concurrent request can win this update
+    const { data: claimed, error: claimError } = await supabase
+      .from('client_discovery_tokens')
+      .update({ used_at: new Date().toISOString() })
+      .eq('id', tokenId)
+      .is('used_at', null)
+      .select('id')
+
+    if (claimError) {
+      console.error('Token claim error:', claimError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+    if (!claimed || claimed.length === 0) {
+      return NextResponse.json({ error: 'Form already submitted' }, { status: 409 })
     }
 
     // Insert submission
@@ -64,14 +80,13 @@ export async function POST(req: NextRequest) {
 
     if (insertError) {
       console.error('Discovery submission insert error:', insertError)
+      // Roll back token claim so user can retry
+      await supabase
+        .from('client_discovery_tokens')
+        .update({ used_at: null })
+        .eq('id', tokenId)
       return NextResponse.json({ error: 'Failed to save submission' }, { status: 500 })
     }
-
-    // Mark token as used
-    await supabase
-      .from('client_discovery_tokens')
-      .update({ used_at: new Date().toISOString() })
-      .eq('id', tokenId)
 
     return NextResponse.json({ success: true })
   } catch (e) {

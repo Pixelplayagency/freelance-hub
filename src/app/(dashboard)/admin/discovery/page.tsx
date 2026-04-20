@@ -38,7 +38,6 @@ export default async function AdminDiscoveryPage() {
   return (
     <DiscoveryAdminPage
       tokens={normalizedTokens}
-      adminId={user.id}
       initialConfig={config}
     />
   )
