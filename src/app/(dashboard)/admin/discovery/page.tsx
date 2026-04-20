@@ -28,9 +28,16 @@ export default async function AdminDiscoveryPage() {
 
   const config: DiscoveryConfig = (configRow?.config as DiscoveryConfig) ?? DEFAULT_DISCOVERY_CONFIG
 
+  const normalizedTokens: DiscoveryToken[] = (tokens ?? []).map((t: Record<string, unknown>) => ({
+    ...t,
+    submission: Array.isArray(t.submission)
+      ? (t.submission[0] ?? null)
+      : (t.submission ?? null),
+  })) as DiscoveryToken[]
+
   return (
     <DiscoveryAdminPage
-      tokens={(tokens ?? []) as DiscoveryToken[]}
+      tokens={normalizedTokens}
       adminId={user.id}
       initialConfig={config}
     />
