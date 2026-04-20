@@ -149,7 +149,7 @@ function QuestionBlock({ q, num, answers, setAnswer }: {
   )
 }
 
-export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previewConfig }: Props) {
+export function DiscoveryForm({ tokenId, token, isExpired, isUsed, previewConfig }: Props) {
   const [config, setConfig] = useState<DiscoveryConfig>(previewConfig ?? DEFAULT_DISCOVERY_CONFIG)
   const [page, setPage] = useState(1)
   const [submitting, setSubmitting] = useState(false)
@@ -294,7 +294,6 @@ export function DiscoveryForm({ tokenId, token, label, isExpired, isUsed, previe
           <p className="text-sm mt-1.5 leading-relaxed" style={{ color: '#8c8278' }}>
             {config.formDescription || 'This form helps us understand your brand and build a custom content system tailored to your needs.'}
           </p>
-          {label && <p className="text-xs mt-1 font-medium" style={{ color: '#f24a49' }}>{label}</p>}
         </div>
 
         <div className="flex items-center justify-center gap-3 mb-8">
