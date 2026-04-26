@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Plus, Copy, Check, ExternalLink, Trash2, Clock, CheckCircle2, ChevronDown, ChevronUp, Link2 } from 'lucide-react'
+import { Plus, Copy, Check, ExternalLink, Trash2, Clock, CheckCircle2, ChevronDown, ChevronUp, Link2, Download } from 'lucide-react'
 import type { DiscoveryToken, DiscoverySubmission, DiscoveryConfig } from '@/lib/types/app.types'
 import { createDiscoveryToken, deleteDiscoveryToken } from '@/lib/actions/discovery.actions'
 import { DiscoveryEditor } from './DiscoveryEditor'
@@ -12,8 +12,35 @@ interface Props {
   initialConfig: DiscoveryConfig
 }
 
+async function downloadSubmissionPDF(sub: DiscoverySubmission) {
+  const [{ pdf }, { SubmissionDocument }] = await Promise.all([
+    import('@react-pdf/renderer'),
+    import('./SubmissionPDF'),
+  ])
+  const blob = await pdf(<SubmissionDocument s={sub} />).toBlob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `discovery-${sub.brand_name.toLowerCase().replace(/\s+/g, '-')}.pdf`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function SubmissionDetail({ s }: { s: DiscoverySubmission }) {
   const [open, setOpen] = useState(false)
+  const [downloading, setDownloading] = useState(false)
+
+  async function handleDownload(e: React.MouseEvent) {
+    e.stopPropagation()
+    setDownloading(true)
+    try {
+      await downloadSubmissionPDF(s)
+    } catch {
+      toast.error('Failed to generate PDF')
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   const row = (label: string, value: string | string[] | null | undefined) => {
     if (!value || (Array.isArray(value) && !value.length)) return null
@@ -37,10 +64,21 @@ function SubmissionDetail({ s }: { s: DiscoverySubmission }) {
             {s.email} · {s.brand_name}{s.industry ? ` · ${s.industry}` : ''}
           </p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs" style={{ color: '#8c8278' }}>
             {new Date(s.submitted_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
           </span>
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            className="p-1.5 rounded-lg border transition-colors hover:bg-white disabled:opacity-40"
+            style={{ borderColor: '#e5e0d8', color: '#8c8278' }}
+            title="Download PDF"
+          >
+            {downloading
+              ? <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
+              : <Download className="w-3.5 h-3.5" />}
+          </button>
           {open ? <ChevronUp className="w-4 h-4" style={{ color: '#8c8278' }} /> : <ChevronDown className="w-4 h-4" style={{ color: '#8c8278' }} />}
         </div>
       </button>
