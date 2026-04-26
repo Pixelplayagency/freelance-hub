@@ -22,7 +22,7 @@ export default async function AdminDashboardPage() {
     { data: freelancers },
   ] = await Promise.all([
     supabase.from('projects').select('id, name, color, status, avatar_url').order('created_at', { ascending: false }).limit(20),
-    supabase.from('tasks').select('id, title, status, due_date, created_at, project:projects(id, name, color), assignee:profiles!assigned_to(id, full_name, avatar_url)'),
+    supabase.from('tasks').select('id, title, status, due_date, created_at, project:projects(id, name, color), assignee:profiles!assigned_to(id, full_name, avatar_url)').limit(500),
     supabase.from('profiles').select('id, full_name, avatar_url, username').eq('role', 'freelancer').eq('status', 'active').limit(20),
   ])
 

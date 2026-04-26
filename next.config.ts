@@ -4,7 +4,23 @@ const nextConfig: NextConfig = {
   compress: true,
   productionBrowserSourceMaps: false,
   experimental: {
-    optimizePackageImports: ['lucide-react', '@dnd-kit/core', '@dnd-kit/sortable', '@tiptap/react'],
+    optimizePackageImports: [
+      'lucide-react',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable',
+      '@tiptap/react',
+      '@tiptap/extension-image',
+      '@tiptap/extension-link',
+      '@tiptap/starter-kit',
+      'sonner',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-label',
+      '@radix-ui/react-slot',
+    ],
   },
   images: {
     remotePatterns: [

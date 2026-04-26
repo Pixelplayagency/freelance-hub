@@ -53,7 +53,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  // Skip Next.js internals, static files, and all API routes (each API route
+  // handles its own auth directly — running middleware on them just adds an
+  // extra getUser() round-trip for every request).
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/auth).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|api/).*)',
   ],
 }
