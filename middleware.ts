@@ -1,16 +1,37 @@
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Check for a Supabase session cookie without making a network call.
-// Full token validation happens in each route/layout via createServerClient.
-function hasSessionCookie(request: NextRequest): boolean {
-  return request.cookies.getAll().some(({ name }) =>
-    name.startsWith('sb-') && name.endsWith('-auth-token')
-  )
-}
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request })
 
-export function middleware(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    return supabaseResponse
+  }
+
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll()
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+        supabaseResponse = NextResponse.next({ request })
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        )
+      },
+    },
+  })
+
+  // getSession() reads from the cookie — no network call, no timeout risk.
+  // getUser() (network call) is done in each route/layout for real validation.
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user ?? null
+
   const path = request.nextUrl.pathname
-  const loggedIn = hasSessionCookie(request)
 
   const isProtected =
     path === '/' ||
@@ -25,15 +46,15 @@ export function middleware(request: NextRequest) {
     path.startsWith('/discovery/') ||
     path.startsWith('/auth/')
 
-  if (!loggedIn && isProtected && !isPublicRoute) {
+  if (!user && isProtected && !isPublicRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (loggedIn && isPublicOnly) {
+  if (user && isPublicOnly) {
     return NextResponse.redirect(new URL('/admin', request.url))
   }
 
-  return NextResponse.next({ request })
+  return supabaseResponse
 }
 
 export const config = {
