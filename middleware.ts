@@ -1,55 +1,39 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  try {
-    let supabaseResponse = NextResponse.next({ request })
+// Check for a Supabase session cookie without making a network call.
+// Full token validation happens in each route/layout via createServerClient.
+function hasSessionCookie(request: NextRequest): boolean {
+  return request.cookies.getAll().some(({ name }) =>
+    name.startsWith('sb-') && name.endsWith('-auth-token')
+  )
+}
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+export function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname
+  const loggedIn = hasSessionCookie(request)
 
-    if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.next({ request })
-    }
+  const isProtected =
+    path === '/' ||
+    path === '/onboarding' ||
+    path.startsWith('/admin') ||
+    path.startsWith('/freelancer')
 
-    const supabase = createServerClient(supabaseUrl, supabaseKey, {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          )
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    })
+  const isPublicOnly = path === '/login' || path === '/signup'
 
-    // Refresh session — MUST use getUser() not getSession() for security
-    const { data: { user } } = await supabase.auth.getUser()
+  const isPublicRoute =
+    path.startsWith('/join/') ||
+    path.startsWith('/discovery/') ||
+    path.startsWith('/auth/')
 
-    const path = request.nextUrl.pathname
-
-    // Redirect unauthenticated users away from protected routes (including root)
-    // /join/[token] is public — anyone with a valid invite link can access it
-    if (!user && !path.startsWith('/join/') && !path.startsWith('/discovery/') && (path === '/' || path === '/onboarding' || path.startsWith('/admin') || path.startsWith('/freelancer'))) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-
-    // Redirect authenticated users away from auth pages
-    if (user && (path === '/login' || path === '/signup' || path === '/')) {
-      // Role-based redirect handled in the dashboard layout
-      return NextResponse.redirect(new URL('/admin', request.url))
-    }
-
-    return supabaseResponse
-  } catch {
-    return NextResponse.next({ request })
+  if (!loggedIn && isProtected && !isPublicRoute) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
+
+  if (loggedIn && isPublicOnly) {
+    return NextResponse.redirect(new URL('/admin', request.url))
+  }
+
+  return NextResponse.next({ request })
 }
 
 export const config = {
