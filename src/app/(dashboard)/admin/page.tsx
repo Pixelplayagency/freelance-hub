@@ -107,8 +107,8 @@ export default async function AdminDashboardPage() {
         </div>
         <Link
           href="/admin/projects/new"
-          className="flex items-center gap-2 bg-primary text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#e03e3d] transition-colors shrink-0"
-          style={{ boxShadow: '0 4px 14px oklch(0.585 0.233 13.3 / 0.30)' }}
+          className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity shrink-0"
+          style={{ boxShadow: 'var(--shadow-primary)' }}
         >
           <Plus className="w-4 h-4" /> Add Project
         </Link>
@@ -120,12 +120,12 @@ export default async function AdminDashboardPage() {
         <Link
           href="/admin/projects"
           className="relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between min-h-[130px] hover:opacity-95 transition-all duration-200"
-          style={{ background: 'linear-gradient(135deg, #1C1C1E 0%, #2c2c2e 100%)', boxShadow: '0 8px 28px oklch(0.585 0.233 13.3 / 0.22)' }}
+          style={{ background: 'linear-gradient(135deg, #1C1C1E 0%, #2c2c2e 100%)', boxShadow: '0 8px 28px oklch(0.21 0.006 285.885 / 0.22)' }}
         >
           <div className="absolute inset-0 opacity-[0.14]"
             style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
           <div className="relative flex items-center justify-between">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center" style={{ boxShadow: '0 2px 12px oklch(0.585 0.233 13.3 / 0.5)' }}>
+            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center ring-1 ring-white/15">
               <FolderKanban style={{ width: 18, height: 18, color: 'white' }} />
             </div>
             <ArrowUpRight className="w-4 h-4 text-white/30" />
@@ -134,7 +134,7 @@ export default async function AdminDashboardPage() {
             <p className="text-3xl font-bold text-white tabular-nums">{activeProjects}</p>
             <p className="text-xs text-white/50 mt-1 font-medium">Active Projects</p>
           </div>
-          <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-[var(--primary)]/50 to-transparent" />
+          <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         </Link>
 
         {/* Colored stat cards */}
@@ -217,7 +217,7 @@ export default async function AdminDashboardPage() {
                           : count > 0
                           ? 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%)'
                           : 'var(--muted)',
-                        boxShadow: isPrimary ? '0 -2px 8px oklch(0.585 0.233 13.3 / 0.3)' : 'none',
+                        boxShadow: isPrimary ? '0 -2px 8px oklch(0.21 0.006 285.885 / 0.3)' : 'none',
                       }}
                     />
                   </div>

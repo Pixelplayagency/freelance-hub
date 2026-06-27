@@ -107,7 +107,7 @@ export default function WorkspacePage() {
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-foreground truncate">{profile.full_name ?? 'Unnamed'}</p>
                             <p className="text-xs text-muted-foreground truncate">{profile.email}</p>
-                            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: 'var(--primary)', backgroundColor: 'oklch(0.585 0.233 13.3 / 0.1)' }}>
+                            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: 'var(--primary)', backgroundColor: 'oklch(0.21 0.006 285.885 / 0.1)' }}>
                               <ShieldCheck className="w-2.5 h-2.5" />
                               Admin
                             </span>

@@ -74,14 +74,14 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
         className="flex items-center gap-3 px-5 py-5 border-b"
         style={{
           borderColor: 'rgba(255,255,255,0.07)',
-          background: 'linear-gradient(180deg, oklch(0.585 0.233 13.3 / 0.08) 0%, transparent 100%)',
+          background: 'linear-gradient(180deg, oklch(0.21 0.006 285.885 / 0.08) 0%, transparent 100%)',
         }}
       >
         <div
           className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-          style={{ backgroundColor: 'var(--primary)', boxShadow: '0 2px 8px oklch(0.585 0.233 13.3 / 0.4)' }}
+          style={{ backgroundColor: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
         >
-          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4" style={{ color: '#1C1C1E' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
@@ -113,7 +113,7 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
               )}
               aria-current={active ? 'page' : undefined}
               style={active
-                ? { backgroundColor: 'var(--primary)', boxShadow: '0 2px 8px oklch(0.585 0.233 13.3 / 0.35)' }
+                ? { backgroundColor: 'rgba(255,255,255,0.12)', color: '#fff' }
                 : { color: 'rgba(255,255,255,0.72)' }
               }
             >
@@ -127,7 +127,7 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
       {/* User */}
       <div className="border-t px-3 py-4" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
         <div className="flex items-center gap-3 px-2 py-2 rounded-lg">
-          <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-white shrink-0" style={{ backgroundColor: 'var(--primary)' }}>
+          <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-white shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.14)' }}>
             {avatarUrl
               ? <img src={avatarUrl} alt={userName ?? ''} className="w-full h-full object-cover" />
               : initials}

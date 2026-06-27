@@ -126,7 +126,7 @@ export default async function FreelancerDashboardPage() {
           className="relative overflow-hidden rounded-2xl p-6 hover:opacity-90 transition-all duration-200 flex flex-col gap-4 min-h-[140px]"
           style={{
             background: 'linear-gradient(135deg, #1C1C1E 0%, #2a2a2c 100%)',
-            boxShadow: '0 4px 24px oklch(0.585 0.233 13.3 / 0.18)',
+            boxShadow: '0 4px 24px oklch(0.21 0.006 285.885 / 0.18)',
           }}
         >
           {/* Dot grid overlay */}
@@ -139,8 +139,7 @@ export default async function FreelancerDashboardPage() {
           />
           <div className="relative flex items-start justify-between">
             <div
-              className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center"
-              style={{ boxShadow: '0 2px 10px oklch(0.585 0.233 13.3 / 0.5)' }}
+              className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center ring-1 ring-white/15"
             >
               <ListTodo className="w-5 h-5 text-white" />
             </div>
@@ -227,7 +226,7 @@ export default async function FreelancerDashboardPage() {
                           : count > 0
                           ? 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%)'
                           : 'var(--muted)',
-                        boxShadow: isPrimary ? '0 -2px 8px oklch(0.585 0.233 13.3 / 0.3)' : 'none',
+                        boxShadow: isPrimary ? '0 -2px 8px oklch(0.21 0.006 285.885 / 0.3)' : 'none',
                       }}
                     />
                   </div>

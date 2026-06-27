@@ -146,7 +146,7 @@ export function DeadlinePicker({ date, time, onDateChange, onTimeChange }: Deadl
                 'hover:bg-primary/10 hover:text-primary',
                 'focus:outline-none focus:ring-2 focus:ring-primary/30'
               ),
-              selected: '[&>button]:bg-primary [&>button]:text-white [&>button]:hover:bg-[#e03938] [&>button]:hover:text-white',
+              selected: '[&>button]:bg-primary [&>button]:text-primary-foreground [&>button]:hover:opacity-90',
               today: '[&>button]:border [&>button]:border-primary/40 [&>button]:text-primary',
               outside: '[&>button]:text-muted-foreground/40 [&>button]:hover:text-muted-foreground [&>button]:hover:bg-transparent',
               disabled: '[&>button]:opacity-30 [&>button]:cursor-not-allowed',
