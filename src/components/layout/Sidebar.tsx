@@ -91,7 +91,7 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <p className="text-[10px] font-semibold uppercase tracking-widest px-3 mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
+        <p className="text-[11px] font-semibold uppercase tracking-widest px-3 mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
           {role === 'admin' ? 'Management' : 'Workspace'}
         </p>
         {nav.map(item => {
@@ -106,13 +106,15 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
               href={item.href}
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1C1C1E]',
                 active
                   ? 'text-white font-medium'
                   : 'hover:text-white hover:bg-white/5'
               )}
+              aria-current={active ? 'page' : undefined}
               style={active
                 ? { backgroundColor: 'var(--primary)', boxShadow: '0 2px 8px oklch(0.585 0.233 13.3 / 0.35)' }
-                : { color: 'rgba(255,255,255,0.52)' }
+                : { color: 'rgba(255,255,255,0.72)' }
               }
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -132,15 +134,16 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">{userName ?? 'User'}</p>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
               {jobRole ? FREELANCER_ROLE_LABELS[jobRole] : role}
             </p>
           </div>
           <button
             onClick={handleSignOut}
             title="Sign out"
-            className="p-1.5 rounded-md hover:bg-white/5 transition-colors"
-            style={{ color: 'rgba(255,255,255,0.45)' }}
+            aria-label="Sign out"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1C1C1E]"
+            style={{ color: 'rgba(255,255,255,0.6)' }}
           >
             <LogOut className="w-4 h-4" />
           </button>

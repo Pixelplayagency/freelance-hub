@@ -10,6 +10,7 @@ import { useKanbanStore } from './useKanbanStore'
 import type { Task } from '@/lib/types/app.types'
 import Link from 'next/link'
 import { useTransition } from 'react'
+import { toast } from 'sonner'
 
 interface KanbanCardProps {
   task: Task
@@ -40,16 +41,40 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
 
   const [isDeleting, startDelete] = useTransition()
   const removeTask = useKanbanStore(s => s.removeTask)
+  const addTask = useKanbanStore(s => s.addTask)
 
   const initials = task.assignee?.full_name
     ? task.assignee.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
     : task.assignee?.email?.[0]?.toUpperCase() ?? '?'
 
+  // Optimistic delete with an Undo window — no native confirm(), fully
+  // touch/keyboard accessible, and reversible (Gmail-style undo).
   function handleDelete(e: React.MouseEvent) {
     e.stopPropagation()
-    if (!confirm('Delete this task?')) return
-    removeTask(task.id) // optimistic — remove from UI immediately
-    startDelete(() => deleteTask(task.id, projectId))
+    e.preventDefault()
+
+    removeTask(task.id) // remove from UI immediately
+    let undone = false
+    let committed = false
+
+    const commit = () => {
+      if (undone || committed) return
+      committed = true
+      startDelete(() => deleteTask(task.id, projectId))
+    }
+
+    toast('Task deleted', {
+      duration: 5000,
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          undone = true
+          addTask(task) // restore the card
+        },
+      },
+      onAutoClose: commit,
+      onDismiss: commit,
+    })
   }
 
   return (
@@ -74,7 +99,7 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
         <div className="flex items-start gap-1 mb-1.5">
           <Link
             href={taskHref}
-            className="flex-1 text-sm font-semibold text-foreground hover:text-primary leading-snug line-clamp-2 transition-colors"
+            className="flex-1 text-sm font-semibold text-foreground hover:text-primary leading-snug line-clamp-2 transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
             onClick={e => e.stopPropagation()}
           >
             {task.title}
@@ -83,7 +108,8 @@ export function KanbanCard({ task, projectId, isAdmin, isDragging }: KanbanCardP
             <button
               onClick={handleDelete}
               title="Delete task"
-              className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-all shrink-0 -mt-0.5"
+              aria-label={`Delete task: ${task.title}`}
+              className="inline-flex items-center justify-center h-8 w-8 -m-1 shrink-0 rounded-md text-muted-foreground/70 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 focus-visible:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
