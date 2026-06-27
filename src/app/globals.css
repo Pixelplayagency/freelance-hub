@@ -107,6 +107,20 @@
 /* Subtle neutral accent tint; adapts to dark mode automatically */
 .accent-tint { background-color: oklch(0.21 0.006 285.885 / 0.08); }
 
+/* iBanKo-style soft pastel data tiles (dark-mode aware) */
+.tile-mint  { background-color: #e9f6ee; }
+.tile-peach { background-color: #fcebe1; }
+.tile-lav   { background-color: #eaedfb; }
+.dark .tile-mint  { background-color: oklch(0.45 0.09 162 / 0.18); }
+.dark .tile-peach { background-color: oklch(0.55 0.12 40 / 0.18); }
+.dark .tile-lav   { background-color: oklch(0.50 0.13 280 / 0.18); }
+.text-mint  { color: #15915b; }
+.text-peach { color: #d2683f; }
+.text-lav   { color: #5a5fd6; }
+.dark .text-mint  { color: #4ade80; }
+.dark .text-peach { color: #fb9a6f; }
+.dark .text-lav   { color: #a5a8f0; }
+
 @keyframes fade-up {
   from {
     opacity: 0;

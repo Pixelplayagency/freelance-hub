@@ -68,30 +68,21 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
     : '?'
 
   return (
-    <aside className="flex flex-col h-full w-60 shrink-0" style={{ backgroundColor: '#1C1C1E' }}>
+    <aside className="flex flex-col h-full w-60 shrink-0 bg-sidebar border-r border-sidebar-border">
       {/* Logo */}
-      <div
-        className="flex items-center gap-3 px-5 py-5 border-b"
-        style={{
-          borderColor: 'rgba(255,255,255,0.07)',
-          background: 'linear-gradient(180deg, oklch(0.21 0.006 285.885 / 0.08) 0%, transparent 100%)',
-        }}
-      >
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-          style={{ backgroundColor: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
-        >
-          <svg className="w-4 h-4" style={{ color: '#1C1C1E' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="flex items-center gap-3 px-5 py-5">
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-primary">
+          <svg className="w-4 h-4 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
         </div>
-        <span className="font-semibold text-white text-sm tracking-tight">PixelFlow</span>
+        <span className="font-semibold text-sidebar-foreground text-sm tracking-tight">PixelFlow</span>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <p className="text-[11px] font-semibold uppercase tracking-widest px-3 mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
+      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
+        <p className="text-[11px] font-semibold uppercase tracking-widest px-3 mb-2 text-muted-foreground">
           {role === 'admin' ? 'Management' : 'Workspace'}
         </p>
         {nav.map(item => {
@@ -105,17 +96,13 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1C1C1E]',
+                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
                 active
-                  ? 'text-white font-medium'
-                  : 'hover:text-white hover:bg-white/5'
+                  ? 'bg-sidebar-accent text-sidebar-foreground font-semibold'
+                  : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60'
               )}
               aria-current={active ? 'page' : undefined}
-              style={active
-                ? { backgroundColor: 'rgba(255,255,255,0.12)', color: '#fff' }
-                : { color: 'rgba(255,255,255,0.72)' }
-              }
             >
               <Icon className="w-4 h-4 shrink-0" />
               {item.label}
@@ -125,16 +112,16 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
       </nav>
 
       {/* User */}
-      <div className="border-t px-3 py-4" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+      <div className="border-t border-sidebar-border px-3 py-4">
         <div className="flex items-center gap-3 px-2 py-2 rounded-lg">
-          <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-white shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.14)' }}>
+          <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold bg-primary text-primary-foreground shrink-0">
             {avatarUrl
               ? <img src={avatarUrl} alt={userName ?? ''} className="w-full h-full object-cover" />
               : initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{userName ?? 'User'}</p>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            <p className="text-sm font-medium text-sidebar-foreground truncate">{userName ?? 'User'}</p>
+            <p className="text-xs text-muted-foreground capitalize">
               {jobRole ? FREELANCER_ROLE_LABELS[jobRole] : role}
             </p>
           </div>
@@ -142,8 +129,7 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
             onClick={handleSignOut}
             title="Sign out"
             aria-label="Sign out"
-            className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1C1C1E]"
-            style={{ color: 'rgba(255,255,255,0.6)' }}
+            className="inline-flex items-center justify-center h-9 w-9 rounded-md text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
           >
             <LogOut className="w-4 h-4" />
           </button>

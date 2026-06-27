@@ -2,12 +2,21 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import {
   FolderKanban, CheckCircle2, Clock, AlertCircle,
-  ArrowUpRight, Plus, Users, TrendingUp, ArrowRight,
+  ArrowUpRight, Plus, Users, TrendingUp, TrendingDown, ArrowRight, MoreHorizontal,
 } from 'lucide-react'
 import Link from 'next/link'
 import { isOverdue } from '@/lib/utils/date'
 import { TaskStatusBadge } from '@/components/tasks/TaskStatusBadge'
+import { MiniSparkline } from '@/components/dashboard/MiniSparkline'
+import { TaskFlowChart } from '@/components/dashboard/TaskFlowChart'
 import type { TaskStatus } from '@/lib/types/app.types'
+
+function trendOf(series: number[]) {
+  const older = series.slice(0, 3).reduce((a, b) => a + b, 0)
+  const recent = series.slice(4).reduce((a, b) => a + b, 0)
+  const pct = older > 0 ? Math.round(((recent - older) / older) * 100) : recent > 0 ? 100 : 0
+  return { pct, up: pct >= 0 }
+}
 
 export default async function AdminDashboardPage() {
   const supabase = await createSupabaseServerClient()
@@ -34,6 +43,9 @@ export default async function AdminDashboardPage() {
   const overdueCount = tasks.filter(t => isOverdue(t.due_date) && t.status !== 'completed').length
 
   const weeklyData = Array(7).fill(0)
+  const completedWeekly = Array(7).fill(0)
+  const activeWeekly = Array(7).fill(0)
+  const reviewWeekly = Array(7).fill(0)
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const weekLabels: string[] = []
   for (let i = 6; i >= 0; i--) {
@@ -43,9 +55,14 @@ export default async function AdminDashboardPage() {
   tasks.forEach(t => {
     if (!t.created_at) return
     const diffDays = Math.floor((now.getTime() - new Date(t.created_at).getTime()) / 86400000)
-    if (diffDays >= 0 && diffDays < 7) weeklyData[6 - diffDays]++
+    if (diffDays >= 0 && diffDays < 7) {
+      const idx = 6 - diffDays
+      weeklyData[idx]++
+      if (t.status === 'completed') completedWeekly[idx]++
+      else activeWeekly[idx]++
+      if (t.status === 'review') reviewWeekly[idx]++
+    }
   })
-  const maxBar = Math.max(...weeklyData, 1)
   const totalWeeklyTasks = weeklyData.reduce((a, b) => a + b, 0)
 
   const projectProgress = (projectsList ?? []).map(p => {
@@ -75,21 +92,15 @@ export default async function AdminDashboardPage() {
   const statCards = [
     {
       label: 'Active Tasks', value: activeTasks, icon: Clock, href: '/admin/projects',
-      gradient: 'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)',
-      glow: 'rgba(59,130,246,0.25)',
-      iconBg: 'rgba(255,255,255,0.18)',
+      tile: 'tile-mint', accent: 'text-mint', series: activeWeekly,
     },
     {
       label: 'In Review', value: inReview, icon: AlertCircle, href: '/admin/projects',
-      gradient: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
-      glow: 'rgba(245,158,11,0.25)',
-      iconBg: 'rgba(255,255,255,0.18)',
+      tile: 'tile-peach', accent: 'text-peach', series: reviewWeekly,
     },
     {
       label: 'Completed', value: completedCount, icon: CheckCircle2, href: '/admin/projects',
-      gradient: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-      glow: 'rgba(16,185,129,0.25)',
-      iconBg: 'rgba(255,255,255,0.18)',
+      tile: 'tile-lav', accent: 'text-lav', series: completedWeekly,
     },
   ]
 
@@ -119,8 +130,8 @@ export default async function AdminDashboardPage() {
         {/* Featured — dark card */}
         <Link
           href="/admin/projects"
-          className="relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between min-h-[130px] hover:opacity-95 transition-all duration-200"
-          style={{ background: 'linear-gradient(135deg, #1C1C1E 0%, #2c2c2e 100%)', boxShadow: '0 8px 28px oklch(0.21 0.006 285.885 / 0.22)' }}
+          className="relative overflow-hidden rounded-3xl p-5 flex flex-col justify-between min-h-[140px] hover:opacity-95 transition-all duration-200"
+          style={{ background: 'linear-gradient(135deg, #1C1C1E 0%, #2c2c2e 100%)', boxShadow: '0 8px 28px rgba(0,0,0,0.22)' }}
         >
           <div className="absolute inset-0 opacity-[0.14]"
             style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
@@ -130,45 +141,44 @@ export default async function AdminDashboardPage() {
             </div>
             <ArrowUpRight className="w-4 h-4 text-white/30" />
           </div>
-          <div className="relative">
-            <p className="text-3xl font-bold text-white tabular-nums">{activeProjects}</p>
-            <p className="text-xs text-white/50 mt-1 font-medium">Active Projects</p>
+          <div className="relative text-white/25 -mx-1">
+            <MiniSparkline data={weeklyData} stroke="currentColor" width={120} height={24} className="w-full" />
           </div>
-          <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="relative">
+            <p className="text-3xl font-bold text-white tabular-nums leading-none">{activeProjects}</p>
+            <p className="text-xs text-white/50 mt-1.5 font-medium">Active Projects</p>
+          </div>
         </Link>
 
-        {/* Colored stat cards */}
+        {/* Pastel stat cards with sparklines */}
         {statCards.map(s => {
           const Icon = s.icon
+          const trend = trendOf(s.series)
+          const TrendIcon = trend.up ? TrendingUp : TrendingDown
           return (
             <Link
               key={s.label}
               href={s.href}
-              className="relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between min-h-[130px] hover:-translate-y-0.5 transition-all duration-200"
-              style={{
-                background: s.gradient,
-                boxShadow: `0 4px 20px ${s.glow}`,
-              }}
+              className={`${s.tile} relative overflow-hidden rounded-3xl p-5 flex flex-col justify-between min-h-[140px] hover:-translate-y-0.5 transition-transform duration-200`}
             >
-              <div
-                className="absolute inset-0 rounded-2xl opacity-20 pointer-events-none"
-                style={{
-                  backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.35) 1px, transparent 1px)',
-                  backgroundSize: '14px 14px',
-                }}
-              />
-              <div className="relative flex items-center justify-between">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: s.iconBg }}
-                >
-                  <Icon className="text-white" style={{ width: 18, height: 18 }} />
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 rounded-xl bg-white/70 dark:bg-white/10 flex items-center justify-center">
+                  <Icon className="text-foreground" style={{ width: 18, height: 18 }} />
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-white/30" />
+                <MoreHorizontal className="w-4 h-4 text-foreground/30" />
               </div>
-              <div className="relative">
-                <p className="text-3xl font-bold tabular-nums text-white">{s.value}</p>
-                <p className="text-xs mt-1 font-medium text-white/70">{s.label}</p>
+              <div className={`${s.accent} -mx-1`}>
+                <MiniSparkline data={s.series} stroke="currentColor" width={120} height={28} className="w-full" />
+              </div>
+              <div className="flex items-end justify-between">
+                <div>
+                  <p className="text-2xl font-bold tabular-nums text-foreground leading-none">{s.value}</p>
+                  <p className="text-xs mt-1.5 font-medium text-foreground/60">{s.label}</p>
+                </div>
+                <span className={`${s.accent} inline-flex items-center gap-0.5 text-xs font-semibold`}>
+                  <TrendIcon className="w-3.5 h-3.5" />
+                  {Math.abs(trend.pct)}%
+                </span>
               </div>
             </Link>
           )
@@ -199,35 +209,18 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Mini bar chart */}
-          <div className="flex items-end gap-1" style={{ height: 80 }}>
-            {weeklyData.map((count, i) => {
-              const heightPct = (count / maxBar) * 100
-              const isToday = i === 6
-              const isPrimary = isToday || (count === maxBar && count > 0)
-              return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="w-full flex items-end" style={{ height: 58 }}>
-                    <div
-                      className="w-full rounded-t-md transition-all duration-700"
-                      style={{
-                        height: `${Math.max(heightPct, count > 0 ? 8 : 4)}%`,
-                        background: isPrimary
-                          ? 'linear-gradient(180deg, var(--primary) 0%, oklch(0.50 0.22 13.3) 100%)'
-                          : count > 0
-                          ? 'linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%)'
-                          : 'var(--muted)',
-                        boxShadow: isPrimary ? '0 -2px 8px oklch(0.21 0.006 285.885 / 0.3)' : 'none',
-                      }}
-                    />
-                  </div>
-                  <span className={`text-[10px] leading-none ${isToday ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
-                    {weekLabels[i].slice(0, 2)}
-                  </span>
-                </div>
-              )
-            })}
+          {/* Legend */}
+          <div className="flex items-center gap-4 mb-1">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+              <span className="w-3 h-[2px] rounded-full bg-foreground" /> Created
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+              <span className="w-3 border-t-2 border-dotted border-muted-foreground" /> Completed
+            </span>
           </div>
+
+          {/* Task flow chart */}
+          <TaskFlowChart created={weeklyData} completed={completedWeekly} labels={weekLabels} />
         </div>
 
         {/* Project Progress */}
