@@ -45,23 +45,24 @@
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.21 0.006 285.885);
+  /* Brand / Primary — rose #E11D48 (buttons, links, focus, accents) */
+  --primary: oklch(0.585 0.233 13.3);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
   --muted: oklch(0.967 0.001 286.375);
   --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
+  --accent: oklch(0.975 0.01 13);
+  --accent-foreground: oklch(0.585 0.233 13.3);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.922 0.004 286.286);
   --input: oklch(0.922 0.004 286.286);
-  --ring: oklch(0.21 0.006 285.885);
+  --ring: oklch(0.585 0.233 13.3);
   --radius: 0.5rem;
   --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
   --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-primary: 0 1px 2px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-primary: 0 4px 14px rgba(225,29,72,0.3);
   --sidebar: hsl(0 0% 98%);
   --sidebar-foreground: hsl(240 5.3% 26.1%);
   --sidebar-primary: hsl(240 5.9% 10%);
@@ -79,9 +80,9 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
-  /* Cal.com-style inverted primary: light button on dark surface */
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.21 0.006 285.885);
+  /* Brand / Primary — rose stays the accent in dark mode */
+  --primary: oklch(0.585 0.233 13.3);
+  --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.269 0.006 285.885);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0.006 285.885);
@@ -91,7 +92,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.871 0.006 286.286);
+  --ring: oklch(0.585 0.233 13.3);
   --shadow-card: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);
   --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
   --sidebar: hsl(240 5.9% 10%);
@@ -104,8 +105,8 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
-/* Subtle neutral accent tint; adapts to dark mode automatically */
-.accent-tint { background-color: oklch(0.21 0.006 285.885 / 0.08); }
+/* Rose accent tint; adapts to dark mode automatically */
+.accent-tint { background-color: oklch(0.585 0.233 13.3 / 0.10); }
 
 /* iBanKo-style soft pastel data tiles (dark-mode aware) */
 .tile-mint  { background-color: #e9f6ee; }
@@ -154,7 +155,7 @@
     font-family: var(--font-heading), system-ui, sans-serif;
   }
   ::selection {
-    background-color: oklch(0.21 0.006 285.885 / 0.15);
+    background-color: oklch(0.585 0.233 13.3 / 0.15);
   }
   ::-webkit-scrollbar {
     width: 5px;

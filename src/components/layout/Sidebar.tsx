@@ -99,7 +99,7 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
                 active
-                  ? 'bg-sidebar-accent text-sidebar-foreground font-semibold'
+                  ? 'bg-primary/10 text-primary font-semibold'
                   : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60'
               )}
               aria-current={active ? 'page' : undefined}
