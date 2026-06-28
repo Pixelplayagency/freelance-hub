@@ -1,7 +1,7 @@
-import Link from 'next/link'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { Bell } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
+import { NotificationBell } from './NotificationBell'
+import type { Notification } from '@/lib/types/app.types'
 
 export async function TopBar() {
   const supabase = await createSupabaseServerClient()
@@ -9,12 +9,13 @@ export async function TopBar() {
 
   if (!user) return null
 
-  const [{ count: unreadCount }, { data: profile }] = await Promise.all([
+  const [{ data: notifications }, { data: profile }] = await Promise.all([
     supabase
       .from('notifications')
-      .select('*', { count: 'exact', head: true })
+      .select('*, task:tasks(id, title)')
       .eq('user_id', user.id)
-      .eq('read', false),
+      .order('created_at', { ascending: false })
+      .limit(8),
     supabase
       .from('profiles')
       .select('role, full_name, avatar_url')
@@ -35,29 +36,16 @@ export async function TopBar() {
       {/* Theme toggle */}
       <ThemeToggle />
 
-      {/* Notification Bell */}
-      <Link
-        href={notifHref}
-        className="relative p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-      >
-        <Bell className="w-5 h-5" />
-        {(unreadCount ?? 0) > 0 && (
-          <span
-            className="absolute top-1 right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full text-[10px] font-semibold text-white leading-none"
-            style={{ backgroundColor: 'var(--primary)', boxShadow: '0 0 0 2px oklch(0.21 0.006 285.885 / 0.25)' }}
-          >
-            {(unreadCount ?? 0) > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </Link>
+      {/* Notification bell — opens a popover */}
+      <NotificationBell
+        notifications={(notifications ?? []) as Notification[]}
+        viewAllHref={notifHref}
+      />
 
       {/* User Avatar */}
       <div
-        className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-white select-none shrink-0 ml-1"
-        style={{
-          backgroundColor: 'var(--primary)',
-          boxShadow: '0 0 0 2px oklch(0.21 0.006 285.885 / 0.25), 0 0 0 3px var(--color-background)',
-        }}
+        className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-primary-foreground select-none shrink-0 ml-1 bg-primary"
+        style={{ boxShadow: '0 0 0 2px oklch(0.585 0.233 13.3 / 0.25), 0 0 0 3px var(--color-background)' }}
       >
         {profile?.avatar_url
           ? <img src={profile.avatar_url} alt={profile.full_name ?? ''} className="w-full h-full object-cover" />

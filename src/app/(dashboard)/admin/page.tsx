@@ -9,6 +9,7 @@ import { isOverdue } from '@/lib/utils/date'
 import { TaskStatusBadge } from '@/components/tasks/TaskStatusBadge'
 import { MiniSparkline } from '@/components/dashboard/MiniSparkline'
 import { TaskFlowChart } from '@/components/dashboard/TaskFlowChart'
+import { LiveClock } from '@/components/dashboard/LiveClock'
 import type { TaskStatus } from '@/lib/types/app.types'
 
 function trendOf(series: number[]) {
@@ -92,15 +93,15 @@ export default async function AdminDashboardPage() {
   const statCards = [
     {
       label: 'Active Tasks', value: activeTasks, icon: Clock, href: '/admin/projects',
-      tile: 'tile-mint', accent: 'text-mint', series: activeWeekly,
+      gradient: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', glow: 'rgba(99,102,241,0.35)', series: activeWeekly,
     },
     {
       label: 'In Review', value: inReview, icon: AlertCircle, href: '/admin/projects',
-      tile: 'tile-peach', accent: 'text-peach', series: reviewWeekly,
+      gradient: 'linear-gradient(135deg, #fb923c 0%, #ea580c 100%)', glow: 'rgba(249,115,22,0.35)', series: reviewWeekly,
     },
     {
       label: 'Completed', value: completedCount, icon: CheckCircle2, href: '/admin/projects',
-      tile: 'tile-lav', accent: 'text-lav', series: completedWeekly,
+      gradient: 'linear-gradient(135deg, #34d399 0%, #059669 100%)', glow: 'rgba(16,185,129,0.35)', series: completedWeekly,
     },
   ]
 
@@ -116,13 +117,16 @@ export default async function AdminDashboardPage() {
               : 'Plan, prioritize, and accomplish your tasks with ease.'}
           </p>
         </div>
-        <Link
-          href="/admin/projects/new"
-          className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity shrink-0"
-          style={{ boxShadow: 'var(--shadow-primary)' }}
-        >
-          <Plus className="w-4 h-4" /> Add Project
-        </Link>
+        <div className="flex items-center gap-3">
+          <LiveClock />
+          <Link
+            href="/admin/projects/new"
+            className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity shrink-0"
+            style={{ boxShadow: 'var(--shadow-primary)' }}
+          >
+            <Plus className="w-4 h-4" /> Add Project
+          </Link>
+        </div>
       </div>
 
       {/* Stat Cards */}
@@ -150,7 +154,7 @@ export default async function AdminDashboardPage() {
           </div>
         </Link>
 
-        {/* Pastel stat cards with sparklines */}
+        {/* Vibrant stat cards with sparklines */}
         {statCards.map(s => {
           const Icon = s.icon
           const trend = trendOf(s.series)
@@ -159,23 +163,26 @@ export default async function AdminDashboardPage() {
             <Link
               key={s.label}
               href={s.href}
-              className={`${s.tile} relative overflow-hidden rounded-3xl p-5 flex flex-col justify-between min-h-[140px] hover:-translate-y-0.5 transition-transform duration-200`}
+              className="relative overflow-hidden rounded-3xl p-5 flex flex-col justify-between min-h-[140px] text-white hover:-translate-y-0.5 transition-transform duration-200"
+              style={{ background: s.gradient, boxShadow: `0 10px 30px ${s.glow}` }}
             >
-              <div className="flex items-center justify-between">
-                <div className="w-9 h-9 rounded-xl bg-white/70 dark:bg-white/10 flex items-center justify-center">
-                  <Icon className="text-foreground" style={{ width: 18, height: 18 }} />
+              <div className="absolute inset-0 opacity-20 pointer-events-none"
+                style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
+              <div className="relative flex items-center justify-between">
+                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Icon className="text-white" style={{ width: 18, height: 18 }} />
                 </div>
-                <MoreHorizontal className="w-4 h-4 text-foreground/30" />
+                <MoreHorizontal className="w-4 h-4 text-white/50" />
               </div>
-              <div className={`${s.accent} -mx-1`}>
+              <div className="relative text-white/40 -mx-1">
                 <MiniSparkline data={s.series} stroke="currentColor" width={120} height={28} className="w-full" />
               </div>
-              <div className="flex items-end justify-between">
+              <div className="relative flex items-end justify-between">
                 <div>
-                  <p className="text-2xl font-bold tabular-nums text-foreground leading-none">{s.value}</p>
-                  <p className="text-xs mt-1.5 font-medium text-foreground/60">{s.label}</p>
+                  <p className="text-2xl font-bold tabular-nums leading-none">{s.value}</p>
+                  <p className="text-xs mt-1.5 font-medium text-white/70">{s.label}</p>
                 </div>
-                <span className={`${s.accent} inline-flex items-center gap-0.5 text-xs font-semibold`}>
+                <span className="inline-flex items-center gap-0.5 text-xs font-semibold bg-white/20 rounded-full px-2 py-0.5">
                   <TrendIcon className="w-3.5 h-3.5" />
                   {Math.abs(trend.pct)}%
                 </span>

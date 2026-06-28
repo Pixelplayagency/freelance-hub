@@ -9,9 +9,8 @@ import {
   LayoutDashboard,
   FolderKanban,
   Users,
-  Bell,
   LogOut,
-  UserCircle,
+  Settings,
   CalendarDays,
   ClipboardList,
 } from 'lucide-react'
@@ -24,21 +23,37 @@ interface NavItem {
   icon: React.ElementType
 }
 
-const ADMIN_NAV: NavItem[] = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/admin/workspace', label: 'Workspace', icon: Users },
-  { href: '/admin/content-planner', label: 'Content Planner', icon: CalendarDays },
-  { href: '/admin/discovery', label: 'Discovery', icon: ClipboardList },
-  { href: '/admin/notifications', label: 'Notifications', icon: Bell },
-  { href: '/admin/profile', label: 'Profile', icon: UserCircle },
+interface NavGroup {
+  label: string
+  items: NavItem[]
+}
+
+const ADMIN_GROUPS: NavGroup[] = [
+  {
+    label: 'Menu',
+    items: [
+      { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
+      { href: '/admin/workspace', label: 'Workspace', icon: Users },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { href: '/admin/content-planner', label: 'Content Planner', icon: CalendarDays },
+      { href: '/admin/discovery', label: 'Discovery', icon: ClipboardList },
+    ],
+  },
 ]
 
-const FREELANCER_NAV_BASE: NavItem[] = [
-  { href: '/freelancer', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/freelancer/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/freelancer/notifications', label: 'Notifications', icon: Bell },
-  { href: '/freelancer/profile', label: 'Profile', icon: UserCircle },
+const FREELANCER_GROUPS_BASE: NavGroup[] = [
+  {
+    label: 'Menu',
+    items: [
+      { href: '/freelancer', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/freelancer/projects', label: 'Projects', icon: FolderKanban },
+    ],
+  },
 ]
 
 export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole; userName: string | null; avatarUrl?: string | null; jobRole?: FreelancerRole | null }) {
@@ -46,16 +61,15 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
   const supabase = useSupabase()
   const router = useRouter()
 
-  const freelancerNav = jobRole === 'social_media_manager'
+  const freelancerGroups: NavGroup[] = jobRole === 'social_media_manager'
     ? [
-        FREELANCER_NAV_BASE[0],
-        { href: '/freelancer/content-planner', label: 'Content Planner', icon: CalendarDays },
-        FREELANCER_NAV_BASE[2],
-        FREELANCER_NAV_BASE[3],
+        ...FREELANCER_GROUPS_BASE,
+        { label: 'Content', items: [{ href: '/freelancer/content-planner', label: 'Content Planner', icon: CalendarDays }] },
       ]
-    : FREELANCER_NAV_BASE
+    : FREELANCER_GROUPS_BASE
 
-  const nav = role === 'admin' ? ADMIN_NAV : freelancerNav
+  const groups = role === 'admin' ? ADMIN_GROUPS : freelancerGroups
+  const profileHref = role === 'admin' ? '/admin/profile' : '/freelancer/profile'
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -81,39 +95,46 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
-        <p className="text-[11px] font-semibold uppercase tracking-widest px-3 mb-2 text-muted-foreground">
-          {role === 'admin' ? 'Management' : 'Workspace'}
-        </p>
-        {nav.map(item => {
-          const Icon = item.icon
-          const isDashboard = item.href === '/admin' || item.href === '/freelancer'
-          const active = pathname === item.href
-            || (!isDashboard && pathname.startsWith(item.href + '/'))
-            || (item.href === '/admin/workspace' && (pathname.startsWith('/admin/freelancers') || pathname.startsWith('/admin/admins')))
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
-                active
-                  ? 'bg-primary/10 text-primary font-semibold'
-                  : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60'
-              )}
-              aria-current={active ? 'page' : undefined}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              {item.label}
-            </Link>
-          )
-        })}
+      <nav className="flex-1 px-3 py-2 space-y-5 overflow-y-auto">
+        {groups.map(group => (
+          <div key={group.label} className="space-y-0.5">
+            <p className="text-[11px] font-semibold uppercase tracking-widest px-3 mb-2 text-muted-foreground">
+              {group.label}
+            </p>
+            {group.items.map(item => {
+              const Icon = item.icon
+              const isDashboard = item.href === '/admin' || item.href === '/freelancer'
+              const active = pathname === item.href
+                || (!isDashboard && pathname.startsWith(item.href + '/'))
+                || (item.href === '/admin/workspace' && (pathname.startsWith('/admin/freelancers') || pathname.startsWith('/admin/admins')))
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
+                    active
+                      ? 'bg-primary/10 text-primary font-semibold'
+                      : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60'
+                  )}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* User */}
-      <div className="border-t border-sidebar-border px-3 py-4">
-        <div className="flex items-center gap-3 px-2 py-2 rounded-lg">
+      <div className="border-t border-sidebar-border p-3 space-y-1">
+        <Link
+          href={profileHref}
+          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-sidebar-accent transition-colors group"
+        >
           <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold bg-primary text-primary-foreground shrink-0">
             {avatarUrl
               ? <img src={avatarUrl} alt={userName ?? ''} className="w-full h-full object-cover" />
@@ -121,15 +142,24 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">{userName ?? 'User'}</p>
-            <p className="text-xs text-muted-foreground capitalize">
+            <p className="text-xs text-muted-foreground capitalize truncate">
               {jobRole ? FREELANCER_ROLE_LABELS[jobRole] : role}
             </p>
           </div>
+        </Link>
+
+        <div className="flex items-center gap-1">
+          <Link
+            href={profileHref}
+            className="flex-1 inline-flex items-center justify-center gap-2 h-9 rounded-lg text-xs font-medium text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+          >
+            <Settings className="w-4 h-4" /> Edit profile
+          </Link>
           <button
             onClick={handleSignOut}
             title="Sign out"
             aria-label="Sign out"
-            className="inline-flex items-center justify-center h-9 w-9 rounded-md text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
           >
             <LogOut className="w-4 h-4" />
           </button>
