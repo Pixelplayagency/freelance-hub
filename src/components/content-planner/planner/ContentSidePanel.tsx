@@ -301,34 +301,7 @@ export function ContentSidePanel({
                 </div>
               </div>
 
-              {/* Schedule */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Schedule</label>
-                <div className="rounded-xl border border-border bg-card overflow-hidden">
-                  <div className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-border">
-                    <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm text-foreground">
-                      {dateFull.toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}
-                    </span>
-                  </div>
-                  <div className="px-3.5 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <input
-                        type="time"
-                        value={draft.scheduled_time}
-                        onChange={e => patch('scheduled_time', e.target.value)}
-                        className="flex-1 text-sm bg-transparent focus:outline-none tabular-nums text-foreground"
-                      />
-                      {draft.scheduled_time && (
-                        <span className="text-xs text-muted-foreground font-medium tabular-nums">{to12h(draft.scheduled_time)}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Publishing status */}
+              {/* Publishing status — moved after content type */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">Publishing status</label>
                 <div className="rounded-xl border border-border bg-card overflow-hidden flex divide-x divide-border">
@@ -345,6 +318,46 @@ export function ContentSidePanel({
                       </button>
                     )
                   })}
+                </div>
+              </div>
+
+              {/* Schedule */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">Schedule</label>
+                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                  {/* Date */}
+                  <div className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-border">
+                    <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-foreground">
+                      {dateFull.toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                  {/* Time */}
+                  <div className="px-3.5 py-2.5">
+                    {!draft.scheduled_time ? (
+                      <button type="button" onClick={() => patch('scheduled_time', '09:00')}
+                        className="w-full flex items-center gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors py-0.5">
+                        <Clock className="w-4 h-4 shrink-0" />
+                        <span>Set time</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2.5">
+                        <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <span className="text-sm font-semibold text-foreground tabular-nums">{to12h(draft.scheduled_time)}</span>
+                        <input
+                          type="time"
+                          value={draft.scheduled_time}
+                          onChange={e => patch('scheduled_time', e.target.value)}
+                          className="ml-auto w-[34px] h-7 rounded-md border border-border bg-muted/50 text-transparent cursor-pointer hover:bg-muted transition-colors [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                          title="Change time"
+                        />
+                        <button type="button" onClick={() => patch('scheduled_time', '')}
+                          className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-red-500 hover:bg-red-50 transition-colors">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
