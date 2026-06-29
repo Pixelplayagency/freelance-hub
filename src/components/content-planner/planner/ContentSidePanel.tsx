@@ -496,7 +496,7 @@ export function ContentSidePanel({
             <button type="button" onClick={onSave} disabled={isSaving || draft.uploading}
               className="px-6 h-10 rounded-xl text-sm font-semibold text-white hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
               style={{ backgroundColor: 'var(--primary)' }}>
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : isAdmin ? (isEdit ? 'Save' : 'Schedule') : (isEdit ? 'Save & Submit' : 'Schedule & Submit')}
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : isEdit ? 'Save' : 'Schedule'}
             </button>
           </div>
         </DialogPrimitive.Content>
