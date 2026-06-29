@@ -7,6 +7,7 @@ import { isOverdue } from '@/lib/utils/date'
 import { MiniSparkline } from '@/components/dashboard/MiniSparkline'
 import { TaskFlowChart } from '@/components/dashboard/TaskFlowChart'
 import { LiveClock } from '@/components/dashboard/LiveClock'
+import { DashboardGreeting } from '@/components/dashboard/DashboardGreeting'
 import type { TaskStatus } from '@/lib/types/app.types'
 
 function trendOf(series: number[]) {
@@ -123,7 +124,7 @@ export default async function FreelancerDashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">My Dashboard</h1>
+          <DashboardGreeting />
           <p className={`text-sm mt-0.5 ${overdueCount > 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
             {overdueCount > 0
               ? `${overdueCount} overdue task${overdueCount !== 1 ? 's' : ''} need attention`

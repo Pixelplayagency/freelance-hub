@@ -10,6 +10,7 @@ import { TaskStatusBadge } from '@/components/tasks/TaskStatusBadge'
 import { MiniSparkline } from '@/components/dashboard/MiniSparkline'
 import { TaskFlowChart } from '@/components/dashboard/TaskFlowChart'
 import { LiveClock } from '@/components/dashboard/LiveClock'
+import { DashboardGreeting } from '@/components/dashboard/DashboardGreeting'
 import type { TaskStatus } from '@/lib/types/app.types'
 
 function trendOf(series: number[]) {
@@ -110,7 +111,7 @@ export default async function AdminDashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+          <DashboardGreeting />
           <p className={`text-sm mt-0.5 ${overdueCount > 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
             {overdueCount > 0
               ? `⚠ ${overdueCount} overdue task${overdueCount !== 1 ? 's' : ''} need attention`
@@ -121,7 +122,7 @@ export default async function AdminDashboardPage() {
           <LiveClock />
           <Link
             href="/admin/projects/new"
-            className="flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity shrink-0"
+            className="flex items-center gap-2 h-12 bg-primary text-primary-foreground text-sm font-semibold px-5 rounded-xl hover:opacity-90 transition-opacity shrink-0"
             style={{ boxShadow: 'var(--shadow-primary)' }}
           >
             <Plus className="w-4 h-4" /> Add Project
