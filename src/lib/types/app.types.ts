@@ -18,10 +18,10 @@ export type TaskType = 'standard' | 'simple'
 export type Priority = 'low' | 'medium' | 'high' | 'urgent'
 
 export const PRIORITY_CONFIG: Record<Priority, { label: string; color: string; bg: string; dot: string }> = {
-  low:    { label: 'Low',    color: 'text-emerald-700', bg: 'bg-emerald-100', dot: 'bg-emerald-500' },
-  medium: { label: 'Medium', color: 'text-blue-700',    bg: 'bg-blue-100',    dot: 'bg-blue-500' },
-  high:   { label: 'High',   color: 'text-amber-700',   bg: 'bg-amber-100',   dot: 'bg-amber-500' },
-  urgent: { label: 'Urgent', color: 'text-red-700',     bg: 'bg-red-100',     dot: 'bg-red-500' },
+  low:    { label: 'Low',    color: 'text-emerald-400', bg: 'bg-emerald-500/15', dot: 'bg-emerald-500' },
+  medium: { label: 'Medium', color: 'text-blue-400',    bg: 'bg-blue-500/15',    dot: 'bg-blue-500' },
+  high:   { label: 'High',   color: 'text-amber-400',   bg: 'bg-amber-500/15',   dot: 'bg-amber-500' },
+  urgent: { label: 'Urgent', color: 'text-red-400',     bg: 'bg-red-500/15',     dot: 'bg-red-500' },
 }
 
 export type ProjectStatus = 'active' | 'archived'
