@@ -23,6 +23,17 @@ export async function assignJobRole(id: string, job_role: FreelancerRole | null)
   revalidatePath('/admin/workspace')
 }
 
+export async function setUserRole(id: string, role: 'manager' | 'freelancer') {
+  await requireAdmin()
+  const supabase = createSupabaseServiceClient()
+  const { error } = await supabase
+    .from('profiles')
+    .update({ role })
+    .eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/workspace')
+}
+
 export async function approveFreelancer(id: string) {
   await requireAdmin()
   const supabase = createSupabaseServiceClient()

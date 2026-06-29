@@ -3,9 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   compress: true,
   productionBrowserSourceMaps: false,
+  // Strip console.* (keep errors) from the production client bundle — smaller, faster JS.
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error'] } : false,
+  },
   experimental: {
     optimizePackageImports: [
       'lucide-react',
+      'date-fns',
       '@dnd-kit/core',
       '@dnd-kit/sortable',
       '@tiptap/react',

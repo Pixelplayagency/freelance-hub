@@ -38,6 +38,7 @@ export function CreateTaskButton({ projectId, freelancers }: CreateTaskButtonPro
           projectId={projectId}
           freelancers={freelancers}
           onSuccess={handleSuccess}
+          onCancel={() => setOpen(false)}
         />
       </DialogContent>
     </Dialog>

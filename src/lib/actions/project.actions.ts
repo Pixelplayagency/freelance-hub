@@ -46,6 +46,12 @@ export async function deleteProject(projectId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
+  // Only full admins may delete a whole project. Managers have admin-tier work
+  // powers but must not be able to delete projects (or anything but their own
+  // tasks and task content).
+  const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (me?.role !== 'admin') throw new Error('Only an admin can delete a project.')
+
   const { error } = await supabase
     .from('projects')
     .delete()

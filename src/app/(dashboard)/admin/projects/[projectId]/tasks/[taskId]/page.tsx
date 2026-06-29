@@ -19,10 +19,12 @@ export default async function TaskDetailPage({
 }) {
   const { projectId, taskId } = await params
   const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  // Session already validated in (dashboard)/layout.tsx — read it from the cookie (no network call).
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user ?? null
   if (!user) redirect('/login')
 
-  const [{ data: task }, { data: references }, { data: freelancers }] = await Promise.all([
+  const [{ data: task }, { data: references }, { data: freelancers }, { data: me }] = await Promise.all([
     supabase
       .from('tasks')
       .select('*, assignee:profiles!assigned_to(id, full_name, email, avatar_url)')
@@ -37,10 +39,18 @@ export default async function TaskDetailPage({
     supabase
       .from('profiles')
       .select('id, full_name, email')
-      .eq('role', 'freelancer'),
+      .in('role', ['freelancer', 'manager']),
+    supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single(),
   ])
 
   if (!task) notFound()
+
+  // Admins can delete any task; managers only the ones they created.
+  const canDeleteTask = me?.role === 'admin' || (me?.role === 'manager' && task.created_by === user.id)
 
   const assignee = task.assignee as Profile | null
 
@@ -85,7 +95,7 @@ export default async function TaskDetailPage({
               freelancers={(freelancers ?? []) as Pick<Profile, 'id' | 'full_name' | 'email'>[]}
               projectId={projectId}
             />
-            <DeleteTaskButton taskId={taskId} projectId={projectId} />
+            {canDeleteTask && <DeleteTaskButton taskId={taskId} projectId={projectId} />}
           </div>
         </div>
 

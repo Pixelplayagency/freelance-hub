@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'freelancer'
+export type UserRole = 'admin' | 'manager' | 'freelancer'
 
 export type FreelancerStatus = 'pending' | 'active' | 'removed'
 

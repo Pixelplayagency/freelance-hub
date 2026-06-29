@@ -24,11 +24,13 @@ export default async function AdminClientCalendarPage({
   searchParams: Promise<{ view?: string; month?: string; year?: string }>
 }) {
   const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  // Session already validated in (dashboard)/layout.tsx — read it from the cookie (no network call).
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user ?? null
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/freelancer')
+  if (profile?.role !== 'admin' && profile?.role !== 'manager') redirect('/freelancer')
 
   const { clientId } = await params
   const sp = await searchParams

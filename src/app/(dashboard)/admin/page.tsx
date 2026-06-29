@@ -22,7 +22,9 @@ function trendOf(series: number[]) {
 
 export default async function AdminDashboardPage() {
   const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  // Session already validated in (dashboard)/layout.tsx — read it from the cookie (no network call).
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user ?? null
   if (!user) redirect('/login')
 
   const now = new Date()
@@ -31,11 +33,16 @@ export default async function AdminDashboardPage() {
     { data: projectsList },
     { data: allTasks },
     { data: freelancers },
+    { data: me },
   ] = await Promise.all([
     supabase.from('projects').select('id, name, color, status, avatar_url').order('created_at', { ascending: false }).limit(20),
     supabase.from('tasks').select('id, title, status, due_date, created_at, project:projects(id, name, color), assignee:profiles!assigned_to(id, full_name, avatar_url)').limit(500),
     supabase.from('profiles').select('id, full_name, avatar_url, username').eq('role', 'freelancer').eq('status', 'active').limit(20),
+    supabase.from('profiles').select('role').eq('id', user.id).single(),
   ])
+
+  // Managers see the admin dashboard but can't manage members (no Workspace access).
+  const canManageTeam = me?.role === 'admin'
 
   const tasks = allTasks ?? []
   const activeProjects = projectsList?.length ?? 0
@@ -300,10 +307,12 @@ export default async function AdminDashboardPage() {
               <h2 className="text-sm font-semibold text-foreground">Team</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{teamData.length} active member{teamData.length !== 1 ? 's' : ''}</p>
             </div>
-            <Link href="/admin/workspace"
-              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted hover:text-foreground transition-colors">
-              <Plus className="w-3 h-3" /> Add Member
-            </Link>
+            {canManageTeam && (
+              <Link href="/admin/workspace"
+                className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted hover:text-foreground transition-colors">
+                <Plus className="w-3 h-3" /> Add Member
+              </Link>
+            )}
           </div>
           {teamData.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -311,7 +320,7 @@ export default async function AdminDashboardPage() {
                 <Users className="w-6 h-6 text-muted-foreground/30" />
               </div>
               <p className="text-sm font-semibold text-foreground">No team members yet</p>
-              <Link href="/admin/workspace" className="text-xs text-primary mt-1.5 hover:underline font-medium">Invite a freelancer →</Link>
+              {canManageTeam && <Link href="/admin/workspace" className="text-xs text-primary mt-1.5 hover:underline font-medium">Invite a freelancer →</Link>}
             </div>
           ) : (
             <div className="divide-y divide-border">

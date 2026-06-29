@@ -38,7 +38,9 @@ export default async function ProjectPage({
 }) {
   const { projectId } = await params
   const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  // Session already validated in (dashboard)/layout.tsx — read it from the cookie (no network call).
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user ?? null
   if (!user) redirect('/login')
 
   const [{ data: project }, { data: tasks }, { data: profile }, { data: freelancers }] =
@@ -46,12 +48,14 @@ export default async function ProjectPage({
       supabase.from('projects').select('*').eq('id', projectId).single(),
       supabase.from('tasks').select('*, assignee:profiles!assigned_to(id, full_name, email, avatar_url)').eq('project_id', projectId).order('sort_order'),
       supabase.from('profiles').select('role').eq('id', user.id).single(),
-      supabase.from('profiles').select('id, full_name, email').eq('role', 'freelancer'),
+      supabase.from('profiles').select('id, full_name, email').in('role', ['freelancer', 'manager']),
     ])
 
   if (!project) notFound()
 
-  const isAdmin = profile?.role === 'admin'
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'manager'
+  // Managers get admin-tier work tools but cannot delete a whole project.
+  const isFullAdmin = profile?.role === 'admin'
 
   const taskIds = (tasks ?? []).map(t => t.id)
   let assigneeMap: AssigneeMap = {}
@@ -122,7 +126,7 @@ export default async function ProjectPage({
             </div>
             {isAdmin && (
               <div className="flex items-center gap-2 shrink-0 pb-1">
-                <DeleteProjectButton projectId={projectId} />
+                {isFullAdmin && <DeleteProjectButton projectId={projectId} />}
                 <CreateTaskButton
                   projectId={projectId}
                   freelancers={(freelancers ?? []) as Pick<Profile, 'id' | 'full_name' | 'email'>[]}

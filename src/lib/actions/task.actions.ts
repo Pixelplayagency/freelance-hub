@@ -118,6 +118,15 @@ export async function deleteTask(taskId: string, projectId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
+  // Admins can delete any task. Managers can only delete tasks they created
+  // (the ones they gave out). Everyone else is blocked.
+  const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (me?.role !== 'admin') {
+    if (me?.role !== 'manager') throw new Error('You are not allowed to delete this task.')
+    const { data: t } = await supabase.from('tasks').select('created_by').eq('id', taskId).single()
+    if (t?.created_by !== user.id) throw new Error('Managers can only delete tasks they created.')
+  }
+
   const { error } = await supabase
     .from('tasks')
     .delete()

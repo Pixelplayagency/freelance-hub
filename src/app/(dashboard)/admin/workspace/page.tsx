@@ -1,15 +1,18 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Clock, UserPlus, Users, ShieldCheck } from 'lucide-react'
+import { Clock, UserPlus, Users, ShieldCheck, Briefcase, ArrowUpCircle, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { InviteFreelancerForm } from '@/components/auth/InviteFreelancerForm'
 import { FreelancerCardActions } from '@/components/admin/FreelancerCardActions'
 import { cn } from '@/lib/utils/cn'
 import type { Profile, FreelancerRole } from '@/lib/types/app.types'
 import { FREELANCER_ROLE_LABELS } from '@/lib/types/app.types'
-import { assignJobRole } from '@/lib/actions/freelancer.actions'
+import { assignJobRole, setUserRole } from '@/lib/actions/freelancer.actions'
+import { toast } from 'sonner'
 import { createBrowserClient } from '@supabase/ssr'
+
+const byName = (a: Profile, b: Profile) => (a.full_name ?? '').localeCompare(b.full_name ?? '')
 
 type Tab = 'members' | 'invite'
 type InviteRole = 'freelancer' | 'admin'
@@ -26,6 +29,7 @@ export default function WorkspacePage() {
   const [pending, setPending] = useState<Profile[]>([])
   const [active, setActive] = useState<Profile[]>([])
   const [admins, setAdmins] = useState<Profile[]>([])
+  const [managers, setManagers] = useState<Profile[]>([])
   const [countMap, setCountMap] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
 
@@ -35,9 +39,10 @@ export default function WorkspacePage() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
     async function load() {
-      const [{ data: freelancers }, { data: adminProfiles }, { data: taskCounts }] = await Promise.all([
+      const [{ data: freelancers }, { data: adminProfiles }, { data: managerProfiles }, { data: taskCounts }] = await Promise.all([
         supabase.from('profiles').select('*').eq('role', 'freelancer').in('status', ['pending', 'active']).order('full_name'),
         supabase.from('profiles').select('*').eq('role', 'admin').order('full_name'),
+        supabase.from('profiles').select('*').eq('role', 'manager').order('full_name'),
         supabase.from('tasks').select('assigned_to, status').neq('status', 'completed'),
       ])
       const map = ((taskCounts ?? []) as { assigned_to: string | null }[]).reduce<Record<string, number>>((acc, t) => {
@@ -48,10 +53,35 @@ export default function WorkspacePage() {
       setPending(((freelancers ?? []) as Profile[]).filter(f => f.status === 'pending'))
       setActive(((freelancers ?? []) as Profile[]).filter(f => f.status === 'active'))
       setAdmins((adminProfiles ?? []) as Profile[])
+      setManagers((managerProfiles ?? []) as Profile[])
       setLoading(false)
     }
     load()
   }, [])
+
+  async function makeManager(profile: Profile) {
+    setActive(prev => prev.filter(p => p.id !== profile.id))
+    setManagers(prev => [...prev, { ...profile, role: 'manager' as const }].sort(byName))
+    try {
+      await setUserRole(profile.id, 'manager')
+      toast.success(`${profile.full_name ?? 'Member'} is now a Manager`)
+    } catch {
+      toast.error('Failed to update role')
+      window.location.reload()
+    }
+  }
+
+  async function revertManager(profile: Profile) {
+    setManagers(prev => prev.filter(p => p.id !== profile.id))
+    setActive(prev => [...prev, { ...profile, role: 'freelancer' as const }].sort(byName))
+    try {
+      await setUserRole(profile.id, 'freelancer')
+      toast.success(`${profile.full_name ?? 'Manager'} reverted to member`)
+    } catch {
+      toast.error('Failed to update role')
+      window.location.reload()
+    }
+  }
 
   return (
     <div>
@@ -118,6 +148,48 @@ export default function WorkspacePage() {
                   </div>
                 )}
               </div>
+
+              {/* Managers */}
+              {managers.length > 0 && (
+                <div className="mb-8">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Briefcase className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                    <h2 className="text-sm font-semibold text-foreground">Managers ({managers.length})</h2>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {managers.map(profile => (
+                      <div key={profile.id} className="bg-card rounded-lg border border-border p-5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-white shrink-0" style={{ backgroundColor: 'var(--primary)' }}>
+                            {getInitials(profile)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-foreground truncate">{profile.full_name ?? 'Unnamed'}</p>
+                            <p className="text-xs text-muted-foreground truncate">{profile.email}</p>
+                            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: 'var(--primary)', backgroundColor: 'oklch(0.21 0.006 285.885 / 0.1)' }}>
+                              <Briefcase className="w-2.5 h-2.5" />
+                              Manager
+                            </span>
+                          </div>
+                          <div className="shrink-0 text-center">
+                            <div className="text-sm font-bold text-foreground">{countMap[profile.id] ?? 0}</div>
+                            <div className="text-[10px] text-muted-foreground uppercase tracking-wide">tasks</div>
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <button
+                            onClick={() => revertManager(profile)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border text-foreground hover:bg-muted transition-colors"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            Revert to member
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Pending */}
               {pending.length > 0 && (
@@ -197,6 +269,13 @@ export default function WorkspacePage() {
                               <option key={val} value={val}>{label}</option>
                             ))}
                           </select>
+                          <button
+                            onClick={() => makeManager(profile)}
+                            className="mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                          >
+                            <ArrowUpCircle className="w-3.5 h-3.5" />
+                            Make Manager
+                          </button>
                         </div>
                         <FreelancerCardActions id={profile.id} mode="active" />
                       </div>

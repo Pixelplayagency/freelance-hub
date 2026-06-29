@@ -13,6 +13,7 @@ import {
   Settings,
   CalendarDays,
   ClipboardList,
+  ListTodo,
 } from 'lucide-react'
 import { useSupabase } from '@/providers/SupabaseProvider'
 import { useRouter } from 'next/navigation'
@@ -56,6 +57,25 @@ const FREELANCER_GROUPS_BASE: NavGroup[] = [
   },
 ]
 
+// Managers are admin-tier (reuse the /admin pages) but without Workspace or
+// Discovery. They also do hands-on work, so they get a personal "My Tasks" view.
+const MANAGER_GROUPS: NavGroup[] = [
+  {
+    label: 'Menu',
+    items: [
+      { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
+      { href: '/freelancer/tasks', label: 'My Tasks', icon: ListTodo },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { href: '/admin/content-planner', label: 'Content Planner', icon: CalendarDays },
+    ],
+  },
+]
+
 export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole; userName: string | null; avatarUrl?: string | null; jobRole?: FreelancerRole | null }) {
   const pathname = usePathname()
   const supabase = useSupabase()
@@ -68,8 +88,8 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
       ]
     : FREELANCER_GROUPS_BASE
 
-  const groups = role === 'admin' ? ADMIN_GROUPS : freelancerGroups
-  const profileHref = role === 'admin' ? '/admin/profile' : '/freelancer/profile'
+  const groups = role === 'admin' ? ADMIN_GROUPS : role === 'manager' ? MANAGER_GROUPS : freelancerGroups
+  const profileHref = role === 'freelancer' ? '/freelancer/profile' : '/admin/profile'
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -143,7 +163,7 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">{userName ?? 'User'}</p>
             <p className="text-xs text-muted-foreground capitalize truncate">
-              {jobRole ? FREELANCER_ROLE_LABELS[jobRole] : role}
+              {role === 'manager' ? 'Manager' : jobRole ? FREELANCER_ROLE_LABELS[jobRole] : role}
             </p>
           </div>
         </Link>

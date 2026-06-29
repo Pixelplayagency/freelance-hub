@@ -20,6 +20,7 @@ interface TaskFormProps {
   freelancers: Pick<Profile, 'id' | 'full_name' | 'email'>[]
   task?: Task
   onSuccess?: (newTask?: Task) => void
+  onCancel?: () => void
 }
 
 interface PendingLink {
@@ -27,7 +28,7 @@ interface PendingLink {
   label: string
 }
 
-export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormProps) {
+export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
   const [assignedTo, setAssignedTo] = useState<string[]>(task?.assigned_to ? [task.assigned_to] : [])
@@ -193,7 +194,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
             >
               <span className={assignedTo.length === 0 ? 'text-muted-foreground' : 'text-foreground'}>
                 {assignedTo.length === 0
-                  ? 'Select freelancers'
+                  ? 'Select people'
                   : assignedTo.length === 1
                     ? (freelancers.find(f => f.id === assignedTo[0])?.full_name ?? freelancers.find(f => f.id === assignedTo[0])?.email ?? '1 selected')
                     : `${assignedTo.length} selected`}
@@ -204,7 +205,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
           <PopoverContent className="w-64 p-1" align="start">
             <div className="max-h-48 overflow-y-auto">
               {freelancers.length === 0 ? (
-                <p className="text-xs text-muted-foreground px-2 py-3 text-center">No freelancers yet</p>
+                <p className="text-xs text-muted-foreground px-2 py-3 text-center">No one to assign yet</p>
               ) : (
                 freelancers.map(f => {
                   const checked = assignedTo.includes(f.id)
@@ -437,14 +438,33 @@ export function TaskForm({ projectId, freelancers, task, onSuccess }: TaskFormPr
         </div>
       )}
 
-      <Button type="submit" className="w-full text-white" style={{ backgroundColor: 'var(--primary)' }} disabled={loading}>
-        {loading ? (
-          <span className="flex items-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            {task ? 'Saving…' : 'Creating…'}
-          </span>
-        ) : task ? 'Save changes' : 'Create task'}
-      </Button>
+      {/* Sticky action bar — stays reachable while the form scrolls */}
+      <div className="sticky bottom-0 -mx-6 -mb-6 mt-2 flex items-center justify-end gap-2 border-t border-border bg-background/95 px-6 py-3.5 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        {onCancel && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            disabled={loading}
+            className="text-muted-foreground"
+          >
+            Cancel
+          </Button>
+        )}
+        <Button
+          type="submit"
+          className="min-w-36 text-white"
+          style={{ backgroundColor: 'var(--primary)' }}
+          disabled={loading}
+        >
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {task ? 'Saving…' : 'Creating…'}
+            </span>
+          ) : task ? 'Save changes' : 'Create task'}
+        </Button>
+      </div>
     </form>
   )
 }

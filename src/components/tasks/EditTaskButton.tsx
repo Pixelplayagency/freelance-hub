@@ -24,7 +24,7 @@ export function EditTaskButton({ task, freelancers, projectId }: EditTaskButtonP
           Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit task</DialogTitle>
         </DialogHeader>
@@ -33,6 +33,7 @@ export function EditTaskButton({ task, freelancers, projectId }: EditTaskButtonP
           freelancers={freelancers}
           task={task}
           onSuccess={() => setOpen(false)}
+          onCancel={() => setOpen(false)}
         />
       </DialogContent>
     </Dialog>

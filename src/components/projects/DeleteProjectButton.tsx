@@ -19,8 +19,8 @@ export function DeleteProjectButton({ projectId }: { projectId: string }) {
 
   if (confirm) {
     return (
-      <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-        <span className="text-xs text-red-700 font-medium">Delete this project and all its tasks?</span>
+      <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 h-9">
+        <span className="text-xs text-red-700 font-medium">Delete project and all tasks?</span>
         <button
           onClick={handleDelete}
           disabled={isPending}
@@ -42,10 +42,10 @@ export function DeleteProjectButton({ projectId }: { projectId: string }) {
     <button
       onClick={() => setConfirm(true)}
       title="Delete project"
-      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-red-500 hover:text-red-600 hover:bg-red-50 border border-red-200 transition-colors"
+      aria-label="Delete project"
+      className="inline-flex items-center justify-center w-9 h-9 rounded-md text-muted-foreground hover:text-red-600 hover:bg-red-50 border border-input hover:border-red-200 transition-colors"
     >
       <Trash2 className="w-4 h-4" />
-      Delete project
     </button>
   )
 }

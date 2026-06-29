@@ -5,7 +5,9 @@ import type { Notification } from '@/lib/types/app.types'
 
 export async function TopBar() {
   const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  // Session already validated in (dashboard)/layout.tsx — read it from the cookie (no network call).
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user ?? null
 
   if (!user) return null
 
@@ -23,9 +25,9 @@ export async function TopBar() {
       .single(),
   ])
 
-  const notifHref = profile?.role === 'admin'
-    ? '/admin/notifications'
-    : '/freelancer/notifications'
+  const notifHref = profile?.role === 'freelancer'
+    ? '/freelancer/notifications'
+    : '/admin/notifications'
 
   const initials = profile?.full_name
     ? profile.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
