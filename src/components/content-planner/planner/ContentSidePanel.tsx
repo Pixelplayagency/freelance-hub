@@ -121,9 +121,10 @@ export function ContentSidePanel({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/30 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-150" />
         <DialogPrimitive.Content
-          className="fixed inset-y-0 right-0 z-50 w-full sm:max-w-[480px] bg-background shadow-2xl border-l border-border flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-300"
+          className="fixed inset-y-0 right-0 z-50 w-full sm:max-w-[480px] bg-background shadow-2xl border-l border-border flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-200 will-change-transform"
+          style={{ transform: 'translate3d(0,0,0)' }}
         >
           <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFileSelect} />
 
@@ -141,7 +142,7 @@ export function ContentSidePanel({
           </div>
 
           {/* ── Body ── */}
-          <div className="overflow-y-auto flex-1 min-h-0">
+          <div className="overflow-y-auto flex-1 min-h-0 overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
 
             {/* ▸ Media zone */}
             <div className="bg-card border-b border-border">
@@ -249,11 +250,12 @@ export function ContentSidePanel({
                     onChange={e => patch('caption', e.target.value)}
                     className="w-full text-sm rounded-xl border border-border bg-card px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all resize-none leading-relaxed placeholder:text-muted-foreground/50" />
                   {emojiOpen && (
-                    <div className="absolute right-0 top-full mt-1 z-10 bg-card border border-border rounded-xl shadow-xl p-2 w-64">
-                      <div className="grid grid-cols-8 gap-0.5 max-h-48 overflow-y-auto">
+                    <div className="absolute right-0 top-full mt-1 z-10 bg-card border border-border rounded-xl shadow-xl p-2 w-64"
+                      style={{ contain: 'layout paint' }}>
+                      <div className="grid grid-cols-8 gap-0.5 max-h-48 overflow-y-auto overscroll-contain">
                         {EMOJIS.map(em => (
                           <button type="button" key={em} onClick={() => { insertEmoji(em); setEmojiOpen(false) }}
-                            className="text-base w-7 h-7 flex items-center justify-center rounded hover:bg-muted transition-colors">{em}</button>
+                            className="text-base w-7 h-7 flex items-center justify-center rounded hover:bg-muted">{em}</button>
                         ))}
                       </div>
                     </div>
