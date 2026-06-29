@@ -103,7 +103,7 @@ export interface ContentPlan {
   status: ContentPlanStatus
   created_by: string | null
   created_at: string
-  creator?: Pick<Profile, 'full_name' | 'username'> | null
+  creator?: Pick<Profile, 'full_name' | 'username' | 'avatar_url'> | null
 }
 
 export interface Project {

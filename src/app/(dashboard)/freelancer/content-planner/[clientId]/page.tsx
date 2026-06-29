@@ -53,7 +53,7 @@ export default async function FreelancerClientCalendarPage({
   // Fetch calendar entries, task view data, and monthly stats in parallel
   const [calendarResult, tasksResult, statsResult] = await Promise.all([
     view === 'calendar'
-      ? supabase.from('content_plans').select('*').eq('client_id', clientId).gte('date', startDate).lte('date', endDate).order('date')
+      ? supabase.from('content_plans').select('*, creator:profiles!created_by(full_name, username, avatar_url)').eq('client_id', clientId).gte('date', startDate).lte('date', endDate).order('date')
       : Promise.resolve({ data: [] }),
     view === 'task'
       ? (async () => {

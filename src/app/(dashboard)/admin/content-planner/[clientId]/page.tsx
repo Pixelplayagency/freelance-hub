@@ -49,7 +49,7 @@ export default async function AdminClientCalendarPage({
   // Always fetch monthly stats for the header
   const [calendarResult, listResult, statsResult] = await Promise.all([
     view === 'calendar'
-      ? supabase.from('content_plans').select('*').eq('client_id', clientId).gte('date', startDate).lte('date', endDate).order('date')
+      ? supabase.from('content_plans').select('*, creator:profiles!created_by(full_name, username, avatar_url)').eq('client_id', clientId).gte('date', startDate).lte('date', endDate).order('date')
       : Promise.resolve({ data: [] }),
     view === 'list'
       ? supabase.from('content_plans').select('*, creator:profiles!created_by(full_name, username)').eq('client_id', clientId).order('date', { ascending: false })
