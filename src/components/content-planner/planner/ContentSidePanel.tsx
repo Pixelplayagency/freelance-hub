@@ -451,24 +451,12 @@ export function ContentSidePanel({
                       </div>
                     )}
                   </div>
-                  {/* Freelancer: submit / resubmit */}
-                  {!isAdmin && !entry.caption_approved && !entry.post_approved && (
-                    <button type="button"
-                      onClick={onSubmitForApproval}
-                      disabled={isSaving || (entry.approval_requested && !entry.caption_rejected && !entry.post_rejected)}
-                      className={`w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-xl transition-colors disabled:opacity-50 ${
-                        entry.caption_rejected || entry.post_rejected
-                          ? 'bg-red-500 text-white hover:bg-red-600'
-                          : entry.approval_requested
-                          ? 'bg-muted text-muted-foreground cursor-default'
-                          : 'bg-amber-500 text-white hover:bg-amber-600'
-                      }`}>
-                      {entry.approval_requested && !entry.caption_rejected && !entry.post_rejected
-                        ? 'Awaiting review'
-                        : entry.caption_rejected || entry.post_rejected
-                        ? <><Send className="w-3 h-3" /> Resubmit</>
-                        : <><Send className="w-3 h-3" /> Submit for approval</>}
-                    </button>
+                  {/* Freelancer: status hint */}
+                  {!isAdmin && entry.approval_requested && !entry.caption_approved && !entry.post_approved && !entry.caption_rejected && !entry.post_rejected && (
+                    <div className="flex items-center justify-center gap-1.5 text-[11px] text-amber-600 py-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      Submitted for review
+                    </div>
                   )}
                 </div>
               )}
@@ -508,7 +496,7 @@ export function ContentSidePanel({
             <button type="button" onClick={onSave} disabled={isSaving || draft.uploading}
               className="px-6 h-10 rounded-xl text-sm font-semibold text-white hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
               style={{ backgroundColor: 'var(--primary)' }}>
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : isEdit ? 'Save' : 'Schedule'}
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : isAdmin ? (isEdit ? 'Save' : 'Schedule') : (isEdit ? 'Save & Submit' : 'Schedule & Submit')}
             </button>
           </div>
         </DialogPrimitive.Content>
