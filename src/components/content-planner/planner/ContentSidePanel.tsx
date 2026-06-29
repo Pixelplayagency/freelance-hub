@@ -261,98 +261,69 @@ export function ContentSidePanel({
                 </div>
               </div>
 
-              {/* Platform + Type — side by side */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Platform</label>
-                  <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
-                    {PLATFORMS.map(p => {
-                      const active = draft.platforms.includes(p.id)
-                      return (
-                        <button key={p.id} type="button" onClick={() => togglePlatform(p.id)}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium transition-all ${
-                            active ? 'bg-primary/[0.04] text-foreground' : 'text-muted-foreground hover:bg-muted/50'
-                          }`}>
-                          <PlatformIcon platform={p.id} size={15} />
-                          <span className="flex-1 text-left">{p.label}</span>
-                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
-                            active ? 'border-primary bg-primary' : 'border-border'
-                          }`}>
-                            {active && <Check className="w-2.5 h-2.5 text-white" />}
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Content type</label>
-                  <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
-                    {(['post', 'reel', 'story'] as ContentType[]).map(ct => {
-                      const active = draft.content_type === ct
-                      const meta = CONTENT_TYPE_META[ct]
-                      return (
-                        <button key={ct} type="button" onClick={() => patch('content_type', ct)}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium transition-all ${
-                            active ? 'text-foreground' : 'text-muted-foreground hover:bg-muted/50'
-                          }`}
-                          style={active ? { backgroundColor: meta.bgVar } : undefined}>
-                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: active ? meta.color : 'var(--border)' }} />
-                          <span className="flex-1 text-left">{meta.label}</span>
-                          {active && <Check className="w-3 h-3" style={{ color: meta.color }} />}
-                        </button>
-                      )
-                    })}
-                  </div>
+              {/* Platforms */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">Platforms</label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {PLATFORMS.map(p => {
+                    const active = draft.platforms.includes(p.id)
+                    return (
+                      <button key={p.id} type="button" onClick={() => togglePlatform(p.id)}
+                        className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border text-xs font-semibold transition-all"
+                        style={active
+                          ? { borderColor: p.color, backgroundColor: p.color + '12', color: p.color }
+                          : { borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                        <PlatformIcon platform={p.id} size={14} />
+                        {p.label}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
-              {/* Schedule — unified card */}
+              {/* Content type */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">Content type</label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(['post', 'reel', 'story'] as ContentType[]).map(ct => {
+                    const active = draft.content_type === ct
+                    const meta = CONTENT_TYPE_META[ct]
+                    return (
+                      <button key={ct} type="button" onClick={() => patch('content_type', ct)}
+                        className="py-2.5 rounded-xl border text-xs font-semibold transition-all"
+                        style={active
+                          ? { borderColor: meta.color + '60', backgroundColor: meta.bgVar, color: meta.color }
+                          : { borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                        {meta.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Schedule */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">Schedule</label>
-                <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
-                  <div className="flex items-center gap-2.5 px-3.5 py-3">
+                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                  <div className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-border">
                     <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm text-foreground flex-1">
+                    <span className="text-sm text-foreground">
                       {dateFull.toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </span>
                   </div>
-                  <div className="px-3.5 py-3">
-                    {!draft.scheduled_time ? (
-                      <button type="button" onClick={() => setTime(9, 0, 'AM')}
-                        className="w-full flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground hover:text-primary transition-colors">
-                        <Clock className="w-4 h-4" />
-                        Add time
-                      </button>
-                    ) : (
-                      <div className="flex items-center justify-center gap-2">
-                        <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <select value={timeParsed!.hour} onChange={e => setTime(parseInt(e.target.value), timeParsed!.minute, timeParsed!.ampm)}
-                          className="w-14 h-9 rounded-lg border border-border bg-background text-center text-sm font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                          style={{ WebkitAppearance: 'none', textAlignLast: 'center' }}>
-                          {HOURS.map(h => <option key={h} value={h}>{String(h).padStart(2, '0')}</option>)}
-                        </select>
-                        <span className="text-base font-bold text-muted-foreground/30">:</span>
-                        <select value={MINUTES.reduce((prev, curr) => Math.abs(parseInt(curr) - timeParsed!.minute) < Math.abs(parseInt(prev) - timeParsed!.minute) ? curr : prev)}
-                          onChange={e => setTime(timeParsed!.hour, parseInt(e.target.value), timeParsed!.ampm)}
-                          className="w-14 h-9 rounded-lg border border-border bg-background text-center text-sm font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                          style={{ WebkitAppearance: 'none', textAlignLast: 'center' }}>
-                          {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
-                        </select>
-                        <div className="flex rounded-lg overflow-hidden border border-border">
-                          {(['AM', 'PM'] as const).map(p => (
-                            <button key={p} type="button" onClick={() => setTime(timeParsed!.hour, timeParsed!.minute, p)}
-                              className={`px-2.5 h-9 text-[11px] font-bold transition-all ${
-                                timeParsed!.ampm === p ? 'bg-foreground text-background' : 'bg-background text-muted-foreground hover:bg-muted'
-                              }`}>{p}</button>
-                          ))}
-                        </div>
-                        <button type="button" onClick={() => patch('scheduled_time', '')}
-                          className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-red-500 hover:bg-red-50 transition-colors ml-1">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    )}
+                  <div className="px-3.5 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <input
+                        type="time"
+                        value={draft.scheduled_time}
+                        onChange={e => patch('scheduled_time', e.target.value)}
+                        className="flex-1 text-sm bg-transparent focus:outline-none tabular-nums text-foreground"
+                      />
+                      {draft.scheduled_time && (
+                        <span className="text-xs text-muted-foreground font-medium tabular-nums">{to12h(draft.scheduled_time)}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
