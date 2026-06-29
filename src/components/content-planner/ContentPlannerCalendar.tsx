@@ -86,12 +86,10 @@ export function ContentPlannerCalendar({
           await updateContentPlan(draft.entry.id, payload)
           const updated = { ...draft.entry, ...payload } as EntryWithCreator
           setEntries(prev => prev.map(e => e.id === updated.id ? updated : e))
-          setDraft(prev => prev ? { ...prev, entry: updated } : prev)
+          setEntries(prev => prev.map(e => e.id === updated.id ? updated : e))
           if (!isAdmin && !draft.entry.approval_requested) {
             await submitForApproval(draft.entry.id)
-            const withApproval = { ...updated, approval_requested: true }
-            setEntries(prev => prev.map(e => e.id === withApproval.id ? withApproval : e))
-            setDraft(prev => prev ? { ...prev, entry: withApproval } : prev)
+            setEntries(prev => prev.map(e => e.id === updated.id ? { ...e, approval_requested: true } : e))
           }
         } else {
           const created = await createContentPlan(payload)
@@ -99,15 +97,14 @@ export function ContentPlannerCalendar({
             const newEntry = created as EntryWithCreator
             if (!isAdmin) {
               await submitForApproval(newEntry.id)
-              const withApproval = { ...newEntry, approval_requested: true }
-              setEntries(prev => [...prev, withApproval])
-              setDraft(prev => prev ? { ...prev, entry: withApproval } : prev)
+              setEntries(prev => [...prev, { ...newEntry, approval_requested: true }])
             } else {
               setEntries(prev => [...prev, newEntry])
-              setDraft(prev => prev ? { ...prev, entry: newEntry } : prev)
             }
           }
         }
+        setPanelOpen(false)
+        setDraft(null)
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Save failed'
         setSaveError(msg)
