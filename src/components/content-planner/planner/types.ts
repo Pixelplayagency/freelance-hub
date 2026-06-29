@@ -50,9 +50,9 @@ export function getDisplayStatus(entry: ContentPlan): { label: string; color: st
   if (entry.approval_requested)
     return { label: 'In review', color: '#d97706', bg: 'rgba(254,243,199,0.5)' }
   if (entry.status === 'posted')
-    return { label: 'Published', color: 'var(--primary)', bg: 'rgba(255,228,230,0.5)' }
+    return { label: 'Published', color: '#059669', bg: 'rgba(220,252,231,0.4)' }
   if (entry.status === 'not_posted')
-    return { label: 'Not posted', color: '#6b7280', bg: 'rgba(243,244,246,0.7)' }
+    return { label: 'Pending', color: '#f59e0b', bg: 'rgba(254,243,199,0.5)' }
   return { label: 'Scheduled', color: '#2563eb', bg: 'rgba(219,234,254,0.45)' }
 }
 

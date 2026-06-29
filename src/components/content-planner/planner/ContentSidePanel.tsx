@@ -16,8 +16,8 @@ const EMOJIS = [
   '🍕','☕','🍷','🥂','🎂','📸','🎬','🏆','💰','🎁','💡','🚀','✈️','📣','🔑','🌐',
 ]
 
-const STATUS_LABELS: Record<ContentPlanStatus, string> = { scheduled: 'Scheduled', posted: 'Posted', not_posted: 'Not posted' }
-const STATUS_DOT: Record<ContentPlanStatus, string> = { scheduled: '#2563eb', posted: '#059669', not_posted: '#6b7280' }
+const STATUS_LABELS: Record<ContentPlanStatus, string> = { scheduled: 'Scheduled', posted: 'Published', not_posted: 'Pending' }
+const STATUS_DOT: Record<ContentPlanStatus, string> = { scheduled: '#2563eb', posted: '#059669', not_posted: '#f59e0b' }
 
 interface ContentSidePanelProps {
   open: boolean
@@ -203,27 +203,50 @@ export function ContentSidePanel({
               </div>
             </Section>
 
-            {/* Schedule time */}
-            <Section title="Scheduled time">
-              <div className="flex items-center gap-2">
-                <input type="time" value={draft.scheduled_time} onChange={e => patch('scheduled_time', e.target.value)}
-                  className="flex-1 text-sm rounded-xl border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
-                {draft.scheduled_time && <span className="text-xs font-semibold text-muted-foreground tabular-nums">{to12h(draft.scheduled_time)}</span>}
+            {/* Schedule */}
+            <Section title="Schedule">
+              <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 space-y-1">
+                    <label className="text-[10px] font-semibold text-muted-foreground">Date</label>
+                    <div className="relative">
+                      <CalendarIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                      <input type="date" value={draft.date} readOnly
+                        className="w-full text-sm rounded-lg border border-border bg-background pl-8 pr-3 py-2 text-foreground tabular-nums cursor-default" />
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <label className="text-[10px] font-semibold text-muted-foreground">Time</label>
+                    <div className="relative">
+                      <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      <input type="time" value={draft.scheduled_time} onChange={e => patch('scheduled_time', e.target.value)}
+                        className="w-full text-sm rounded-lg border border-border bg-background pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all tabular-nums" />
+                    </div>
+                  </div>
+                </div>
+                {draft.scheduled_time && (
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-primary/[0.06] border border-primary/15">
+                    <CalendarIcon className="w-3 h-3 text-primary" />
+                    <span className="text-xs font-semibold text-primary tabular-nums">
+                      {new Date(draft.date + 'T00:00:00').toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })} at {to12h(draft.scheduled_time)}
+                    </span>
+                  </div>
+                )}
               </div>
             </Section>
 
-            {/* Status */}
-            <Section title="Status">
+            {/* Publishing status */}
+            <Section title="Publishing status">
               <div className="grid grid-cols-3 gap-1.5">
                 {(['scheduled', 'posted', 'not_posted'] as ContentPlanStatus[]).map(st => {
                   const active = draft.status === st
                   return (
                     <button key={st} type="button" onClick={() => patch('status', st)}
-                      className="py-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
+                      className="py-2.5 rounded-xl border text-xs font-semibold transition-all flex flex-col items-center justify-center gap-1"
                       style={active
-                        ? { borderColor: STATUS_DOT[st] + '60', backgroundColor: STATUS_DOT[st] + '15', color: STATUS_DOT[st] }
+                        ? { borderColor: STATUS_DOT[st], backgroundColor: STATUS_DOT[st] + '12', color: STATUS_DOT[st], boxShadow: `0 0 0 1px ${STATUS_DOT[st]}30` }
                         : { borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: STATUS_DOT[st] }} />
+                      <span className="w-2 h-2 rounded-full transition-all" style={{ backgroundColor: active ? STATUS_DOT[st] : 'var(--border)' }} />
                       {STATUS_LABELS[st]}
                     </button>
                   )

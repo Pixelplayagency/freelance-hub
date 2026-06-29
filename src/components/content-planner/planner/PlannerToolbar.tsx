@@ -21,8 +21,8 @@ const STATUS_OPTIONS: { id: FilterStatus; label: string; dot: string }[] = [
   { id: 'in_review',   label: 'In review',    dot: '#d97706' },
   { id: 'approved',    label: 'Approved',     dot: '#059669' },
   { id: 'rejected',    label: 'Rejected',     dot: '#dc2626' },
-  { id: 'published',   label: 'Published',    dot: '#e11d48' },
-  { id: 'not_posted',  label: 'Not posted',   dot: '#6b7280' },
+  { id: 'published',   label: 'Published',    dot: '#059669' },
+  { id: 'not_posted',  label: 'Pending',      dot: '#f59e0b' },
 ]
 
 const TYPE_OPTIONS: { id: FilterType; label: string }[] = [

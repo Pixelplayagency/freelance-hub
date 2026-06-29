@@ -48,7 +48,7 @@ export function ContentPlannerCalendar({
       const st = getDisplayStatus(e)
       const statusMap: Record<FilterStatus, string> = {
         all: '', scheduled: 'Scheduled', in_review: 'In review', approved: 'Approved',
-        rejected: 'Rejected', published: 'Published', not_posted: 'Not posted',
+        rejected: 'Rejected', published: 'Published', not_posted: 'Pending',
       }
       if (st.label !== statusMap[filters.status]) return false
     }
