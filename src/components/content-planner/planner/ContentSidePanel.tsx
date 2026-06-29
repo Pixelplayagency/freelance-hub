@@ -17,10 +17,10 @@ const EMOJIS = [
   '🍕','☕','🍷','🥂','🎂','📸','🎬','🏆','💰','🎁','💡','🚀','✈️','📣','🔑','🌐',
 ]
 
-const STATUS_CFG: { key: ContentPlanStatus; label: string; color: string; icon: string }[] = [
-  { key: 'scheduled',  label: 'Scheduled',  color: '#2563eb', icon: '📅' },
-  { key: 'posted',     label: 'Published',  color: '#059669', icon: '✅' },
-  { key: 'not_posted', label: 'Pending',    color: '#f59e0b', icon: '⏳' },
+const STATUS_CFG: { key: ContentPlanStatus; label: string; color: string }[] = [
+  { key: 'scheduled',  label: 'Scheduled',  color: '#2563eb' },
+  { key: 'posted',     label: 'Published',  color: '#059669' },
+  { key: 'not_posted', label: 'Pending',    color: '#f59e0b' },
 ]
 
 const ASPECT_RATIOS = [
@@ -366,7 +366,7 @@ export function ContentSidePanel({
                         style={active
                           ? { borderColor: st.color, backgroundColor: st.color + '10', color: st.color }
                           : { borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                        <span className="text-sm leading-none">{st.icon}</span>
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: active ? st.color : 'var(--border)' }} />
                         {st.label}
                       </button>
                     )
