@@ -317,36 +317,39 @@ export function ContentSidePanel({
                       {dateFull.toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2.5 px-3.5 py-3">
-                    <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <div className="px-3.5 py-3">
                     {!draft.scheduled_time ? (
                       <button type="button" onClick={() => setTime(9, 0, 'AM')}
-                        className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        className="w-full flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+                        <Clock className="w-4 h-4" />
                         Add time
                       </button>
                     ) : (
-                      <div className="flex items-center gap-1.5 flex-1">
+                      <div className="flex items-center justify-center gap-2">
+                        <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
                         <select value={timeParsed!.hour} onChange={e => setTime(parseInt(e.target.value), timeParsed!.minute, timeParsed!.ampm)}
-                          className="w-14 h-8 rounded-md border border-border bg-background text-center text-xs font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer">
+                          className="w-14 h-9 rounded-lg border border-border bg-background text-center text-sm font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                          style={{ WebkitAppearance: 'none', textAlignLast: 'center' }}>
                           {HOURS.map(h => <option key={h} value={h}>{String(h).padStart(2, '0')}</option>)}
                         </select>
-                        <span className="text-sm font-semibold text-muted-foreground/40">:</span>
+                        <span className="text-base font-bold text-muted-foreground/30">:</span>
                         <select value={MINUTES.reduce((prev, curr) => Math.abs(parseInt(curr) - timeParsed!.minute) < Math.abs(parseInt(prev) - timeParsed!.minute) ? curr : prev)}
                           onChange={e => setTime(timeParsed!.hour, parseInt(e.target.value), timeParsed!.ampm)}
-                          className="w-14 h-8 rounded-md border border-border bg-background text-center text-xs font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer">
+                          className="w-14 h-9 rounded-lg border border-border bg-background text-center text-sm font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                          style={{ WebkitAppearance: 'none', textAlignLast: 'center' }}>
                           {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
-                        <div className="flex rounded-md overflow-hidden border border-border">
+                        <div className="flex rounded-lg overflow-hidden border border-border">
                           {(['AM', 'PM'] as const).map(p => (
                             <button key={p} type="button" onClick={() => setTime(timeParsed!.hour, timeParsed!.minute, p)}
-                              className={`px-2 h-8 text-[10px] font-bold transition-all ${
+                              className={`px-2.5 h-9 text-[11px] font-bold transition-all ${
                                 timeParsed!.ampm === p ? 'bg-foreground text-background' : 'bg-background text-muted-foreground hover:bg-muted'
                               }`}>{p}</button>
                           ))}
                         </div>
                         <button type="button" onClick={() => patch('scheduled_time', '')}
-                          className="ml-auto text-[10px] text-muted-foreground/60 hover:text-red-500 transition-colors font-medium">
-                          Clear
+                          className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground/40 hover:text-red-500 hover:bg-red-50 transition-colors ml-1">
+                          <X className="w-3 h-3" />
                         </button>
                       </div>
                     )}
