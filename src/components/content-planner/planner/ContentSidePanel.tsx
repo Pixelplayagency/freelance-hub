@@ -3,7 +3,8 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useRef, useState, useEffect } from 'react'
 import {
-  X, Upload, Loader2, Eye, Trash2, Send, Check, CheckCircle2, Smile, Calendar as CalendarIcon,
+  X, Upload, Loader2, Eye, Trash2, Send, Check, CheckCircle2, Smile,
+  Calendar as CalendarIcon, Clock, ImageIcon, Film, Crop, Square, RectangleVertical, Smartphone,
 } from 'lucide-react'
 import type { ContentPlanStatus, ContentType, MediaItem } from '@/lib/types/app.types'
 import { PlatformIcon } from './PlatformIcon'
@@ -16,8 +17,27 @@ const EMOJIS = [
   '🍕','☕','🍷','🥂','🎂','📸','🎬','🏆','💰','🎁','💡','🚀','✈️','📣','🔑','🌐',
 ]
 
-const STATUS_LABELS: Record<ContentPlanStatus, string> = { scheduled: 'Scheduled', posted: 'Published', not_posted: 'Pending' }
-const STATUS_DOT: Record<ContentPlanStatus, string> = { scheduled: '#2563eb', posted: '#059669', not_posted: '#f59e0b' }
+const STATUS_CFG: { key: ContentPlanStatus; label: string; color: string; icon: string }[] = [
+  { key: 'scheduled',  label: 'Scheduled',  color: '#2563eb', icon: '📅' },
+  { key: 'posted',     label: 'Published',  color: '#059669', icon: '✅' },
+  { key: 'not_posted', label: 'Pending',    color: '#f59e0b', icon: '⏳' },
+]
+
+const ASPECT_RATIOS = [
+  { id: 'free',    label: 'Original', icon: ImageIcon,            ratio: null },
+  { id: '1:1',     label: '1:1',      icon: Square,               ratio: '1:1' },
+  { id: '4:5',     label: '4:5',      icon: RectangleVertical,    ratio: '4:5' },
+  { id: '9:16',    label: '9:16',     icon: Smartphone,           ratio: '9:16' },
+] as const
+
+function cropUrl(url: string, ratio: string | null) {
+  if (!ratio) return thumbUrl(url)
+  const [w, h] = ratio.split(':').map(Number)
+  return url.replace('/upload/', `/upload/ar_${w}:${h},c_fill,g_auto,q_auto,f_auto/`)
+}
+
+const HOURS = Array.from({ length: 12 }, (_, i) => i + 1)
+const MINUTES = ['00', '15', '30', '45']
 
 interface ContentSidePanelProps {
   open: boolean
@@ -43,25 +63,26 @@ export function ContentSidePanel({
   const fileRef = useRef<HTMLInputElement>(null)
   const captionRef = useRef<HTMLTextAreaElement>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
+  const [activeRatio, setActiveRatio] = useState<string>('free')
+  const [previewIdx, setPreviewIdx] = useState(0)
 
-  useEffect(() => { if (!open) setEmojiOpen(false) }, [open])
+  useEffect(() => { if (!open) { setEmojiOpen(false); setPreviewIdx(0); setActiveRatio('free') } }, [open])
 
   if (!draft) return null
 
   const isEdit = !!draft.entry
-  const creatorName = draft.entry?.creator?.full_name || draft.entry?.creator?.username || 'Unassigned'
-  const dateLabel = new Date(draft.date + 'T00:00:00').toLocaleDateString('default', {
-    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
-  })
+  const entry = draft.entry
+  const creatorName = entry?.creator?.full_name || entry?.creator?.username || ''
+  const dateFull = new Date(draft.date + 'T00:00:00')
+  const dateShort = dateFull.toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })
 
   function patch<K extends keyof PanelDraft>(key: K, value: PanelDraft[K]) {
     onDraftChange({ ...draft!, [key]: value })
   }
 
   function togglePlatform(pid: string) {
-    if (!draft) return
-    const has = draft.platforms.includes(pid)
-    patch('platforms', has ? draft.platforms.filter(p => p !== pid) : [...draft.platforms, pid])
+    const has = draft!.platforms.includes(pid)
+    patch('platforms', has ? draft!.platforms.filter(p => p !== pid) : [...draft!.platforms, pid])
   }
 
   function insertEmoji(emoji: string) {
@@ -71,278 +92,386 @@ export function ContentSidePanel({
     const end = ta.selectionEnd ?? ta.value.length
     const next = ta.value.slice(0, start) + emoji + ta.value.slice(end)
     patch('caption', next)
-    requestAnimationFrame(() => {
-      ta.selectionStart = ta.selectionEnd = start + emoji.length
-      ta.focus()
-    })
+    requestAnimationFrame(() => { ta.selectionStart = ta.selectionEnd = start + emoji.length; ta.focus() })
   }
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []).filter(f =>
-      f.type.startsWith('image/') || f.type.startsWith('video/')
-    )
+    const files = Array.from(e.target.files ?? []).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'))
     if (!files.length) return
     await onUploadMedia(files)
     e.target.value = ''
   }
 
-  const entry = draft.entry
+  const hasMedia = draft.media_items.length > 0
+  const currentMedia = draft.media_items[previewIdx] ?? draft.media_items[0]
+  const currentRatio = ASPECT_RATIOS.find(r => r.id === activeRatio)?.ratio ?? null
+
+  // Time picker helpers
+  const timeParsed = draft.scheduled_time ? (() => {
+    const [h, m] = draft.scheduled_time.split(':').map(Number)
+    return { hour: h % 12 || 12, minute: m, ampm: (h >= 12 ? 'PM' : 'AM') as 'AM' | 'PM' }
+  })() : null
+
+  function setTime(hour: number, minute: number, ampm: 'AM' | 'PM') {
+    let h24 = hour % 12
+    if (ampm === 'PM') h24 += 12
+    patch('scheduled_time', `${String(h24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`)
+  }
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
-          className="fixed inset-y-0 right-0 z-50 w-full sm:max-w-[460px] bg-card shadow-2xl border-l border-border flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-300"
+          className="fixed inset-y-0 right-0 z-50 w-full sm:max-w-[480px] bg-background shadow-2xl border-l border-border flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-300"
         >
           <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFileSelect} />
 
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-            <div className="min-w-0">
-              <DialogPrimitive.Title className="text-base font-bold text-foreground leading-tight truncate">
-                {isEdit ? 'Edit content' : 'New content'}
-              </DialogPrimitive.Title>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <CalendarIcon className="w-3 h-3 text-muted-foreground" />
-                <span className="text-[11px] text-muted-foreground">{dateLabel}</span>
-              </div>
+          {/* ── Header ── */}
+          <div className="flex items-center justify-between px-5 h-14 border-b border-border shrink-0 bg-card">
+            <DialogPrimitive.Title className="text-sm font-bold text-foreground">
+              {isEdit ? 'Edit content' : 'New content'}
+            </DialogPrimitive.Title>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded-md">{dateShort}</span>
+              <DialogPrimitive.Close className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                <X className="w-4 h-4" />
+              </DialogPrimitive.Close>
             </div>
-            <DialogPrimitive.Close className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-              <X className="w-4 h-4" />
-            </DialogPrimitive.Close>
           </div>
 
-          {/* Body */}
-          <div className="overflow-y-auto flex-1 px-5 py-5 space-y-6 min-h-0">
-            {/* Media */}
-            <Section title="Media">
-              <div className="grid grid-cols-3 gap-2">
-                {draft.media_items.map((item, i) => (
-                  <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-muted border border-border group">
-                    {item.type === 'video'
-                      ? <video src={item.url} className="w-full h-full object-cover" muted />
-                      : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
-                      <button type="button" onClick={() => onViewMedia(item)}
-                        className="w-7 h-7 rounded-full bg-white/95 text-foreground flex items-center justify-center hover:scale-110 transition-transform">
+          {/* ── Body ── */}
+          <div className="overflow-y-auto flex-1 min-h-0">
+
+            {/* ▸ Media zone */}
+            <div className="bg-card border-b border-border">
+              {hasMedia ? (
+                <div className="space-y-0">
+                  {/* Big preview */}
+                  <div className="relative bg-muted/60 flex items-center justify-center" style={{ minHeight: 220 }}>
+                    {currentMedia?.type === 'video' ? (
+                      <video src={currentMedia.url} className="max-h-[280px] w-full object-contain" muted playsInline />
+                    ) : currentMedia ? (
+                      <img src={cropUrl(currentMedia.url, currentRatio)} alt="" className="max-h-[280px] w-full object-contain" />
+                    ) : null}
+                    {/* Overlay controls */}
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      <button type="button" onClick={() => currentMedia && onViewMedia(currentMedia)}
+                        className="w-7 h-7 rounded-lg bg-black/50 backdrop-blur text-white flex items-center justify-center hover:bg-black/70 transition-colors">
                         <Eye className="w-3.5 h-3.5" />
                       </button>
-                      <button type="button" onClick={() => patch('media_items', draft.media_items.filter((_, j) => j !== i))}
-                        className="w-7 h-7 rounded-full bg-white/95 text-red-600 flex items-center justify-center hover:scale-110 transition-transform">
-                        <Trash2 className="w-3 h-3" />
+                      <button type="button" onClick={() => {
+                        patch('media_items', draft.media_items.filter((_, j) => j !== previewIdx))
+                        setPreviewIdx(0)
+                      }}
+                        className="w-7 h-7 rounded-lg bg-black/50 backdrop-blur text-white flex items-center justify-center hover:bg-red-600/80 transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
+                    {/* Counter */}
+                    {draft.media_items.length > 1 && (
+                      <div className="absolute bottom-2 left-2 bg-black/50 backdrop-blur rounded-md px-2 py-0.5 text-[10px] text-white font-bold tabular-nums">
+                        {previewIdx + 1} / {draft.media_items.length}
+                      </div>
+                    )}
                   </div>
-                ))}
-                <button type="button" onClick={() => fileRef.current?.click()} disabled={draft.uploading}
-                  className="aspect-square rounded-lg border-2 border-dashed border-border bg-muted/20 flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/[0.03] transition-all disabled:opacity-50">
-                  {draft.uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Upload className="w-4 h-4" /><span className="text-[10px] font-medium">Upload</span></>}
-                </button>
-              </div>
-            </Section>
 
-            {/* Caption */}
-            <Section title="Caption" actions={
-              <button type="button" onClick={() => setEmojiOpen(o => !o)} className="text-muted-foreground hover:text-foreground transition-colors">
-                <Smile className="w-3.5 h-3.5" />
-              </button>
-            }>
-              <div className="relative">
-                <textarea ref={captionRef} rows={4} placeholder="Write the post caption…" value={draft.caption}
-                  onChange={e => patch('caption', e.target.value)}
-                  className="w-full text-sm rounded-xl border border-border bg-background px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none leading-relaxed" />
-                {emojiOpen && (
-                  <div className="absolute right-0 top-full mt-1 z-10 bg-card border border-border rounded-xl shadow-xl p-2 w-64">
-                    <div className="grid grid-cols-8 gap-0.5 max-h-48 overflow-y-auto">
-                      {EMOJIS.map(em => (
-                        <button type="button" key={em} onClick={() => insertEmoji(em)}
-                          className="text-base w-7 h-7 flex items-center justify-center rounded hover:bg-muted transition-colors">{em}</button>
-                      ))}
+                  {/* Aspect ratio bar */}
+                  {currentMedia?.type !== 'video' && (
+                    <div className="flex items-center gap-1 px-3 py-2 border-t border-border/50 bg-muted/30">
+                      <Crop className="w-3 h-3 text-muted-foreground mr-1" />
+                      {ASPECT_RATIOS.map(r => {
+                        const active = activeRatio === r.id
+                        const Icon = r.icon
+                        return (
+                          <button key={r.id} type="button" onClick={() => setActiveRatio(r.id)}
+                            className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                              active ? 'bg-foreground text-background' : 'text-muted-foreground hover:bg-muted'
+                            }`}>
+                            <Icon className="w-3 h-3" />
+                            {r.label}
+                          </button>
+                        )
+                      })}
                     </div>
+                  )}
+
+                  {/* Thumbnails strip + add */}
+                  <div className="flex items-center gap-1.5 px-3 py-2 border-t border-border/50 overflow-x-auto">
+                    {draft.media_items.map((item, i) => (
+                      <button key={i} type="button" onClick={() => setPreviewIdx(i)}
+                        className={`w-11 h-11 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
+                          i === previewIdx ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
+                        }`}>
+                        {item.type === 'video'
+                          ? <video src={item.url} className="w-full h-full object-cover" muted />
+                          : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
+                      </button>
+                    ))}
+                    <button type="button" onClick={() => fileRef.current?.click()} disabled={draft.uploading}
+                      className="w-11 h-11 rounded-lg border-2 border-dashed border-border shrink-0 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all disabled:opacity-50">
+                      {draft.uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
+                </div>
+              ) : (
+                /* Empty upload zone */
+                <button type="button" onClick={() => fileRef.current?.click()} disabled={draft.uploading}
+                  className="w-full flex flex-col items-center justify-center gap-3 py-12 px-6 text-muted-foreground hover:text-primary transition-all disabled:opacity-50 group">
+                  <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-current flex items-center justify-center group-hover:scale-105 transition-transform">
+                    {draft.uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold">Drop files or click to upload</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Images & videos — any size, we'll handle cropping</p>
+                  </div>
+                </button>
+              )}
+            </div>
+
+            {/* ▸ Form fields */}
+            <div className="px-5 py-5 space-y-5">
+
+              {/* Caption */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground">Caption</label>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-muted-foreground tabular-nums">{draft.caption.length}</span>
+                    <button type="button" onClick={() => setEmojiOpen(o => !o)}
+                      className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                      <Smile className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="relative">
+                  <textarea ref={captionRef} rows={3} placeholder="Write your caption…" value={draft.caption}
+                    onChange={e => patch('caption', e.target.value)}
+                    className="w-full text-sm rounded-xl border border-border bg-card px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all resize-none leading-relaxed placeholder:text-muted-foreground/50" />
+                  {emojiOpen && (
+                    <div className="absolute right-0 top-full mt-1 z-10 bg-card border border-border rounded-xl shadow-xl p-2 w-64">
+                      <div className="grid grid-cols-8 gap-0.5 max-h-48 overflow-y-auto">
+                        {EMOJIS.map(em => (
+                          <button type="button" key={em} onClick={() => { insertEmoji(em); setEmojiOpen(false) }}
+                            className="text-base w-7 h-7 flex items-center justify-center rounded hover:bg-muted transition-colors">{em}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Platform + Type — side by side */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">Platform</label>
+                  <div className="space-y-1">
+                    {PLATFORMS.map(p => {
+                      const active = draft.platforms.includes(p.id)
+                      return (
+                        <button key={p.id} type="button" onClick={() => togglePlatform(p.id)}
+                          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
+                            active ? 'border-primary/40 bg-primary/[0.05] text-foreground' : 'border-border text-muted-foreground hover:border-border/80'
+                          }`}>
+                          <PlatformIcon platform={p.id} size={14} />
+                          <span className="flex-1 text-left">{p.label}</span>
+                          {active && <Check className="w-3 h-3 text-primary" />}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">Content type</label>
+                  <div className="space-y-1">
+                    {(['post', 'reel', 'story'] as ContentType[]).map(ct => {
+                      const active = draft.content_type === ct
+                      const meta = CONTENT_TYPE_META[ct]
+                      return (
+                        <button key={ct} type="button" onClick={() => patch('content_type', ct)}
+                          className={`w-full px-3 py-2 rounded-lg border text-xs font-medium transition-all text-left ${
+                            active ? 'border-current' : 'border-border text-muted-foreground hover:border-border/80'
+                          }`}
+                          style={active ? { color: meta.color, backgroundColor: meta.bgVar, borderColor: meta.color + '50' } : undefined}>
+                          {meta.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Schedule */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">Schedule</label>
+                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                  {/* Date row */}
+                  <div className="flex items-center gap-2 px-3.5 py-2.5 bg-muted/30">
+                    <CalendarIcon className="w-4 h-4 text-primary shrink-0" />
+                    <span className="text-sm font-semibold text-foreground flex-1">
+                      {dateFull.toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric' })}
+                    </span>
+                  </div>
+                  {/* Time row */}
+                  <div className="px-3.5 py-3 border-t border-border space-y-2">
+                    {!draft.scheduled_time ? (
+                      <button type="button" onClick={() => setTime(9, 0, 'AM')}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary/40 transition-all">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span className="text-xs font-semibold">Add time</span>
+                      </button>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-1.5">
+                          <select value={timeParsed!.hour} onChange={e => setTime(parseInt(e.target.value), timeParsed!.minute, timeParsed!.ampm)}
+                            className="w-16 h-9 rounded-lg border border-border bg-background text-center text-sm font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer">
+                            {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                          </select>
+                          <span className="text-base font-bold text-muted-foreground/50">:</span>
+                          <select value={MINUTES.reduce((prev, curr) => Math.abs(parseInt(curr) - timeParsed!.minute) < Math.abs(parseInt(prev) - timeParsed!.minute) ? curr : prev)}
+                            onChange={e => setTime(timeParsed!.hour, parseInt(e.target.value), timeParsed!.ampm)}
+                            className="w-16 h-9 rounded-lg border border-border bg-background text-center text-sm font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer">
+                            {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
+                          </select>
+                          <div className="flex rounded-lg overflow-hidden border border-border ml-1">
+                            {(['AM', 'PM'] as const).map(p => (
+                              <button key={p} type="button" onClick={() => setTime(timeParsed!.hour, timeParsed!.minute, p)}
+                                className={`px-2.5 h-9 text-[11px] font-bold transition-all ${
+                                  timeParsed!.ampm === p ? 'bg-foreground text-background' : 'bg-background text-muted-foreground hover:bg-muted'
+                                }`}>{p}</button>
+                            ))}
+                          </div>
+                          <button type="button" onClick={() => patch('scheduled_time', '')}
+                            className="ml-auto w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground/50 hover:text-red-500 hover:bg-red-50 transition-colors">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Publishing status */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">Publishing status</label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {STATUS_CFG.map(st => {
+                    const active = draft.status === st.key
+                    return (
+                      <button key={st.key} type="button" onClick={() => patch('status', st.key)}
+                        className={`py-2.5 rounded-xl border text-[11px] font-semibold transition-all flex flex-col items-center gap-1 ${
+                          active ? 'shadow-sm' : ''
+                        }`}
+                        style={active
+                          ? { borderColor: st.color, backgroundColor: st.color + '10', color: st.color }
+                          : { borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                        <span className="text-sm leading-none">{st.icon}</span>
+                        {st.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">Notes</label>
+                {isAdmin ? (
+                  <textarea rows={2} placeholder="Add a note…" value={draft.client_comments}
+                    onChange={e => patch('client_comments', e.target.value)}
+                    className="w-full text-sm rounded-xl border border-border bg-card px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all resize-none leading-relaxed placeholder:text-muted-foreground/50" />
+                ) : draft.client_comments ? (
+                  <div className="rounded-xl bg-muted/30 border border-border px-3.5 py-2.5 text-sm text-foreground/80 leading-relaxed whitespace-pre-line">{draft.client_comments}</div>
+                ) : (
+                  <p className="text-xs text-muted-foreground/50 italic py-2">No notes</p>
                 )}
               </div>
-            </Section>
 
-            {/* Platforms */}
-            <Section title="Platforms">
-              <div className="grid grid-cols-3 gap-1.5">
-                {PLATFORMS.map(p => {
-                  const active = draft.platforms.includes(p.id)
-                  return (
-                    <button key={p.id} type="button" onClick={() => togglePlatform(p.id)}
-                      className="flex items-center justify-center gap-1.5 py-2 rounded-xl border text-xs font-semibold transition-all"
-                      style={active
-                        ? { borderColor: p.color, backgroundColor: p.color + '12', color: p.color }
-                        : { borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                      <PlatformIcon platform={p.id} size={14} />
-                      {p.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </Section>
-
-            {/* Content type */}
-            <Section title="Content type">
-              <div className="grid grid-cols-3 gap-1.5">
-                {(['post', 'reel', 'story'] as ContentType[]).map(ct => {
-                  const active = draft.content_type === ct
-                  const meta = CONTENT_TYPE_META[ct]
-                  return (
-                    <button key={ct} type="button" onClick={() => patch('content_type', ct)}
-                      className="py-2 rounded-xl border text-xs font-semibold transition-all"
-                      style={active
-                        ? { borderColor: meta.color + '60', backgroundColor: meta.bgVar, color: meta.color }
-                        : { borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                      {meta.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </Section>
-
-            {/* Schedule */}
-            <Section title="Schedule">
-              <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-3">
-                {/* Date display */}
-                <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-background border border-border">
-                  <CalendarIcon className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-sm font-semibold text-foreground">
-                    {new Date(draft.date + 'T00:00:00').toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-                  </span>
-                </div>
-
-                {/* Time picker */}
-                <TimePicker
-                  value={draft.scheduled_time}
-                  onChange={v => patch('scheduled_time', v)}
-                />
-              </div>
-            </Section>
-
-            {/* Publishing status */}
-            <Section title="Publishing status">
-              <div className="grid grid-cols-3 gap-1.5">
-                {(['scheduled', 'posted', 'not_posted'] as ContentPlanStatus[]).map(st => {
-                  const active = draft.status === st
-                  return (
-                    <button key={st} type="button" onClick={() => patch('status', st)}
-                      className="py-2.5 rounded-xl border text-xs font-semibold transition-all flex flex-col items-center justify-center gap-1"
-                      style={active
-                        ? { borderColor: STATUS_DOT[st], backgroundColor: STATUS_DOT[st] + '12', color: STATUS_DOT[st], boxShadow: `0 0 0 1px ${STATUS_DOT[st]}30` }
-                        : { borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                      <span className="w-2 h-2 rounded-full transition-all" style={{ backgroundColor: active ? STATUS_DOT[st] : 'var(--border)' }} />
-                      {STATUS_LABELS[st]}
-                    </button>
-                  )
-                })}
-              </div>
-            </Section>
-
-            {/* Created by (read-only) */}
-            {isEdit && entry?.creator && (
-              <Section title="Created by">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-muted/30">
-                  <div className="w-7 h-7 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+              {/* Created by */}
+              {isEdit && creatorName && (
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="w-6 h-6 rounded-full bg-primary/15 text-primary text-[9px] font-bold flex items-center justify-center shrink-0">
                     {creatorName.split(' ').map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-foreground truncate">{creatorName}</p>
-                    {entry.creator.username && <p className="text-[10px] text-muted-foreground truncate">@{entry.creator.username}</p>}
-                  </div>
+                  <span className="text-[11px] text-muted-foreground">Created by <span className="font-semibold text-foreground">{creatorName}</span></span>
                 </div>
-              </Section>
-            )}
-
-            {/* Notes */}
-            <Section title="Notes & comments">
-              {isAdmin ? (
-                <textarea rows={3} placeholder="Leave a note for the team…" value={draft.client_comments}
-                  onChange={e => patch('client_comments', e.target.value)}
-                  className="w-full text-sm rounded-xl border border-border bg-background px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none leading-relaxed" />
-              ) : draft.client_comments ? (
-                <div className="rounded-xl bg-muted/40 border border-border px-3 py-2.5 text-sm text-foreground/80 leading-relaxed whitespace-pre-line">{draft.client_comments}</div>
-              ) : (
-                <div className="rounded-xl bg-muted/20 border border-dashed border-border px-3 py-3 text-xs text-muted-foreground/60 italic text-center">No notes yet</div>
               )}
-            </Section>
 
-            {/* Approval */}
-            {isEdit && entry && (
-              <Section title="Approval">
-                {!isAdmin && (
-                  <div className="space-y-2">
-                    <div className="rounded-xl bg-muted/30 border border-border px-3 py-2.5 space-y-1.5">
-                      <ApprovalRow label="Caption" approved={entry.caption_approved} rejected={entry.caption_rejected} />
-                      <ApprovalRow label="Post" approved={entry.post_approved} rejected={entry.post_rejected} />
-                    </div>
-                    {!entry.approval_requested && !entry.caption_approved && !entry.post_approved && !entry.caption_rejected && !entry.post_rejected ? (
-                      <button type="button" onClick={onSubmitForApproval} disabled={isSaving}
-                        className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50">
-                        <Send className="w-3.5 h-3.5" /> Send for approval
-                      </button>
-                    ) : entry.approval_requested && !entry.caption_approved && !entry.post_approved && !entry.caption_rejected && !entry.post_rejected ? (
-                      <div className="flex items-center justify-center gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-xl py-2.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Awaiting admin review
+              {/* Approval */}
+              {isEdit && entry && (
+                <div className="space-y-2 pt-2 border-t border-border">
+                  <label className="text-xs font-semibold text-foreground">Approval</label>
+                  {!isAdmin && (
+                    <div className="space-y-2">
+                      <div className="rounded-xl bg-card border border-border divide-y divide-border overflow-hidden">
+                        <ApprovalRow label="Caption" approved={entry.caption_approved} rejected={entry.caption_rejected} />
+                        <ApprovalRow label="Post" approved={entry.post_approved} rejected={entry.post_rejected} />
                       </div>
-                    ) : (entry.caption_rejected || entry.post_rejected) ? (
-                      <button type="button" onClick={onSubmitForApproval} disabled={isSaving}
-                        className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2.5 rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors disabled:opacity-50">
-                        <Send className="w-3.5 h-3.5" /> Resubmit for approval
+                      {!entry.approval_requested && !entry.caption_approved && !entry.post_approved && !entry.caption_rejected && !entry.post_rejected ? (
+                        <button type="button" onClick={onSubmitForApproval} disabled={isSaving}
+                          className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2.5 rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition-colors disabled:opacity-50">
+                          <Send className="w-3.5 h-3.5" /> Send for approval
+                        </button>
+                      ) : entry.approval_requested && !entry.caption_approved && !entry.post_approved && !entry.caption_rejected && !entry.post_rejected ? (
+                        <div className="flex items-center justify-center gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-xl py-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Awaiting review
+                        </div>
+                      ) : (entry.caption_rejected || entry.post_rejected) ? (
+                        <button type="button" onClick={onSubmitForApproval} disabled={isSaving}
+                          className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold py-2.5 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50">
+                          <Send className="w-3.5 h-3.5" /> Resubmit
+                        </button>
+                      ) : null}
+                    </div>
+                  )}
+                  {isAdmin && (
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <button type="button" onClick={onApproveCaption} disabled={isSaving}
+                        className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                          entry.caption_approved ? 'bg-green-50 text-green-700 border-green-300' : 'border-border text-foreground hover:bg-muted'
+                        }`}>
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        {entry.caption_approved ? 'Caption ✓' : 'Caption'}
                       </button>
-                    ) : null}
-                  </div>
-                )}
-                {isAdmin && (
-                  <div className="space-y-1.5">
-                    <button type="button" onClick={onApproveCaption} disabled={isSaving}
-                      className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all text-left"
-                      style={entry.caption_approved
-                        ? { backgroundColor: '#dcfce7', color: '#15803d', borderColor: '#86efac' }
-                        : { borderColor: 'var(--border)', color: 'var(--foreground)' }}>
-                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                      {entry.caption_approved ? 'Caption approved' : 'Approve caption'}
-                    </button>
-                    <button type="button" onClick={onApprovePost} disabled={isSaving}
-                      className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all text-left"
-                      style={entry.post_approved
-                        ? { backgroundColor: '#dcfce7', color: '#15803d', borderColor: '#86efac' }
-                        : { borderColor: 'var(--border)', color: 'var(--foreground)' }}>
-                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                      {entry.post_approved ? 'Post approved' : 'Approve post'}
-                    </button>
-                    {entry.approval_requested && <p className="text-[10px] text-amber-600 text-center pt-1">Submitted for review</p>}
-                  </div>
-                )}
-              </Section>
-            )}
+                      <button type="button" onClick={onApprovePost} disabled={isSaving}
+                        className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                          entry.post_approved ? 'bg-green-50 text-green-700 border-green-300' : 'border-border text-foreground hover:bg-muted'
+                        }`}>
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        {entry.post_approved ? 'Post ✓' : 'Post'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Error */}
+          {/* ── Error ── */}
           {saveError && (
             <div className="px-5 py-2 bg-red-50 border-t border-red-200 shrink-0">
               <p className="text-xs text-red-700 font-medium">{saveError}</p>
             </div>
           )}
 
-          {/* Footer */}
+          {/* ── Footer ── */}
           <div className="px-5 py-3 border-t border-border flex items-center gap-2 shrink-0 bg-card">
             {isEdit && (
               <button type="button" onClick={onDelete} disabled={isSaving}
-                className="w-10 h-10 rounded-xl border border-border text-muted-foreground hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors flex items-center justify-center" aria-label="Delete">
+                className="w-10 h-10 rounded-xl border border-border text-muted-foreground hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-colors flex items-center justify-center" aria-label="Delete">
                 <Trash2 className="w-4 h-4" />
               </button>
             )}
+            <div className="flex-1" />
             <button type="button" onClick={() => onOpenChange(false)} disabled={isSaving}
-              className="flex-1 h-10 rounded-xl border border-border bg-background text-sm font-semibold text-foreground hover:bg-muted transition-colors">
+              className="px-5 h-10 rounded-xl border border-border bg-background text-sm font-semibold text-foreground hover:bg-muted transition-colors">
               Cancel
             </button>
             <button type="button" onClick={onSave} disabled={isSaving || draft.uploading}
-              className="flex-1 h-10 rounded-xl text-sm font-semibold text-white hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+              className="px-6 h-10 rounded-xl text-sm font-semibold text-white hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
               style={{ backgroundColor: 'var(--primary)' }}>
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : isEdit ? 'Save changes' : 'Schedule'}
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : isEdit ? 'Save' : 'Schedule'}
             </button>
           </div>
         </DialogPrimitive.Content>
@@ -351,129 +480,15 @@ export function ContentSidePanel({
   )
 }
 
-function Section({ title, children, actions }: { title: string; children: React.ReactNode; actions?: React.ReactNode }) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{title}</p>
-        {actions}
-      </div>
-      {children}
-    </div>
-  )
-}
-
 function ApprovalRow({ label, approved, rejected }: { label: string; approved: boolean; rejected: boolean }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between px-3.5 py-2">
       <span className="text-xs text-muted-foreground">{label}</span>
       {approved
-        ? <span className="text-[11px] font-semibold text-green-700 flex items-center gap-0.5"><Check className="w-3 h-3" /> Approved</span>
+        ? <span className="text-[11px] font-semibold text-green-700 flex items-center gap-1"><Check className="w-3 h-3" /> Approved</span>
         : rejected
         ? <span className="text-[11px] font-semibold text-red-600">Rejected</span>
-        : <span className="text-[11px] text-muted-foreground/60">Pending</span>}
-    </div>
-  )
-}
-
-const HOURS = Array.from({ length: 12 }, (_, i) => i + 1)
-const MINUTES = ['00', '15', '30', '45']
-
-function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const parsed = value ? (() => {
-    const [h, m] = value.split(':').map(Number)
-    return { hour: h % 12 || 12, minute: m, ampm: h >= 12 ? 'PM' : 'AM' as 'AM' | 'PM' }
-  })() : null
-
-  function update(hour: number, minute: number, ampm: 'AM' | 'PM') {
-    let h24 = hour % 12
-    if (ampm === 'PM') h24 += 12
-    onChange(`${String(h24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`)
-  }
-
-  const hour = parsed?.hour ?? 9
-  const minute = parsed?.minute ?? 0
-  const ampm = parsed?.ampm ?? 'AM'
-
-  if (!value) {
-    return (
-      <button
-        type="button"
-        onClick={() => update(9, 0, 'AM')}
-        className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-lg border-2 border-dashed border-border bg-background text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-primary/[0.02] transition-all"
-      >
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span className="text-xs font-semibold">Set time</span>
-      </button>
-    )
-  }
-
-  const nearestMin = MINUTES.reduce((prev, curr) =>
-    Math.abs(parseInt(curr) - minute) < Math.abs(parseInt(prev) - minute) ? curr : prev
-  )
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-1.5">
-        {/* Hour */}
-        <select
-          value={hour}
-          onChange={e => update(parseInt(e.target.value), minute, ampm)}
-          className="flex-1 h-10 rounded-lg border border-border bg-background text-center text-sm font-bold tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none cursor-pointer"
-        >
-          {HOURS.map(h => (
-            <option key={h} value={h}>{h}</option>
-          ))}
-        </select>
-
-        <span className="text-lg font-bold text-muted-foreground">:</span>
-
-        {/* Minute */}
-        <select
-          value={nearestMin}
-          onChange={e => update(hour, parseInt(e.target.value), ampm)}
-          className="flex-1 h-10 rounded-lg border border-border bg-background text-center text-sm font-bold tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none cursor-pointer"
-        >
-          {MINUTES.map(m => (
-            <option key={m} value={m}>{m}</option>
-          ))}
-        </select>
-
-        {/* AM/PM toggle */}
-        <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
-          <button
-            type="button"
-            onClick={() => update(hour, minute, 'AM')}
-            className={`px-3 h-10 text-xs font-bold transition-all ${
-              ampm === 'AM'
-                ? 'bg-primary text-white'
-                : 'bg-background text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            AM
-          </button>
-          <button
-            type="button"
-            onClick={() => update(hour, minute, 'PM')}
-            className={`px-3 h-10 text-xs font-bold transition-all ${
-              ampm === 'PM'
-                ? 'bg-primary text-white'
-                : 'bg-background text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            PM
-          </button>
-        </div>
-      </div>
-
-      {/* Clear */}
-      <button
-        type="button"
-        onClick={() => onChange('')}
-        className="text-[10px] text-muted-foreground hover:text-foreground transition-colors font-medium"
-      >
-        Clear time
-      </button>
+        : <span className="text-[11px] text-muted-foreground/50">Pending</span>}
     </div>
   )
 }
