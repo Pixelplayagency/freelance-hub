@@ -13,7 +13,8 @@ import { useRouter } from 'next/navigation'
 import { ChevronDown, ExternalLink, ImagePlus, Link2, Loader2, Plus, Trash2, X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { DeadlinePicker } from './DeadlinePicker'
-import type { Profile, Task } from '@/lib/types/app.types'
+import type { Priority, Profile, Task } from '@/lib/types/app.types'
+import { PRIORITY_CONFIG } from '@/lib/types/app.types'
 
 interface TaskFormProps {
   projectId: string
@@ -43,6 +44,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
     const t = task.due_date.slice(11, 16) // HH:MM
     return t === '00:00' ? '' : t
   })
+  const [priority, setPriority] = useState<Priority>((task as any)?.priority ?? 'medium')
   const [taskType, setTaskType] = useState<'standard' | 'simple'>((task as any)?.task_type ?? 'standard')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -94,6 +96,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
           description: description || undefined,
           assigned_to: assignedTo[0] ?? null,
           due_date: deadlineValue,
+          priority,
           assignee_ids: assignedTo,
         })
         toast.success('Task updated')
@@ -110,6 +113,7 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
           assigned_to: assignedTo[0] ?? null,
           due_date: deadlineValue,
           status: 'todo',
+          priority,
           task_type: taskType,
           assignee_ids: assignedTo,
         })
@@ -277,6 +281,32 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
           onDateChange={setDueDate}
           onTimeChange={setDueTime}
         />
+      </div>
+
+      {/* Priority */}
+      <div className="space-y-1.5">
+        <Label>Priority</Label>
+        <div className="grid grid-cols-4 gap-1.5">
+          {(['low', 'medium', 'high', 'urgent'] as Priority[]).map(p => {
+            const cfg = PRIORITY_CONFIG[p]
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPriority(p)}
+                className={cn(
+                  'flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border text-xs font-medium transition-all',
+                  priority === p
+                    ? `${cfg.bg} ${cfg.color} border-current/20`
+                    : 'border-border text-muted-foreground hover:border-muted-foreground'
+                )}
+              >
+                <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', cfg.dot)} />
+                {cfg.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Concept reference links — only shown during task creation */}

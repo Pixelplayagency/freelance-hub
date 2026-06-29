@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import { ProjectTaskList } from '@/components/projects/ProjectTaskList'
+import { ViewToggle } from '@/components/projects/ViewToggle'
 import { CreateTaskButton } from '@/components/tasks/CreateTaskButton'
 import { DeleteProjectButton } from '@/components/projects/DeleteProjectButton'
 import { ChevronLeft, Instagram, Facebook } from 'lucide-react'
@@ -38,7 +38,6 @@ export default async function ProjectPage({
 }) {
   const { projectId } = await params
   const supabase = await createSupabaseServerClient()
-  // Session already validated in (dashboard)/layout.tsx — read it from the cookie (no network call).
   const { data: { session } } = await supabase.auth.getSession()
   const user = session?.user ?? null
   if (!user) redirect('/login')
@@ -54,23 +53,48 @@ export default async function ProjectPage({
   if (!project) notFound()
 
   const isAdmin = profile?.role === 'admin' || profile?.role === 'manager'
-  // Managers get admin-tier work tools but cannot delete a whole project.
   const isFullAdmin = profile?.role === 'admin'
 
-  const taskIds = (tasks ?? []).map(t => t.id)
+  const allTasks = (tasks ?? []) as Task[]
+  const taskIds = allTasks.map(t => t.id)
+
+  // Fetch assignees, comment counts, and subtask counts in parallel
   let assigneeMap: AssigneeMap = {}
+  let commentCounts: Record<string, number> = {}
+  let subtaskCounts: Record<string, { done: number; total: number }> = {}
+
   if (taskIds.length > 0) {
-    const { data: assignments } = await supabase
-      .from('task_assignments')
-      .select('task_id, user:profiles!user_id(id, full_name, avatar_url)')
-      .in('task_id', taskIds)
+    const [{ data: assignments }, { data: references }, { data: subtasks }] = await Promise.all([
+      supabase
+        .from('task_assignments')
+        .select('task_id, user:profiles!user_id(id, full_name, avatar_url)')
+        .in('task_id', taskIds),
+      supabase
+        .from('task_references')
+        .select('task_id')
+        .in('task_id', taskIds),
+      supabase
+        .from('subtasks')
+        .select('task_id, completed')
+        .in('task_id', taskIds),
+    ])
+
     for (const a of assignments ?? []) {
       if (!assigneeMap[a.task_id]) assigneeMap[a.task_id] = []
       assigneeMap[a.task_id].push(a.user as unknown as Pick<Profile, 'id' | 'full_name' | 'avatar_url'>)
     }
+
+    for (const r of references ?? []) {
+      commentCounts[r.task_id] = (commentCounts[r.task_id] ?? 0) + 1
+    }
+
+    for (const s of subtasks ?? []) {
+      if (!subtaskCounts[s.task_id]) subtaskCounts[s.task_id] = { done: 0, total: 0 }
+      subtaskCounts[s.task_id].total++
+      if (s.completed) subtaskCounts[s.task_id].done++
+    }
   }
 
-  const allTasks = (tasks ?? []) as Task[]
   const total = allTasks.length
   const counts: Record<TaskStatus, number> = {
     todo:        allTasks.filter(t => t.status === 'todo').length,
@@ -203,12 +227,15 @@ export default async function ProjectPage({
         </div>
       </div>
 
-      {/* Task list */}
-      <ProjectTaskList
+      {/* Task board with view toggle */}
+      <ViewToggle
         tasks={allTasks}
         projectId={projectId}
         isAdmin={isAdmin}
         assigneeMap={assigneeMap}
+        commentCounts={commentCounts}
+        subtaskCounts={subtaskCounts}
+        freelancers={(freelancers ?? []) as Pick<Profile, 'id' | 'full_name' | 'email'>[]}
       />
     </div>
   )

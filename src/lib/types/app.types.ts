@@ -15,6 +15,15 @@ export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'completed'
 
 export type TaskType = 'standard' | 'simple'
 
+export type Priority = 'low' | 'medium' | 'high' | 'urgent'
+
+export const PRIORITY_CONFIG: Record<Priority, { label: string; color: string; bg: string; dot: string }> = {
+  low:    { label: 'Low',    color: 'text-emerald-700', bg: 'bg-emerald-100', dot: 'bg-emerald-500' },
+  medium: { label: 'Medium', color: 'text-blue-700',    bg: 'bg-blue-100',    dot: 'bg-blue-500' },
+  high:   { label: 'High',   color: 'text-amber-700',   bg: 'bg-amber-100',   dot: 'bg-amber-500' },
+  urgent: { label: 'Urgent', color: 'text-red-700',     bg: 'bg-red-100',     dot: 'bg-red-500' },
+}
+
 export type ProjectStatus = 'active' | 'archived'
 
 export type ReferenceType = 'image' | 'link' | 'video' | 'note'
@@ -119,6 +128,7 @@ export interface Task {
   title: string
   description: string | null
   status: TaskStatus
+  priority: Priority
   assigned_to: string | null
   due_date: string | null
   sort_order: number
@@ -129,6 +139,15 @@ export interface Task {
   // Joined fields
   assignee?: Profile | null
   project?: Pick<Project, 'id' | 'name' | 'color'> | null
+}
+
+export interface Subtask {
+  id: string
+  task_id: string
+  title: string
+  completed: boolean
+  sort_order: number
+  created_at: string
 }
 
 export interface TaskReference {

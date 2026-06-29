@@ -38,6 +38,7 @@ export async function updateTask(taskId: string, updates: Partial<{
   description: string
   assigned_to: string | null
   due_date: string | null
+  priority: string
   assignee_ids: string[]
 }>) {
   const supabase = await createSupabaseServerClient()
@@ -135,4 +136,58 @@ export async function deleteTask(taskId: string, projectId: string) {
   if (error) throw new Error(error.message)
 
   revalidatePath(`/admin/projects/${projectId}`)
+}
+
+// ── Subtasks ──────────────────────────────────────────────────────────────
+
+export async function createSubtask(taskId: string, title: string) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: maxOrder } = await supabase
+    .from('subtasks')
+    .select('sort_order')
+    .eq('task_id', taskId)
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .single()
+
+  const { data, error } = await supabase
+    .from('subtasks')
+    .insert({ task_id: taskId, title: title.trim(), sort_order: (maxOrder?.sort_order ?? -1) + 1 })
+    .select()
+    .single()
+
+  if (error) throw new Error(error.message)
+
+  const { data: task } = await supabase.from('tasks').select('project_id').eq('id', taskId).single()
+  if (task?.project_id) revalidatePath(`/admin/projects/${task.project_id}`)
+  return data
+}
+
+export async function toggleSubtask(subtaskId: string, completed: boolean) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { error } = await supabase
+    .from('subtasks')
+    .update({ completed })
+    .eq('id', subtaskId)
+
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteSubtask(subtaskId: string) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { error } = await supabase
+    .from('subtasks')
+    .delete()
+    .eq('id', subtaskId)
+
+  if (error) throw new Error(error.message)
 }

@@ -19,7 +19,7 @@ import { KanbanCard } from './KanbanCard'
 import { useKanbanStore } from './useKanbanStore'
 import { useTaskRealtime } from '@/lib/hooks/useTaskRealtime'
 import { updateTaskStatus } from '@/lib/actions/task.actions'
-import type { Task, TaskStatus } from '@/lib/types/app.types'
+import type { Task, TaskStatus, Profile } from '@/lib/types/app.types'
 import { toast } from 'sonner'
 import { TASK_STATUSES } from '@/lib/types/app.types'
 
@@ -35,18 +35,25 @@ const COLUMNS = TASK_STATUSES.map(s => ({
   }[s.id],
 }))
 
+type AssigneeMap = Record<string, Pick<Profile, 'id' | 'full_name' | 'avatar_url'>[]>
+type CountMap = Record<string, number>
+type SubtaskMap = Record<string, { done: number; total: number }>
+
 interface KanbanBoardProps {
   initialTasks: Task[]
   projectId: string
   isAdmin: boolean
+  assigneeMap?: AssigneeMap
+  commentCounts?: CountMap
+  subtaskCounts?: SubtaskMap
+  onAddTask?: (status: TaskStatus) => void
 }
 
-export function KanbanBoard({ initialTasks, projectId, isAdmin }: KanbanBoardProps) {
+export function KanbanBoard({ initialTasks, projectId, isAdmin, assigneeMap = {}, commentCounts = {}, subtaskCounts = {}, onAddTask }: KanbanBoardProps) {
   const { tasks, setTasks, moveTask, revertTasks, getPreviousSnapshot } = useKanbanStore()
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const initialized = useRef(false)
 
-  // Initialize store once
   useEffect(() => {
     if (!initialized.current) {
       setTasks(initialTasks)
@@ -54,7 +61,6 @@ export function KanbanBoard({ initialTasks, projectId, isAdmin }: KanbanBoardPro
     }
   }, [initialTasks, setTasks])
 
-  // Realtime sync
   useTaskRealtime(projectId)
 
   const sensors = useSensors(
@@ -77,7 +83,6 @@ export function KanbanBoard({ initialTasks, projectId, isAdmin }: KanbanBoardPro
     const activeTask = tasks.find(t => t.id === active.id)
     if (!activeTask) return
 
-    // Determine target column
     let newStatus: TaskStatus
     const overIsColumn = COLUMNS.some(c => c.id === over.id)
     if (overIsColumn) {
@@ -88,24 +93,18 @@ export function KanbanBoard({ initialTasks, projectId, isAdmin }: KanbanBoardPro
       newStatus = overTask.status
     }
 
-    // Determine new index within target column
     const targetColumnTasks = tasks.filter(t => t.status === newStatus && t.id !== active.id)
     const overTaskIdx = targetColumnTasks.findIndex(t => t.id === over.id)
     const newIndex = overTaskIdx === -1 ? targetColumnTasks.length : overTaskIdx
 
-    // Already in place?
     if (activeTask.status === newStatus) {
       const currentIdx = tasks.filter(t => t.status === newStatus).findIndex(t => t.id === active.id)
       if (currentIdx === newIndex) return
     }
 
-    // Snapshot for rollback
     const snapshot = getPreviousSnapshot()
-
-    // Optimistic update
     moveTask(active.id as string, newStatus, newIndex)
 
-    // Persist
     try {
       await updateTaskStatus(active.id as string, newStatus, newIndex)
     } catch {
@@ -128,7 +127,7 @@ export function KanbanBoard({ initialTasks, projectId, isAdmin }: KanbanBoardPro
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-12rem)]">
+      <div className="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-16rem)]">
         {COLUMNS.map(col => (
           <KanbanColumn
             key={col.id}
@@ -136,6 +135,10 @@ export function KanbanBoard({ initialTasks, projectId, isAdmin }: KanbanBoardPro
             tasks={tasksByStatus[col.id] ?? []}
             projectId={projectId}
             isAdmin={isAdmin}
+            assigneeMap={assigneeMap}
+            commentCounts={commentCounts}
+            subtaskCounts={subtaskCounts}
+            onAddTask={onAddTask}
           />
         ))}
       </div>
@@ -147,6 +150,9 @@ export function KanbanBoard({ initialTasks, projectId, isAdmin }: KanbanBoardPro
             projectId={projectId}
             isAdmin={isAdmin}
             isDragging
+            assignees={assigneeMap[activeTask.id]}
+            commentCount={commentCounts[activeTask.id] ?? 0}
+            subtaskProgress={subtaskCounts[activeTask.id]}
           />
         )}
       </DragOverlay>

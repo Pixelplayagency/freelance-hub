@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import { ProjectTaskList } from '@/components/projects/ProjectTaskList'
+import { ViewToggle } from '@/components/projects/ViewToggle'
 import { ChevronLeft, Instagram, Facebook } from 'lucide-react'
 import Link from 'next/link'
 import type { Task, Profile, TaskStatus } from '@/lib/types/app.types'
@@ -36,7 +36,6 @@ export default async function FreelancerProjectPage({
 }) {
   const { projectId } = await params
   const supabase = await createSupabaseServerClient()
-  // Session already validated in (dashboard)/layout.tsx — read it from the cookie (no network call).
   const { data: { session } } = await supabase.auth.getSession()
   const user = session?.user ?? null
   if (!user) redirect('/login')
@@ -48,20 +47,45 @@ export default async function FreelancerProjectPage({
 
   if (!project) notFound()
 
-  const taskIds = (tasks ?? []).map(t => t.id)
+  const allTasks = (tasks ?? []) as Task[]
+  const taskIds = allTasks.map(t => t.id)
+
   let assigneeMap: AssigneeMap = {}
+  let commentCounts: Record<string, number> = {}
+  let subtaskCounts: Record<string, { done: number; total: number }> = {}
+
   if (taskIds.length > 0) {
-    const { data: assignments } = await supabase
-      .from('task_assignments')
-      .select('task_id, user:profiles!user_id(id, full_name, avatar_url)')
-      .in('task_id', taskIds)
+    const [{ data: assignments }, { data: references }, { data: subtasks }] = await Promise.all([
+      supabase
+        .from('task_assignments')
+        .select('task_id, user:profiles!user_id(id, full_name, avatar_url)')
+        .in('task_id', taskIds),
+      supabase
+        .from('task_references')
+        .select('task_id')
+        .in('task_id', taskIds),
+      supabase
+        .from('subtasks')
+        .select('task_id, completed')
+        .in('task_id', taskIds),
+    ])
+
     for (const a of assignments ?? []) {
       if (!assigneeMap[a.task_id]) assigneeMap[a.task_id] = []
       assigneeMap[a.task_id].push(a.user as unknown as Pick<Profile, 'id' | 'full_name' | 'avatar_url'>)
     }
+
+    for (const r of references ?? []) {
+      commentCounts[r.task_id] = (commentCounts[r.task_id] ?? 0) + 1
+    }
+
+    for (const s of subtasks ?? []) {
+      if (!subtaskCounts[s.task_id]) subtaskCounts[s.task_id] = { done: 0, total: 0 }
+      subtaskCounts[s.task_id].total++
+      if (s.completed) subtaskCounts[s.task_id].done++
+    }
   }
 
-  const allTasks = (tasks ?? []) as Task[]
   const total = allTasks.length
   const counts: Record<TaskStatus, number> = {
     todo:        allTasks.filter(t => t.status === 'todo').length,
@@ -84,9 +108,8 @@ export default async function FreelancerProjectPage({
         Projects
       </Link>
 
-      {/* ── Hero card ── */}
+      {/* Hero card */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
-        {/* Cover */}
         <div className="relative h-40 overflow-hidden">
           {project.cover_image_url ? (
             <img src={project.cover_image_url} alt="" className="w-full h-full object-cover" />
@@ -96,13 +119,10 @@ export default async function FreelancerProjectPage({
               style={{ background: `linear-gradient(135deg, ${project.color}cc 0%, ${project.color} 100%)` }}
             />
           )}
-          {/* Scrim for text contrast */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         </div>
 
-        {/* Body */}
         <div className="px-6 pb-6 -mt-10 relative">
-          {/* Avatar */}
           <div className="w-20 h-20 rounded-2xl border-4 border-card bg-card overflow-hidden shadow-lg mb-4">
             {project.avatar_url ? (
               <img src={project.avatar_url} alt={project.name} className="w-full h-full object-cover" />
@@ -116,7 +136,6 @@ export default async function FreelancerProjectPage({
             )}
           </div>
 
-          {/* Name row + socials */}
           <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-foreground leading-tight">{project.name}</h1>
@@ -125,22 +144,19 @@ export default async function FreelancerProjectPage({
               <div className="flex items-center gap-1.5 shrink-0 mt-1">
                 {project.instagram_url && (
                   <a href={project.instagram_url} target="_blank" rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-[#E1306C] hover:bg-muted transition-all"
-                    title="Instagram">
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-[#E1306C] hover:bg-muted transition-all">
                     <Instagram className="w-4 h-4" />
                   </a>
                 )}
                 {project.facebook_url && (
                   <a href={project.facebook_url} target="_blank" rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-[#1877F2] hover:bg-muted transition-all"
-                    title="Facebook">
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-[#1877F2] hover:bg-muted transition-all">
                     <Facebook className="w-4 h-4" />
                   </a>
                 )}
                 {project.tiktok_url && (
                   <a href={project.tiktok_url} target="_blank" rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                    title="TikTok">
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
                     <TikTokIcon className="w-4 h-4" />
                   </a>
                 )}
@@ -148,12 +164,10 @@ export default async function FreelancerProjectPage({
             )}
           </div>
 
-          {/* Description */}
           {project.description && (
             <p className="text-sm text-muted-foreground leading-relaxed mb-5">{project.description}</p>
           )}
 
-          {/* Stats strip */}
           <div className="flex rounded-xl overflow-hidden border border-border mb-5">
             {STAT_CONFIG.map(({ status, label, dot, num }, i) => (
               <div
@@ -169,7 +183,6 @@ export default async function FreelancerProjectPage({
             ))}
           </div>
 
-          {/* Progress bar */}
           {total > 0 && (
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
@@ -181,11 +194,7 @@ export default async function FreelancerProjectPage({
                   const pct = total > 0 ? (counts[s] / total) * 100 : 0
                   if (pct === 0) return null
                   return (
-                    <div
-                      key={s}
-                      className={`h-full transition-all ${BAR_COLORS[s]}`}
-                      style={{ width: `${pct}%` }}
-                    />
+                    <div key={s} className={`h-full transition-all ${BAR_COLORS[s]}`} style={{ width: `${pct}%` }} />
                   )
                 })}
               </div>
@@ -194,12 +203,15 @@ export default async function FreelancerProjectPage({
         </div>
       </div>
 
-      {/* Task board */}
-      <ProjectTaskList
+      {/* Task board with view toggle */}
+      <ViewToggle
         tasks={allTasks}
         projectId={projectId}
         isAdmin={false}
         assigneeMap={assigneeMap}
+        commentCounts={commentCounts}
+        subtaskCounts={subtaskCounts}
+        freelancers={[]}
       />
     </div>
   )
