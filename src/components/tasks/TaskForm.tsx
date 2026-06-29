@@ -162,7 +162,8 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+      <div className="flex-1 overflow-y-auto space-y-4 px-1 -mx-1">
       {/* Title */}
       <div className="space-y-1.5">
         <Label htmlFor="title">Title *</Label>
@@ -468,8 +469,10 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
         </div>
       )}
 
-      {/* Sticky action bar — stays reachable while the form scrolls */}
-      <div className="sticky bottom-0 -mx-6 -mb-6 mt-2 flex items-center justify-end gap-2 border-t border-border bg-background/95 px-6 py-3.5 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      </div>
+
+      {/* Fixed footer — always visible */}
+      <div className="flex items-center justify-end gap-2 border-t border-border pt-3.5 mt-3 shrink-0">
         {onCancel && (
           <Button
             type="button"

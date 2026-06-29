@@ -40,7 +40,7 @@ export function CreateTaskButton({ projectId, freelancers, defaultOpen = false, 
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>New task</DialogTitle>
         </DialogHeader>

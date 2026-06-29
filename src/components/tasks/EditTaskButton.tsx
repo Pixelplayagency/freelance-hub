@@ -24,7 +24,7 @@ export function EditTaskButton({ task, freelancers, projectId }: EditTaskButtonP
           Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Edit task</DialogTitle>
         </DialogHeader>
