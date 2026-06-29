@@ -35,7 +35,7 @@ export const PLATFORMS = [
 ] as const
 
 export const CONTENT_TYPE_META: Record<ContentType, { label: string; color: string; bgVar: string }> = {
-  post:  { label: 'Post',  color: '#15803d', bgVar: 'rgba(187,247,208,0.55)' },
+  post:  { label: 'Image',  color: '#15803d', bgVar: 'rgba(187,247,208,0.55)' },
   story: { label: 'Story', color: '#b91c1c', bgVar: 'rgba(254,202,202,0.55)' },
   reel:  { label: 'Reel',  color: '#a16207', bgVar: 'rgba(254,240,138,0.55)' },
 }

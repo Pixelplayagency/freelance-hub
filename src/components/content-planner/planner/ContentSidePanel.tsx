@@ -262,20 +262,24 @@ export function ContentSidePanel({
               </div>
 
               {/* Platform + Type — side by side */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">Platform</label>
-                  <div className="space-y-1">
+                  <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
                     {PLATFORMS.map(p => {
                       const active = draft.platforms.includes(p.id)
                       return (
                         <button key={p.id} type="button" onClick={() => togglePlatform(p.id)}
-                          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
-                            active ? 'border-primary/40 bg-primary/[0.05] text-foreground' : 'border-border text-muted-foreground hover:border-border/80'
+                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium transition-all ${
+                            active ? 'bg-primary/[0.04] text-foreground' : 'text-muted-foreground hover:bg-muted/50'
                           }`}>
-                          <PlatformIcon platform={p.id} size={14} />
+                          <PlatformIcon platform={p.id} size={15} />
                           <span className="flex-1 text-left">{p.label}</span>
-                          {active && <Check className="w-3 h-3 text-primary" />}
+                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                            active ? 'border-primary bg-primary' : 'border-border'
+                          }`}>
+                            {active && <Check className="w-2.5 h-2.5 text-white" />}
+                          </div>
                         </button>
                       )
                     })}
@@ -283,17 +287,19 @@ export function ContentSidePanel({
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">Content type</label>
-                  <div className="space-y-1">
+                  <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
                     {(['post', 'reel', 'story'] as ContentType[]).map(ct => {
                       const active = draft.content_type === ct
                       const meta = CONTENT_TYPE_META[ct]
                       return (
                         <button key={ct} type="button" onClick={() => patch('content_type', ct)}
-                          className={`w-full px-3 py-2 rounded-lg border text-xs font-medium transition-all text-left ${
-                            active ? 'border-current' : 'border-border text-muted-foreground hover:border-border/80'
+                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium transition-all ${
+                            active ? 'text-foreground' : 'text-muted-foreground hover:bg-muted/50'
                           }`}
-                          style={active ? { color: meta.color, backgroundColor: meta.bgVar, borderColor: meta.color + '50' } : undefined}>
-                          {meta.label}
+                          style={active ? { backgroundColor: meta.bgVar } : undefined}>
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: active ? meta.color : 'var(--border)' }} />
+                          <span className="flex-1 text-left">{meta.label}</span>
+                          {active && <Check className="w-3 h-3" style={{ color: meta.color }} />}
                         </button>
                       )
                     })}
@@ -301,51 +307,47 @@ export function ContentSidePanel({
                 </div>
               </div>
 
-              {/* Schedule */}
+              {/* Schedule — unified card */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">Schedule</label>
-                <div className="rounded-xl border border-border bg-card overflow-hidden">
-                  {/* Date row */}
-                  <div className="flex items-center gap-2 px-3.5 py-2.5 bg-muted/30">
-                    <CalendarIcon className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-sm font-semibold text-foreground flex-1">
-                      {dateFull.toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric' })}
+                <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
+                  <div className="flex items-center gap-2.5 px-3.5 py-3">
+                    <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-foreground flex-1">
+                      {dateFull.toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </span>
                   </div>
-                  {/* Time row */}
-                  <div className="px-3.5 py-3 border-t border-border space-y-2">
+                  <div className="flex items-center gap-2.5 px-3.5 py-3">
+                    <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
                     {!draft.scheduled_time ? (
                       <button type="button" onClick={() => setTime(9, 0, 'AM')}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary/40 transition-all">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span className="text-xs font-semibold">Add time</span>
+                        className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        Add time
                       </button>
                     ) : (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-1.5">
-                          <select value={timeParsed!.hour} onChange={e => setTime(parseInt(e.target.value), timeParsed!.minute, timeParsed!.ampm)}
-                            className="w-16 h-9 rounded-lg border border-border bg-background text-center text-sm font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer">
-                            {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                          </select>
-                          <span className="text-base font-bold text-muted-foreground/50">:</span>
-                          <select value={MINUTES.reduce((prev, curr) => Math.abs(parseInt(curr) - timeParsed!.minute) < Math.abs(parseInt(prev) - timeParsed!.minute) ? curr : prev)}
-                            onChange={e => setTime(timeParsed!.hour, parseInt(e.target.value), timeParsed!.ampm)}
-                            className="w-16 h-9 rounded-lg border border-border bg-background text-center text-sm font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer">
-                            {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
-                          </select>
-                          <div className="flex rounded-lg overflow-hidden border border-border ml-1">
-                            {(['AM', 'PM'] as const).map(p => (
-                              <button key={p} type="button" onClick={() => setTime(timeParsed!.hour, timeParsed!.minute, p)}
-                                className={`px-2.5 h-9 text-[11px] font-bold transition-all ${
-                                  timeParsed!.ampm === p ? 'bg-foreground text-background' : 'bg-background text-muted-foreground hover:bg-muted'
-                                }`}>{p}</button>
-                            ))}
-                          </div>
-                          <button type="button" onClick={() => patch('scheduled_time', '')}
-                            className="ml-auto w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground/50 hover:text-red-500 hover:bg-red-50 transition-colors">
-                            <X className="w-3 h-3" />
-                          </button>
+                      <div className="flex items-center gap-1.5 flex-1">
+                        <select value={timeParsed!.hour} onChange={e => setTime(parseInt(e.target.value), timeParsed!.minute, timeParsed!.ampm)}
+                          className="w-14 h-8 rounded-md border border-border bg-background text-center text-xs font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer">
+                          {HOURS.map(h => <option key={h} value={h}>{String(h).padStart(2, '0')}</option>)}
+                        </select>
+                        <span className="text-sm font-semibold text-muted-foreground/40">:</span>
+                        <select value={MINUTES.reduce((prev, curr) => Math.abs(parseInt(curr) - timeParsed!.minute) < Math.abs(parseInt(prev) - timeParsed!.minute) ? curr : prev)}
+                          onChange={e => setTime(timeParsed!.hour, parseInt(e.target.value), timeParsed!.ampm)}
+                          className="w-14 h-8 rounded-md border border-border bg-background text-center text-xs font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer">
+                          {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                        <div className="flex rounded-md overflow-hidden border border-border">
+                          {(['AM', 'PM'] as const).map(p => (
+                            <button key={p} type="button" onClick={() => setTime(timeParsed!.hour, timeParsed!.minute, p)}
+                              className={`px-2 h-8 text-[10px] font-bold transition-all ${
+                                timeParsed!.ampm === p ? 'bg-foreground text-background' : 'bg-background text-muted-foreground hover:bg-muted'
+                              }`}>{p}</button>
+                          ))}
                         </div>
+                        <button type="button" onClick={() => patch('scheduled_time', '')}
+                          className="ml-auto text-[10px] text-muted-foreground/60 hover:text-red-500 transition-colors font-medium">
+                          Clear
+                        </button>
                       </div>
                     )}
                   </div>
@@ -355,18 +357,16 @@ export function ContentSidePanel({
               {/* Publishing status */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">Publishing status</label>
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="rounded-xl border border-border bg-card overflow-hidden flex divide-x divide-border">
                   {STATUS_CFG.map(st => {
                     const active = draft.status === st.key
                     return (
                       <button key={st.key} type="button" onClick={() => patch('status', st.key)}
-                        className={`py-2.5 rounded-xl border text-[11px] font-semibold transition-all flex flex-col items-center gap-1 ${
-                          active ? 'shadow-sm' : ''
+                        className={`flex-1 py-2.5 text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                          active ? '' : 'text-muted-foreground hover:bg-muted/50'
                         }`}
-                        style={active
-                          ? { borderColor: st.color, backgroundColor: st.color + '10', color: st.color }
-                          : { borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: active ? st.color : 'var(--border)' }} />
+                        style={active ? { backgroundColor: st.color + '10', color: st.color } : undefined}>
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: active ? st.color : 'var(--border)' }} />
                         {st.label}
                       </button>
                     )
@@ -380,11 +380,11 @@ export function ContentSidePanel({
                 {isAdmin ? (
                   <textarea rows={2} placeholder="Add a note…" value={draft.client_comments}
                     onChange={e => patch('client_comments', e.target.value)}
-                    className="w-full text-sm rounded-xl border border-border bg-card px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all resize-none leading-relaxed placeholder:text-muted-foreground/50" />
+                    className="w-full text-sm rounded-xl border border-border bg-card px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all resize-none leading-relaxed placeholder:text-muted-foreground/40" />
                 ) : draft.client_comments ? (
-                  <div className="rounded-xl bg-muted/30 border border-border px-3.5 py-2.5 text-sm text-foreground/80 leading-relaxed whitespace-pre-line">{draft.client_comments}</div>
+                  <div className="rounded-xl bg-card border border-border px-3.5 py-2.5 text-sm text-foreground/80 leading-relaxed whitespace-pre-line">{draft.client_comments}</div>
                 ) : (
-                  <p className="text-xs text-muted-foreground/50 italic py-2">No notes</p>
+                  <p className="text-[11px] text-muted-foreground/40 py-1">No notes added</p>
                 )}
               </div>
 
