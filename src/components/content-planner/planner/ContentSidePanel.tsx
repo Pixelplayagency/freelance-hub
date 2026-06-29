@@ -206,32 +206,19 @@ export function ContentSidePanel({
             {/* Schedule */}
             <Section title="Schedule">
               <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 space-y-1">
-                    <label className="text-[10px] font-semibold text-muted-foreground">Date</label>
-                    <div className="relative">
-                      <CalendarIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-                      <input type="date" value={draft.date} readOnly
-                        className="w-full text-sm rounded-lg border border-border bg-background pl-8 pr-3 py-2 text-foreground tabular-nums cursor-default" />
-                    </div>
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <label className="text-[10px] font-semibold text-muted-foreground">Time</label>
-                    <div className="relative">
-                      <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      <input type="time" value={draft.scheduled_time} onChange={e => patch('scheduled_time', e.target.value)}
-                        className="w-full text-sm rounded-lg border border-border bg-background pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all tabular-nums" />
-                    </div>
-                  </div>
+                {/* Date display */}
+                <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-background border border-border">
+                  <CalendarIcon className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-sm font-semibold text-foreground">
+                    {new Date(draft.date + 'T00:00:00').toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                  </span>
                 </div>
-                {draft.scheduled_time && (
-                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-primary/[0.06] border border-primary/15">
-                    <CalendarIcon className="w-3 h-3 text-primary" />
-                    <span className="text-xs font-semibold text-primary tabular-nums">
-                      {new Date(draft.date + 'T00:00:00').toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })} at {to12h(draft.scheduled_time)}
-                    </span>
-                  </div>
-                )}
+
+                {/* Time picker */}
+                <TimePicker
+                  value={draft.scheduled_time}
+                  onChange={v => patch('scheduled_time', v)}
+                />
               </div>
             </Section>
 
@@ -385,6 +372,108 @@ function ApprovalRow({ label, approved, rejected }: { label: string; approved: b
         : rejected
         ? <span className="text-[11px] font-semibold text-red-600">Rejected</span>
         : <span className="text-[11px] text-muted-foreground/60">Pending</span>}
+    </div>
+  )
+}
+
+const HOURS = Array.from({ length: 12 }, (_, i) => i + 1)
+const MINUTES = ['00', '15', '30', '45']
+
+function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const parsed = value ? (() => {
+    const [h, m] = value.split(':').map(Number)
+    return { hour: h % 12 || 12, minute: m, ampm: h >= 12 ? 'PM' : 'AM' as 'AM' | 'PM' }
+  })() : null
+
+  function update(hour: number, minute: number, ampm: 'AM' | 'PM') {
+    let h24 = hour % 12
+    if (ampm === 'PM') h24 += 12
+    onChange(`${String(h24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`)
+  }
+
+  const hour = parsed?.hour ?? 9
+  const minute = parsed?.minute ?? 0
+  const ampm = parsed?.ampm ?? 'AM'
+
+  if (!value) {
+    return (
+      <button
+        type="button"
+        onClick={() => update(9, 0, 'AM')}
+        className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-lg border-2 border-dashed border-border bg-background text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-primary/[0.02] transition-all"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span className="text-xs font-semibold">Set time</span>
+      </button>
+    )
+  }
+
+  const nearestMin = MINUTES.reduce((prev, curr) =>
+    Math.abs(parseInt(curr) - minute) < Math.abs(parseInt(prev) - minute) ? curr : prev
+  )
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5">
+        {/* Hour */}
+        <select
+          value={hour}
+          onChange={e => update(parseInt(e.target.value), minute, ampm)}
+          className="flex-1 h-10 rounded-lg border border-border bg-background text-center text-sm font-bold tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none cursor-pointer"
+        >
+          {HOURS.map(h => (
+            <option key={h} value={h}>{h}</option>
+          ))}
+        </select>
+
+        <span className="text-lg font-bold text-muted-foreground">:</span>
+
+        {/* Minute */}
+        <select
+          value={nearestMin}
+          onChange={e => update(hour, parseInt(e.target.value), ampm)}
+          className="flex-1 h-10 rounded-lg border border-border bg-background text-center text-sm font-bold tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none cursor-pointer"
+        >
+          {MINUTES.map(m => (
+            <option key={m} value={m}>{m}</option>
+          ))}
+        </select>
+
+        {/* AM/PM toggle */}
+        <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
+          <button
+            type="button"
+            onClick={() => update(hour, minute, 'AM')}
+            className={`px-3 h-10 text-xs font-bold transition-all ${
+              ampm === 'AM'
+                ? 'bg-primary text-white'
+                : 'bg-background text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            AM
+          </button>
+          <button
+            type="button"
+            onClick={() => update(hour, minute, 'PM')}
+            className={`px-3 h-10 text-xs font-bold transition-all ${
+              ampm === 'PM'
+                ? 'bg-primary text-white'
+                : 'bg-background text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            PM
+          </button>
+        </div>
+      </div>
+
+      {/* Clear */}
+      <button
+        type="button"
+        onClick={() => onChange('')}
+        className="text-[10px] text-muted-foreground hover:text-foreground transition-colors font-medium"
+      >
+        Clear time
+      </button>
     </div>
   )
 }
