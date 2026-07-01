@@ -6,7 +6,7 @@ import { ClientPdfSection } from '@/components/content-planner/ClientPdfSection'
 import Link from 'next/link'
 import { ChevronLeft, CalendarDays, CheckSquare, Instagram, Facebook } from 'lucide-react'
 import { createSupabaseServiceClient } from '@/lib/supabase/server'
-import type { ContentPlan, Task, Project } from '@/lib/types/app.types'
+import type { ContentPlan, ScheduleEntry, Task, Project } from '@/lib/types/app.types'
 
 type TaskWithProject = Task & {
   project: Pick<Project, 'id' | 'name' | 'color' | 'avatar_url'> | null
@@ -51,7 +51,7 @@ export default async function FreelancerClientCalendarPage({
   const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0]
 
   // Fetch calendar entries, task view data, and monthly stats in parallel
-  const [calendarResult, tasksResult, statsResult] = await Promise.all([
+  const [calendarResult, tasksResult, statsResult, scheduleResult] = await Promise.all([
     view === 'calendar'
       ? supabase.from('content_plans').select('*, creator:profiles!created_by(full_name, username, avatar_url)').eq('client_id', clientId).gte('date', startDate).lte('date', endDate).order('date')
       : Promise.resolve({ data: [] }),
@@ -66,10 +66,14 @@ export default async function FreelancerClientCalendarPage({
         })()
       : Promise.resolve({ data: [] }),
     supabase.from('content_plans').select('content_type').eq('client_id', clientId).gte('date', startDate).lte('date', endDate),
+    view === 'calendar'
+      ? supabase.from('content_schedule').select('*').eq('client_id', clientId).gte('date', startDate).lte('date', endDate).order('date')
+      : Promise.resolve({ data: [] }),
   ])
 
   const entries = (calendarResult.data ?? []) as ContentPlan[]
   const userTasks = (tasksResult.data ?? []) as TaskWithProject[]
+  const scheduleEntries = (scheduleResult.data ?? []) as ScheduleEntry[]
   const stats = statsResult.data ?? []
   const postCount  = stats.filter(e => e.content_type === 'post').length
   const reelCount  = stats.filter(e => e.content_type === 'reel').length
@@ -207,6 +211,7 @@ export default async function FreelancerClientCalendarPage({
         <ContentPlannerCalendar
           key={`${year}-${month}`}
           entries={entries}
+          scheduleEntries={scheduleEntries}
           month={month}
           year={year}
           clientId={clientId}

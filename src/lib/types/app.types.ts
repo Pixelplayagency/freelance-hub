@@ -106,6 +106,21 @@ export interface ContentPlan {
   creator?: Pick<Profile, 'full_name' | 'username' | 'avatar_url'> | null
 }
 
+// Lightweight planning entry — separate from ContentPlan. Admin/SMM sketches
+// out type + time + status per day so freelancers know what to post, without
+// touching the full production workflow (media/caption/approval).
+export interface ScheduleEntry {
+  id: string
+  client_id: string
+  date: string
+  content_type: ContentType
+  scheduled_time: string | null
+  status: ContentPlanStatus
+  note: string | null
+  created_by: string | null
+  created_at: string
+}
+
 export interface Project {
   id: string
   name: string

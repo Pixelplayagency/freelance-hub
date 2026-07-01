@@ -7,7 +7,10 @@ import {
   createContentPlan, updateContentPlan, deleteContentPlan,
   approveCaption, approvePost, submitForApproval,
 } from '@/lib/actions/content-plan.actions'
-import type { ContentPlan, ContentType, MediaItem } from '@/lib/types/app.types'
+import {
+  createScheduleEntry, updateScheduleEntry, deleteScheduleEntry,
+} from '@/lib/actions/content-schedule.actions'
+import type { ContentPlan, ContentPlanStatus, ContentType, MediaItem, ScheduleEntry } from '@/lib/types/app.types'
 import { PlannerToolbar } from './planner/PlannerToolbar'
 import { CalendarView } from './planner/CalendarView'
 import { FeedPreviewGrid } from './planner/FeedPreviewGrid'
@@ -22,9 +25,10 @@ const CLOUD_NAME = 'desj9wmtd'
 const UPLOAD_PRESET = 'task-uploads'
 
 export function ContentPlannerCalendar({
-  entries: initialEntries, month, year, clientId, basePath, isAdmin,
+  entries: initialEntries, scheduleEntries: initialScheduleEntries, month, year, clientId, basePath, isAdmin,
 }: {
   entries: EntryWithCreator[]
+  scheduleEntries: ScheduleEntry[]
   month: number
   year: number
   clientId: string
@@ -34,6 +38,7 @@ export function ContentPlannerCalendar({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [entries, setEntries] = useState<EntryWithCreator[]>(initialEntries)
+  const [scheduleEntries, setScheduleEntries] = useState<ScheduleEntry[]>(initialScheduleEntries)
   const [draft, setDraft] = useState<PanelDraft | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
   const [view, setView] = useState<'calendar' | 'preview' | 'schedule'>('calendar')
@@ -62,11 +67,50 @@ export function ContentPlannerCalendar({
     entryMap[e.date].push(e)
   }
 
-  function openPanel(ds: string, entry?: EntryWithCreator, initialType?: ContentType) {
+  // Schedule entries are a separate, lightweight data set — not linked to entries above.
+  const scheduleEntryMap: Record<string, ScheduleEntry[]> = {}
+  for (const e of scheduleEntries) {
+    if (!scheduleEntryMap[e.date]) scheduleEntryMap[e.date] = []
+    scheduleEntryMap[e.date].push(e)
+  }
+
+  function openPanel(ds: string, entry?: EntryWithCreator) {
     const target = entry || entries.find(e => e.date === ds) || null
-    const nextDraft = makeDraft(ds, target)
-    setDraft(initialType && !target ? { ...nextDraft, content_type: initialType } : nextDraft)
+    setDraft(makeDraft(ds, target))
     setPanelOpen(true)
+  }
+
+  function handleCreateSchedule(date: string, type: ContentType) {
+    startTransition(async () => {
+      try {
+        const created = await createScheduleEntry({ client_id: clientId, date, content_type: type })
+        if (created) setScheduleEntries(prev => [...prev, created as ScheduleEntry])
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to add'
+        setSaveError(msg)
+        setTimeout(() => setSaveError(null), 5000)
+      }
+    })
+  }
+
+  function handleUpdateSchedule(id: string, patch: Partial<Pick<ScheduleEntry, 'content_type' | 'scheduled_time' | 'status'>>) {
+    setScheduleEntries(prev => prev.map(e => e.id === id ? { ...e, ...patch } : e))
+    startTransition(async () => {
+      try {
+        await updateScheduleEntry(id, patch)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Update failed'
+        setSaveError(msg)
+        setTimeout(() => setSaveError(null), 5000)
+      }
+    })
+  }
+
+  function handleDeleteSchedule(id: string) {
+    setScheduleEntries(prev => prev.filter(e => e.id !== id))
+    startTransition(async () => {
+      await deleteScheduleEntry(id)
+    })
   }
 
   const handleSave = useCallback(() => {
@@ -206,6 +250,12 @@ export function ContentPlannerCalendar({
         onViewChange={setView}
       />
 
+      {saveError && !panelOpen && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5">
+          <p className="text-xs text-red-700 font-medium">{saveError}</p>
+        </div>
+      )}
+
       {view === 'calendar' && (
         <CalendarView
           year={year}
@@ -220,10 +270,10 @@ export function ContentPlannerCalendar({
         <ScheduleView
           year={year}
           month={month}
-          entryMap={entryMap}
-          activeDate={draft?.date ?? null}
-          onSelectEntry={entry => openPanel(entry.date, entry)}
-          onAddNew={(ds, type) => openPanel(ds, undefined, type)}
+          entryMap={scheduleEntryMap}
+          onCreate={handleCreateSchedule}
+          onUpdate={handleUpdateSchedule}
+          onDelete={handleDeleteSchedule}
         />
       )}
       {view === 'preview' && (

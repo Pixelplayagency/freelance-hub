@@ -6,7 +6,7 @@ import { ClientPdfSection } from '@/components/content-planner/ClientPdfSection'
 import Link from 'next/link'
 import { ChevronLeft, CalendarDays, List, Instagram, Facebook } from 'lucide-react'
 import { createSupabaseServiceClient } from '@/lib/supabase/server'
-import type { ContentPlan } from '@/lib/types/app.types'
+import type { ContentPlan, ScheduleEntry } from '@/lib/types/app.types'
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -47,7 +47,7 @@ export default async function AdminClientCalendarPage({
   const endDate   = new Date(year, month + 1, 0).toISOString().split('T')[0]
 
   // Always fetch monthly stats for the header
-  const [calendarResult, listResult, statsResult] = await Promise.all([
+  const [calendarResult, listResult, statsResult, scheduleResult] = await Promise.all([
     view === 'calendar'
       ? supabase.from('content_plans').select('*, creator:profiles!created_by(full_name, username, avatar_url)').eq('client_id', clientId).gte('date', startDate).lte('date', endDate).order('date')
       : Promise.resolve({ data: [] }),
@@ -55,9 +55,13 @@ export default async function AdminClientCalendarPage({
       ? supabase.from('content_plans').select('*, creator:profiles!created_by(full_name, username)').eq('client_id', clientId).order('date', { ascending: false })
       : Promise.resolve({ data: [] }),
     supabase.from('content_plans').select('content_type').eq('client_id', clientId).gte('date', startDate).lte('date', endDate),
+    view === 'calendar'
+      ? supabase.from('content_schedule').select('*').eq('client_id', clientId).gte('date', startDate).lte('date', endDate).order('date')
+      : Promise.resolve({ data: [] }),
   ])
 
   const entries = (view === 'calendar' ? calendarResult.data : listResult.data ?? []) as ContentPlan[]
+  const scheduleEntries = (scheduleResult.data ?? []) as ScheduleEntry[]
   const stats = statsResult.data ?? []
   const postCount  = stats.filter(e => e.content_type === 'post').length
   const reelCount  = stats.filter(e => e.content_type === 'reel').length
@@ -195,6 +199,7 @@ export default async function AdminClientCalendarPage({
         <ContentPlannerCalendar
           key={`${year}-${month}`}
           entries={entries}
+          scheduleEntries={scheduleEntries}
           month={month}
           year={year}
           clientId={clientId}
