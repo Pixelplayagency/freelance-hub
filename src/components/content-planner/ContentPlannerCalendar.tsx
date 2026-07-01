@@ -274,6 +274,7 @@ export function ContentPlannerCalendar({
           onCreate={handleCreateSchedule}
           onUpdate={handleUpdateSchedule}
           onDelete={handleDeleteSchedule}
+          readOnly={!isAdmin}
         />
       )}
       {view === 'preview' && (

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Plus, ChevronDown, Check, Trash2 } from 'lucide-react'
+import { Plus, ChevronDown, Check, Trash2, Clock } from 'lucide-react'
 import type { ContentPlanStatus, ContentType, ScheduleEntry } from '@/lib/types/app.types'
 import { CONTENT_TYPE_META, STATUS_CFG, getCalendarWeeks, to12h, toDateString } from './types'
 
@@ -17,9 +17,10 @@ interface ScheduleViewProps {
   onCreate: (date: string, type: ContentType) => void
   onUpdate: (id: string, patch: Partial<{ content_type: ContentType; scheduled_time: string | null; status: ContentPlanStatus }>) => void
   onDelete: (id: string) => void
+  readOnly?: boolean
 }
 
-export function ScheduleView({ year, month, entryMap, onCreate, onUpdate, onDelete }: ScheduleViewProps) {
+export function ScheduleView({ year, month, entryMap, onCreate, onUpdate, onDelete, readOnly = false }: ScheduleViewProps) {
   const weeks = getCalendarWeeks(year, month)
   const todayDS = toDateString(new Date())
 
@@ -67,7 +68,7 @@ export function ScheduleView({ year, month, entryMap, onCreate, onUpdate, onDele
                       >
                         {day.getDate()}
                       </span>
-                      {inMonth && entries.length > 0 && (
+                      {!readOnly && inMonth && entries.length > 0 && (
                         <TypePickerButton
                           className="w-5 h-5 opacity-0 group-hover/day:opacity-100 text-muted-foreground/50 hover:text-foreground hover:bg-muted"
                           onSelect={type => onCreate(ds, type)}
@@ -76,7 +77,7 @@ export function ScheduleView({ year, month, entryMap, onCreate, onUpdate, onDele
                     </div>
 
                     <div className="flex-1 px-1.5 pb-1.5 space-y-1">
-                      {inMonth && entries.length === 0 && (
+                      {!readOnly && inMonth && entries.length === 0 && (
                         <TypePickerButton
                           className="w-full h-full min-h-[56px] border border-dashed border-border/50 text-muted-foreground/30 hover:text-primary hover:border-primary/40 hover:bg-primary/[0.02]"
                           onSelect={type => onCreate(ds, type)}
@@ -89,6 +90,7 @@ export function ScheduleView({ year, month, entryMap, onCreate, onUpdate, onDele
                           entry={entry}
                           onUpdate={patch => onUpdate(entry.id, patch)}
                           onDelete={() => onDelete(entry.id)}
+                          readOnly={readOnly}
                         />
                       ))}
                     </div>
@@ -147,13 +149,35 @@ function TypePickerButton({ onSelect, className = '', large = false }: { onSelec
 }
 
 function ScheduleCard({
-  entry, onUpdate, onDelete,
+  entry, onUpdate, onDelete, readOnly,
 }: {
   entry: ScheduleEntry
   onUpdate: (patch: Partial<{ content_type: ContentType; scheduled_time: string | null; status: ContentPlanStatus }>) => void
   onDelete: () => void
+  readOnly?: boolean
 }) {
   const meta = CONTENT_TYPE_META[entry.content_type]
+  const statusCfg = STATUS_CFG.find(s => s.key === entry.status) ?? STATUS_CFG[0]
+
+  if (readOnly) {
+    return (
+      <div className="rounded-lg border border-border/60 px-1.5 py-1.5 space-y-1" style={{ backgroundColor: meta.bgVar }}>
+        <div className="flex items-center justify-between gap-1 px-0.5">
+          <span className="text-[10px] font-bold" style={{ color: meta.color }}>{meta.label}</span>
+          {entry.scheduled_time && (
+            <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-foreground/70 tabular-nums">
+              <Clock className="w-2.5 h-2.5" />
+              {to12h(entry.scheduled_time)}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 px-0.5">
+          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: statusCfg.color }} />
+          <span className="text-[10px] font-semibold" style={{ color: statusCfg.color }}>{statusCfg.label}</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="group/card relative rounded-lg border border-border/60 hover:border-border px-1.5 py-1.5 space-y-1 transition-all" style={{ backgroundColor: meta.bgVar }}>
