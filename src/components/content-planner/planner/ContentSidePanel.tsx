@@ -6,21 +6,15 @@ import {
   X, Upload, Loader2, Eye, Trash2, Send, Check, CheckCircle2, Smile,
   Calendar as CalendarIcon, Clock, ImageIcon, Film, Crop, Square, RectangleVertical, Smartphone,
 } from 'lucide-react'
-import type { ContentPlanStatus, ContentType, MediaItem } from '@/lib/types/app.types'
+import type { ContentType, MediaItem } from '@/lib/types/app.types'
 import { PlatformIcon } from './PlatformIcon'
-import { thumbUrl, to12h, PLATFORMS, CONTENT_TYPE_META, type PanelDraft } from './types'
+import { thumbUrl, to12h, PLATFORMS, CONTENT_TYPE_META, STATUS_CFG, type PanelDraft } from './types'
 
 const EMOJIS = [
   '😀','😂','😍','🥰','😎','🤩','😜','🥺','😭','🤔','🙄','🥳','🤗','😴','🫠','🥹',
   '❤️','🧡','💛','💚','💙','💜','💖','💯','👍','👏','🙌','💪','🤞','✌️','🫶','🙏',
   '🌟','⭐','🌙','☀️','🌈','🔥','❄️','🌊','🌸','🌻','🍀','🦋','✨','💫','⚡','🎉',
   '🍕','☕','🍷','🥂','🎂','📸','🎬','🏆','💰','🎁','💡','🚀','✈️','📣','🔑','🌐',
-]
-
-const STATUS_CFG: { key: ContentPlanStatus; label: string; color: string }[] = [
-  { key: 'scheduled',  label: 'Scheduled',  color: '#2563eb' },
-  { key: 'posted',     label: 'Published',  color: '#059669' },
-  { key: 'not_posted', label: 'Pending',    color: '#f59e0b' },
 ]
 
 const ASPECT_RATIOS = [

@@ -7,7 +7,7 @@ import {
   createContentPlan, updateContentPlan, deleteContentPlan,
   approveCaption, approvePost, submitForApproval,
 } from '@/lib/actions/content-plan.actions'
-import type { ContentPlan, MediaItem } from '@/lib/types/app.types'
+import type { ContentPlan, ContentPlanStatus, ContentType, MediaItem } from '@/lib/types/app.types'
 import { PlannerToolbar } from './planner/PlannerToolbar'
 import { CalendarView } from './planner/CalendarView'
 import { FeedPreviewGrid } from './planner/FeedPreviewGrid'
@@ -62,11 +62,29 @@ export function ContentPlannerCalendar({
     entryMap[e.date].push(e)
   }
 
-  function openPanel(ds: string, entry?: EntryWithCreator) {
+  function openPanel(ds: string, entry?: EntryWithCreator, initialType?: ContentType) {
     const target = entry || entries.find(e => e.date === ds) || null
-    setDraft(makeDraft(ds, target))
+    const nextDraft = makeDraft(ds, target)
+    setDraft(initialType && !target ? { ...nextDraft, content_type: initialType } : nextDraft)
     setPanelOpen(true)
   }
+
+  const handleQuickUpdate = useCallback((id: string, patch: Partial<{
+    content_type: ContentType
+    scheduled_time: string | null
+    status: ContentPlanStatus
+  }>) => {
+    startTransition(async () => {
+      try {
+        await updateContentPlan(id, patch)
+        setEntries(prev => prev.map(e => e.id === id ? { ...e, ...patch } : e))
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Update failed'
+        setSaveError(msg)
+        setTimeout(() => setSaveError(null), 5000)
+      }
+    })
+  }, [startTransition])
 
   const handleSave = useCallback(() => {
     if (!draft) return
@@ -222,7 +240,8 @@ export function ContentPlannerCalendar({
           entryMap={entryMap}
           activeDate={draft?.date ?? null}
           onSelectEntry={entry => openPanel(entry.date, entry)}
-          onAddNew={ds => openPanel(ds)}
+          onAddNew={(ds, type) => openPanel(ds, undefined, type)}
+          onQuickUpdate={handleQuickUpdate}
         />
       )}
       {view === 'preview' && (

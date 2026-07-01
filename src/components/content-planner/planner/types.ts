@@ -42,6 +42,12 @@ export const CONTENT_TYPE_META: Record<ContentType, { label: string; color: stri
   reel:  { label: 'Reel',  color: '#a16207', bgVar: 'rgba(254,240,138,0.55)' },
 }
 
+export const STATUS_CFG: { key: ContentPlanStatus; label: string; color: string }[] = [
+  { key: 'scheduled',  label: 'Scheduled',  color: '#2563eb' },
+  { key: 'posted',     label: 'Published',  color: '#059669' },
+  { key: 'not_posted', label: 'Pending',    color: '#f59e0b' },
+]
+
 export function getDisplayStatus(entry: ContentPlan): { label: string; color: string; bg: string } {
   if (entry.caption_rejected || entry.post_rejected)
     return { label: 'Rejected', color: '#dc2626', bg: 'rgba(254,226,226,0.5)' }
