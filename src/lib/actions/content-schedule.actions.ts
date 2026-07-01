@@ -2,9 +2,9 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import type { ContentPlanStatus, ContentType } from '@/lib/types/app.types'
+import type { ContentPlanStatus, ScheduleContentType } from '@/lib/types/app.types'
 
-export async function createScheduleEntry(data: { client_id: string; date: string; content_type: ContentType }) {
+export async function createScheduleEntry(data: { client_id: string; date: string; content_type: ScheduleContentType }) {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
@@ -20,7 +20,8 @@ export async function createScheduleEntry(data: { client_id: string; date: strin
 }
 
 export async function updateScheduleEntry(id: string, data: Partial<{
-  content_type: ContentType
+  content_type: ScheduleContentType
+  platforms: string[]
   scheduled_time: string | null
   status: ContentPlanStatus
   note: string | null

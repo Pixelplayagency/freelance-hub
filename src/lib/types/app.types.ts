@@ -59,6 +59,7 @@ export interface Profile {
 
 export type ContentPlanStatus = 'scheduled' | 'posted' | 'not_posted'
 export type ContentType = 'post' | 'story' | 'reel'
+export type ScheduleContentType = ContentType | 'none'
 
 export interface ContentClient {
   id: string
@@ -113,7 +114,8 @@ export interface ScheduleEntry {
   id: string
   client_id: string
   date: string
-  content_type: ContentType
+  content_type: ScheduleContentType
+  platforms: string[]
   scheduled_time: string | null
   status: ContentPlanStatus
   note: string | null

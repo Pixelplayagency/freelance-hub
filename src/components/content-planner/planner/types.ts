@@ -1,4 +1,4 @@
-import type { ContentPlan, ContentPlanStatus, ContentType, MediaItem, Profile } from '@/lib/types/app.types'
+import type { ContentPlan, ContentPlanStatus, ContentType, MediaItem, Profile, ScheduleContentType } from '@/lib/types/app.types'
 
 export type FilterStatus = 'all' | 'scheduled' | 'in_review' | 'approved' | 'rejected' | 'published' | 'not_posted'
 export type FilterPlatform = 'all' | 'instagram' | 'facebook' | 'tiktok' | 'linkedin'
@@ -40,6 +40,14 @@ export const CONTENT_TYPE_META: Record<ContentType, { label: string; color: stri
   post:  { label: 'Image',  color: '#15803d', bgVar: 'rgba(187,247,208,0.55)' },
   story: { label: 'Story', color: '#b91c1c', bgVar: 'rgba(254,202,202,0.55)' },
   reel:  { label: 'Reel',  color: '#a16207', bgVar: 'rgba(254,240,138,0.55)' },
+}
+
+// Schedule cards support an extra "No content" marker (grey) that full content
+// plans don't — kept separate from CONTENT_TYPE_META so it can't leak into the
+// production side panel's type picker.
+export const SCHEDULE_TYPE_META: Record<ScheduleContentType, { label: string; color: string; bgVar: string }> = {
+  ...CONTENT_TYPE_META,
+  none: { label: 'No content', color: '#6b7280', bgVar: 'rgba(228,228,231,0.6)' },
 }
 
 export const STATUS_CFG: { key: ContentPlanStatus; label: string; color: string }[] = [

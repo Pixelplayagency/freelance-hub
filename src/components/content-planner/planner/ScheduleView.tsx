@@ -2,20 +2,23 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Plus, ChevronDown, Check, Trash2, Clock } from 'lucide-react'
-import type { ContentPlanStatus, ContentType, ScheduleEntry } from '@/lib/types/app.types'
-import { CONTENT_TYPE_META, getCalendarWeeks, to12h, toDateString } from './types'
+import type { ContentPlanStatus, ScheduleContentType, ScheduleEntry } from '@/lib/types/app.types'
+import { PLATFORMS, SCHEDULE_TYPE_META, getCalendarWeeks, to12h, toDateString } from './types'
+import { PlatformIcon } from './PlatformIcon'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const CONTENT_TYPES: ContentType[] = ['post', 'reel', 'story']
+const SCHEDULE_CONTENT_TYPES: ScheduleContentType[] = ['post', 'reel', 'story', 'none']
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 1)
 const MINUTES = [0, 15, 30, 45]
+
+type SchedulePatch = Partial<{ content_type: ScheduleContentType; scheduled_time: string | null; status: ContentPlanStatus; platforms: string[] }>
 
 interface ScheduleViewProps {
   year: number
   month: number
   entryMap: Record<string, ScheduleEntry[]>
-  onCreate: (date: string, type: ContentType) => void
-  onUpdate: (id: string, patch: Partial<{ content_type: ContentType; scheduled_time: string | null; status: ContentPlanStatus }>) => void
+  onCreate: (date: string, type: ScheduleContentType) => void
+  onUpdate: (id: string, patch: SchedulePatch) => void
   onDelete: (id: string) => void
   readOnly?: boolean
 }
@@ -70,7 +73,7 @@ export function ScheduleView({ year, month, entryMap, onCreate, onUpdate, onDele
                       </span>
                       {!readOnly && inMonth && entries.length > 0 && (
                         <TypePickerButton
-                          className="w-5 h-5 opacity-0 group-hover/day:opacity-100 text-muted-foreground/50 hover:text-foreground hover:bg-muted"
+                          className="w-5 h-5 rounded-md border border-border/60 text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-primary/5"
                           onSelect={type => onCreate(ds, type)}
                         />
                       )}
@@ -79,7 +82,7 @@ export function ScheduleView({ year, month, entryMap, onCreate, onUpdate, onDele
                     <div className="flex-1 px-1.5 pb-1.5 space-y-1">
                       {!readOnly && inMonth && entries.length === 0 && (
                         <TypePickerButton
-                          className="w-full h-full min-h-[56px] border border-dashed border-border/50 text-muted-foreground/30 hover:text-primary hover:border-primary/40 hover:bg-primary/[0.02]"
+                          className="w-full h-full min-h-[56px] border border-dashed border-border text-muted-foreground/70 hover:text-primary hover:border-primary/40 hover:bg-primary/[0.02]"
                           onSelect={type => onCreate(ds, type)}
                           large
                         />
@@ -105,7 +108,7 @@ export function ScheduleView({ year, month, entryMap, onCreate, onUpdate, onDele
   )
 }
 
-function TypePickerButton({ onSelect, className = '', large = false }: { onSelect: (type: ContentType) => void; className?: string; large?: boolean }) {
+function TypePickerButton({ onSelect, className = '', large = false }: { onSelect: (type: ScheduleContentType) => void; className?: string; large?: boolean }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -128,8 +131,8 @@ function TypePickerButton({ onSelect, className = '', large = false }: { onSelec
       </button>
       {open && (
         <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-30 bg-card border border-border rounded-lg shadow-lg py-1 w-28">
-          {CONTENT_TYPES.map(t => {
-            const meta = CONTENT_TYPE_META[t]
+          {SCHEDULE_CONTENT_TYPES.map(t => {
+            const meta = SCHEDULE_TYPE_META[t]
             return (
               <button
                 key={t}
@@ -152,24 +155,28 @@ function ScheduleCard({
   entry, onUpdate, onDelete, readOnly,
 }: {
   entry: ScheduleEntry
-  onUpdate: (patch: Partial<{ content_type: ContentType; scheduled_time: string | null; status: ContentPlanStatus }>) => void
+  onUpdate: (patch: SchedulePatch) => void
   onDelete: () => void
   readOnly?: boolean
 }) {
-  const meta = CONTENT_TYPE_META[entry.content_type]
+  const meta = SCHEDULE_TYPE_META[entry.content_type]
+  const platforms = entry.platforms ?? []
 
   if (readOnly) {
     return (
       <div className="rounded-lg border border-border/60 px-1.5 py-1.5 space-y-1" style={{ backgroundColor: meta.bgVar }}>
         <div className="flex items-center justify-between gap-1 px-0.5">
           <span className="text-[10px] font-bold" style={{ color: meta.color }}>{meta.label}</span>
-          {entry.scheduled_time && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-foreground/70 tabular-nums">
-              <Clock className="w-2.5 h-2.5" />
-              {to12h(entry.scheduled_time)}
-            </span>
-          )}
+          <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-foreground/70 tabular-nums">
+            <Clock className="w-2.5 h-2.5" />
+            {entry.scheduled_time ? to12h(entry.scheduled_time) : 'No time set'}
+          </span>
         </div>
+        {platforms.length > 0 && (
+          <div className="flex items-center gap-1 px-0.5">
+            {platforms.map(p => <PlatformIcon key={p} platform={p} size={11} />)}
+          </div>
+        )}
       </div>
     )
   }
@@ -190,14 +197,20 @@ function ScheduleCard({
 
       {/* Time row */}
       <TimeInlinePicker time={entry.scheduled_time ?? ''} onChange={t => onUpdate({ scheduled_time: t })} />
+
+      {/* Platforms row */}
+      <PlatformsRow platforms={platforms} onToggle={p => {
+        const next = platforms.includes(p) ? platforms.filter(x => x !== p) : [...platforms, p]
+        onUpdate({ platforms: next })
+      }} />
     </div>
   )
 }
 
-function TypeInlinePicker({ type, onSelect }: { type: ContentType; onSelect: (t: ContentType) => void }) {
+function TypeInlinePicker({ type, onSelect }: { type: ScheduleContentType; onSelect: (t: ScheduleContentType) => void }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const meta = CONTENT_TYPE_META[type]
+  const meta = SCHEDULE_TYPE_META[type]
 
   useEffect(() => {
     if (!open) return
@@ -218,9 +231,9 @@ function TypeInlinePicker({ type, onSelect }: { type: ContentType; onSelect: (t:
         <ChevronDown className="w-2.5 h-2.5 shrink-0 opacity-60" />
       </button>
       {open && (
-        <div className="absolute left-0 top-full mt-1 z-30 bg-card border border-border rounded-lg shadow-lg py-1 w-24">
-          {CONTENT_TYPES.map(t => {
-            const m = CONTENT_TYPE_META[t]
+        <div className="absolute left-0 top-full mt-1 z-30 bg-card border border-border rounded-lg shadow-lg py-1 w-28">
+          {SCHEDULE_CONTENT_TYPES.map(t => {
+            const m = SCHEDULE_TYPE_META[t]
             return (
               <button
                 key={t}
@@ -235,6 +248,28 @@ function TypeInlinePicker({ type, onSelect }: { type: ContentType; onSelect: (t:
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+function PlatformsRow({ platforms, onToggle }: { platforms: string[]; onToggle: (p: string) => void }) {
+  return (
+    <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-md bg-background/70">
+      {PLATFORMS.map(p => {
+        const active = platforms.includes(p.id)
+        return (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => onToggle(p.id)}
+            className={`transition-opacity ${active ? 'opacity-100' : 'opacity-25 hover:opacity-60'}`}
+            aria-label={p.label}
+            aria-pressed={active}
+          >
+            <PlatformIcon platform={p.id} size={12} />
+          </button>
+        )
+      })}
     </div>
   )
 }

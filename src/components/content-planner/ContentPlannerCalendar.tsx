@@ -10,7 +10,7 @@ import {
 import {
   createScheduleEntry, updateScheduleEntry, deleteScheduleEntry,
 } from '@/lib/actions/content-schedule.actions'
-import type { ContentPlan, ContentPlanStatus, ContentType, MediaItem, ScheduleEntry } from '@/lib/types/app.types'
+import type { ContentPlan, ContentPlanStatus, ContentType, MediaItem, ScheduleContentType, ScheduleEntry } from '@/lib/types/app.types'
 import { PlannerToolbar } from './planner/PlannerToolbar'
 import { CalendarView } from './planner/CalendarView'
 import { FeedPreviewGrid } from './planner/FeedPreviewGrid'
@@ -80,7 +80,7 @@ export function ContentPlannerCalendar({
     setPanelOpen(true)
   }
 
-  function handleCreateSchedule(date: string, type: ContentType) {
+  function handleCreateSchedule(date: string, type: ScheduleContentType) {
     startTransition(async () => {
       try {
         const created = await createScheduleEntry({ client_id: clientId, date, content_type: type })
@@ -93,7 +93,7 @@ export function ContentPlannerCalendar({
     })
   }
 
-  function handleUpdateSchedule(id: string, patch: Partial<Pick<ScheduleEntry, 'content_type' | 'scheduled_time' | 'status'>>) {
+  function handleUpdateSchedule(id: string, patch: Partial<Pick<ScheduleEntry, 'content_type' | 'scheduled_time' | 'status' | 'platforms'>>) {
     setScheduleEntries(prev => prev.map(e => e.id === id ? { ...e, ...patch } : e))
     startTransition(async () => {
       try {
