@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Plus, ChevronDown, Check, Trash2, Clock } from 'lucide-react'
 import type { ContentPlanStatus, ContentType, ScheduleEntry } from '@/lib/types/app.types'
-import { CONTENT_TYPE_META, STATUS_CFG, getCalendarWeeks, to12h, toDateString } from './types'
+import { CONTENT_TYPE_META, getCalendarWeeks, to12h, toDateString } from './types'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const CONTENT_TYPES: ContentType[] = ['post', 'reel', 'story']
@@ -157,7 +157,6 @@ function ScheduleCard({
   readOnly?: boolean
 }) {
   const meta = CONTENT_TYPE_META[entry.content_type]
-  const statusCfg = STATUS_CFG.find(s => s.key === entry.status) ?? STATUS_CFG[0]
 
   if (readOnly) {
     return (
@@ -170,10 +169,6 @@ function ScheduleCard({
               {to12h(entry.scheduled_time)}
             </span>
           )}
-        </div>
-        <div className="flex items-center gap-1.5 px-0.5">
-          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: statusCfg.color }} />
-          <span className="text-[10px] font-semibold" style={{ color: statusCfg.color }}>{statusCfg.label}</span>
         </div>
       </div>
     )
@@ -195,9 +190,6 @@ function ScheduleCard({
 
       {/* Time row */}
       <TimeInlinePicker time={entry.scheduled_time ?? ''} onChange={t => onUpdate({ scheduled_time: t })} />
-
-      {/* Status row */}
-      <StatusInlinePicker status={entry.status} onSelect={s => onUpdate({ status: s })} />
     </div>
   )
 }
@@ -241,49 +233,6 @@ function TypeInlinePicker({ type, onSelect }: { type: ContentType; onSelect: (t:
               </button>
             )
           })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function StatusInlinePicker({ status, onSelect }: { status: ContentPlanStatus; onSelect: (s: ContentPlanStatus) => void }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  const cfg = STATUS_CFG.find(s => s.key === status) ?? STATUS_CFG[0]
-
-  useEffect(() => {
-    if (!open) return
-    function handler(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [open])
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-1.5 px-1.5 py-1 rounded-md bg-background/70 text-[10px] font-semibold transition-colors hover:bg-background"
-        style={{ color: cfg.color }}
-      >
-        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
-        {cfg.label}
-      </button>
-      {open && (
-        <div className="absolute left-0 top-full mt-1 z-30 bg-card border border-border rounded-lg shadow-lg py-1 w-28">
-          {STATUS_CFG.map(s => (
-            <button
-              key={s.key}
-              type="button"
-              onClick={() => { onSelect(s.key); setOpen(false) }}
-              className="w-full flex items-center gap-1.5 text-left px-2.5 py-1.5 text-[11px] font-semibold hover:bg-muted transition-colors"
-              style={{ color: s.color }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-              {s.label}
-            </button>
-          ))}
         </div>
       )}
     </div>
