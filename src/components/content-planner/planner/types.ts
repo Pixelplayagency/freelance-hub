@@ -21,6 +21,7 @@ export interface PanelDraft {
   content_type: ContentType
   platforms: string[]
   scheduled_time: string
+  tbc: string
   caption: string
   client_comments: string
   media_items: MediaItem[]
@@ -71,6 +72,7 @@ export function makeDraft(date: string, entry: EntryWithCreator | null): PanelDr
     content_type: entry?.content_type ?? 'post',
     platforms: entry?.platforms ?? [],
     scheduled_time: entry?.scheduled_time ?? '',
+    tbc: entry?.tbc ?? '',
     caption: entry?.caption ?? '',
     client_comments: entry?.client_comments ?? '',
     media_items: entryMediaItems(entry),

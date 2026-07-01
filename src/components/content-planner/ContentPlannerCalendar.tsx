@@ -11,6 +11,7 @@ import type { ContentPlan, MediaItem } from '@/lib/types/app.types'
 import { PlannerToolbar } from './planner/PlannerToolbar'
 import { CalendarView } from './planner/CalendarView'
 import { FeedPreviewGrid } from './planner/FeedPreviewGrid'
+import { ScheduleView } from './planner/ScheduleView'
 import { ContentSidePanel } from './planner/ContentSidePanel'
 import {
   makeDraft, toDateString, getDisplayStatus, entryMediaItems,
@@ -35,7 +36,7 @@ export function ContentPlannerCalendar({
   const [entries, setEntries] = useState<EntryWithCreator[]>(initialEntries)
   const [draft, setDraft] = useState<PanelDraft | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
-  const [view, setView] = useState<'calendar' | 'preview'>('calendar')
+  const [view, setView] = useState<'calendar' | 'preview' | 'schedule'>('calendar')
   const [viewMedia, setViewMedia] = useState<{ url: string; type: 'image' | 'video' } | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [filters, setFilters] = useState<PlannerFilters>({ search: '', platform: 'all', status: 'all', type: 'all' })
@@ -76,6 +77,7 @@ export function ContentPlannerCalendar({
         content_type: draft.content_type,
         platforms: draft.platforms,
         scheduled_time: draft.scheduled_time || null,
+        tbc: draft.tbc || null,
         caption: draft.caption || null,
         ...(isAdmin ? { client_comments: draft.client_comments || null } : {}),
         media_items: draft.media_items,
@@ -203,7 +205,7 @@ export function ContentPlannerCalendar({
         onViewChange={setView}
       />
 
-      {view === 'calendar' ? (
+      {view === 'calendar' && (
         <CalendarView
           year={year}
           month={month}
@@ -212,7 +214,18 @@ export function ContentPlannerCalendar({
           onSelectEntry={entry => openPanel(entry.date, entry)}
           onAddNew={ds => openPanel(ds)}
         />
-      ) : (
+      )}
+      {view === 'schedule' && (
+        <ScheduleView
+          year={year}
+          month={month}
+          entryMap={entryMap}
+          activeDate={draft?.date ?? null}
+          onSelectEntry={entry => openPanel(entry.date, entry)}
+          onAddNew={ds => openPanel(ds)}
+        />
+      )}
+      {view === 'preview' && (
         <FeedPreviewGrid
           entries={filtered}
           activeDate={draft?.date ?? null}

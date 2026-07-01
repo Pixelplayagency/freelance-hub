@@ -363,6 +363,19 @@ export function ContentSidePanel({
                 </div>
               </div>
 
+              {/* Plan note — short "what to post" idea, shown on the Schedule view */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">Plan note</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Cocktail story, Repost content…"
+                  value={draft.tbc}
+                  onChange={e => patch('tbc', e.target.value)}
+                  className="w-full h-10 text-sm rounded-xl border border-border bg-card px-3.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all placeholder:text-muted-foreground/50"
+                />
+                <p className="text-[10px] text-muted-foreground/60">Shown on the Schedule view so freelancers know what to post at a glance.</p>
+              </div>
+
               {/* Notes */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">Notes</label>

@@ -118,6 +118,7 @@ interface ContentPlanInput {
   content_type: ContentType
   platforms?: string[]
   scheduled_time?: string | null
+  tbc?: string | null
   caption?: string | null
   media_url?: string | null
   media_type?: 'image' | 'video' | null

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronRight, Plus, Search, Filter, X, CalendarDays, Grid3x3 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Search, Filter, X, CalendarDays, Grid3x3, ListChecks } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { PlatformIcon } from './PlatformIcon'
 import type { PlannerFilters, FilterPlatform, FilterStatus, FilterType } from './types'
@@ -42,8 +42,8 @@ interface PlannerToolbarProps {
   onAddNew: () => void
   totalCount: number
   filteredCount: number
-  view: 'calendar' | 'preview'
-  onViewChange: (v: 'calendar' | 'preview') => void
+  view: 'calendar' | 'preview' | 'schedule'
+  onViewChange: (v: 'calendar' | 'preview' | 'schedule') => void
 }
 
 export function PlannerToolbar({
@@ -117,6 +117,15 @@ export function PlannerToolbar({
           >
             <CalendarDays className="w-3.5 h-3.5" />
             Calendar
+          </button>
+          <button
+            onClick={() => onViewChange('schedule')}
+            className={`inline-flex items-center gap-1.5 px-2.5 h-7 rounded-md text-xs font-semibold transition-colors ${
+              view === 'schedule' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <ListChecks className="w-3.5 h-3.5" />
+            Schedule
           </button>
           <button
             onClick={() => onViewChange('preview')}
