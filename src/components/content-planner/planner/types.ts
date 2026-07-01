@@ -1,7 +1,7 @@
 import type { ContentPlan, ContentPlanStatus, ContentType, MediaItem, Profile } from '@/lib/types/app.types'
 
 export type FilterStatus = 'all' | 'scheduled' | 'in_review' | 'approved' | 'rejected' | 'published' | 'not_posted'
-export type FilterPlatform = 'all' | 'instagram' | 'facebook' | 'tiktok'
+export type FilterPlatform = 'all' | 'instagram' | 'facebook' | 'tiktok' | 'linkedin'
 export type FilterType = 'all' | ContentType
 
 export interface PlannerFilters {
@@ -32,6 +32,7 @@ export const PLATFORMS = [
   { id: 'instagram', label: 'Instagram', color: '#E1306C' },
   { id: 'facebook',  label: 'Facebook',  color: '#1877F2' },
   { id: 'tiktok',    label: 'TikTok',    color: '#010101' },
+  { id: 'linkedin',  label: 'LinkedIn',  color: '#0A66C2' },
 ] as const
 
 export const CONTENT_TYPE_META: Record<ContentType, { label: string; color: string; bgVar: string }> = {

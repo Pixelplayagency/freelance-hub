@@ -40,5 +40,13 @@ export function PlatformIcon({ platform, size = 14, className }: PlatformIconPro
       </svg>
     )
   }
+  if (platform === 'linkedin') {
+    return (
+      <svg {...props}>
+        <rect x="0" y="0" width="24" height="24" rx="5" fill="#0A66C2" />
+        <path d="M8.4 9.6H5.7V18h2.7V9.6zM7.05 8.4a1.55 1.55 0 1 0 0-3.1 1.55 1.55 0 0 0 0 3.1zM18.3 18h-2.7v-4.35c0-1.04-.02-2.37-1.44-2.37-1.45 0-1.67 1.13-1.67 2.3V18H9.8V9.6h2.6v1.15h.04c.36-.68 1.24-1.4 2.56-1.4 2.74 0 3.3 1.8 3.3 4.14V18z" fill="white" />
+      </svg>
+    )
+  }
   return null
 }

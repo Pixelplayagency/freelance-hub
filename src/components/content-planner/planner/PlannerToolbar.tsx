@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronRight, Plus, Search, Filter, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Search, Filter, X, CalendarDays, Grid3x3 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { PlatformIcon } from './PlatformIcon'
 import type { PlannerFilters, FilterPlatform, FilterStatus, FilterType } from './types'
@@ -13,6 +13,7 @@ const PLATFORM_OPTIONS: { id: FilterPlatform; label: string }[] = [
   { id: 'instagram', label: 'Instagram' },
   { id: 'facebook', label: 'Facebook' },
   { id: 'tiktok', label: 'TikTok' },
+  { id: 'linkedin', label: 'LinkedIn' },
 ]
 
 const STATUS_OPTIONS: { id: FilterStatus; label: string; dot: string }[] = [
@@ -41,10 +42,12 @@ interface PlannerToolbarProps {
   onAddNew: () => void
   totalCount: number
   filteredCount: number
+  view: 'calendar' | 'preview'
+  onViewChange: (v: 'calendar' | 'preview') => void
 }
 
 export function PlannerToolbar({
-  year, month, basePath, filters, onFilterChange, onAddNew, totalCount, filteredCount,
+  year, month, basePath, filters, onFilterChange, onAddNew, totalCount, filteredCount, view, onViewChange,
 }: PlannerToolbarProps) {
   const router = useRouter()
 
@@ -104,6 +107,27 @@ export function PlannerToolbar({
         </h2>
 
         <div className="flex-1" />
+
+        <div className="inline-flex items-center rounded-lg border border-border bg-background p-0.5">
+          <button
+            onClick={() => onViewChange('calendar')}
+            className={`inline-flex items-center gap-1.5 px-2.5 h-7 rounded-md text-xs font-semibold transition-colors ${
+              view === 'calendar' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <CalendarDays className="w-3.5 h-3.5" />
+            Calendar
+          </button>
+          <button
+            onClick={() => onViewChange('preview')}
+            className={`inline-flex items-center gap-1.5 px-2.5 h-7 rounded-md text-xs font-semibold transition-colors ${
+              view === 'preview' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Grid3x3 className="w-3.5 h-3.5" />
+            Preview
+          </button>
+        </div>
 
         <button
           onClick={onAddNew}
