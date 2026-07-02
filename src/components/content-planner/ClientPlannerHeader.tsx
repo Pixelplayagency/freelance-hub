@@ -59,7 +59,7 @@ export function ClientPlannerHeader({
             </div>
           )}
           <div className="min-w-0">
-            <h1 className="text-lg font-bold text-foreground leading-tight truncate">{client.name}</h1>
+            <h1 className="text-lg font-bold tracking-tight text-foreground leading-tight truncate">{client.name}</h1>
             {hasSocials && (
               <div className="flex items-center gap-1 mt-1">
                 {client.instagram_url && (
@@ -144,8 +144,8 @@ export function ClientPlannerHeader({
 function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div className="px-4 py-2 text-center">
-      <p className="text-base font-bold text-foreground tabular-nums leading-none">{value}</p>
-      <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{label}</p>
+      <p className="text-xl font-bold text-foreground tabular-nums tracking-tight leading-none">{value}</p>
+      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider leading-none mt-1.5">{label}</p>
     </div>
   )
 }

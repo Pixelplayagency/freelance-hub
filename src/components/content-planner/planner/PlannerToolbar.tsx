@@ -102,7 +102,7 @@ export function PlannerToolbar({
           </button>
         </div>
 
-        <h2 className="text-base font-bold text-foreground tabular-nums ml-1">
+        <h2 className="text-base font-bold tracking-tight text-foreground tabular-nums ml-1">
           {MONTH_NAMES[month]} <span className="text-muted-foreground font-medium">{year}</span>
         </h2>
 
