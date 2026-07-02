@@ -48,37 +48,44 @@ export default async function FreelancerProjectsPage() {
     .eq('user_id', user.id)
   const coIds = (coAssigned ?? []).map((r: { task_id: string }) => r.task_id)
 
-  // All my tasks
-  const { data: tasks } = await supabase
-    .from('tasks')
-    .select('*, project:projects(id, name, color, cover_image_url, avatar_url, description, instagram_url, facebook_url, tiktok_url, status)')
-    .or(`assigned_to.eq.${user.id}${coIds.length > 0 ? `,id.in.(${coIds.join(',')})` : ''}`)
-    .order('due_date', { ascending: true, nullsFirst: false })
+  // Every active project — freelancers browse all of them, not just ones
+  // they currently have a task in.
+  const [{ data: allProjects }, { data: tasks }] = await Promise.all([
+    supabase
+      .from('projects')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('tasks')
+      .select('*, project:projects(id, name, color, cover_image_url, avatar_url, description, instagram_url, facebook_url, tiktok_url, status)')
+      .or(`assigned_to.eq.${user.id}${coIds.length > 0 ? `,id.in.(${coIds.join(',')})` : ''}`)
+      .order('due_date', { ascending: true, nullsFirst: false }),
+  ])
 
   const allTasks = (tasks ?? []) as TaskWithProject[]
 
-  // Group tasks by project (only active projects)
-  const projectMap = new Map<string, ProjectEntry>()
+  // Group my tasks by project
+  const tasksByProject = new Map<string, TaskWithProject[]>()
   for (const task of allTasks) {
     const p = task.project as (Pick<Project, 'id' | 'name' | 'color'> & Partial<Project>) | null
-    if (!p || (p as Project).status === 'archived') continue
-    if (!projectMap.has(p.id)) {
-      projectMap.set(p.id, {
-        project: p as Project,
-        tasks: [],
-        counts: { todo: 0, in_progress: 0, review: 0, completed: 0 },
-        total: 0,
-        completed: 0,
-      })
-    }
-    const entry = projectMap.get(p.id)!
-    entry.tasks.push(task)
-    entry.counts[task.status as TaskStatus] = (entry.counts[task.status as TaskStatus] ?? 0) + 1
-    entry.total++
-    if (task.status === 'completed') entry.completed++
+    if (!p) continue
+    if (!tasksByProject.has(p.id)) tasksByProject.set(p.id, [])
+    tasksByProject.get(p.id)!.push(task)
   }
 
-  const projectEntries = Array.from(projectMap.values())
+  const projectEntries: ProjectEntry[] = (allProjects ?? []).map(project => {
+    const projectTasks = tasksByProject.get(project.id) ?? []
+    const counts: Record<TaskStatus, number> = { todo: 0, in_progress: 0, review: 0, completed: 0 }
+    for (const t of projectTasks) counts[t.status as TaskStatus] = (counts[t.status as TaskStatus] ?? 0) + 1
+    return {
+      project: project as Project,
+      tasks: projectTasks,
+      counts,
+      total: projectTasks.length,
+      completed: counts.completed,
+    }
+  })
 
   // Global stats
   const totalTasks = allTasks.length
@@ -226,10 +233,16 @@ export default async function FreelancerProjectsPage() {
                   {/* Task list — max 3, compact */}
                   <div className="mt-2 space-y-0.5 flex-1">
                     {pendingTasks.length === 0 ? (
-                      <div className="flex items-center gap-1.5 py-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                        <span className="text-xs text-green-600 dark:text-green-400 font-medium">All done!</span>
-                      </div>
+                      total === 0 ? (
+                        <div className="flex items-center gap-1.5 py-1.5">
+                          <span className="text-xs text-muted-foreground">No tasks assigned to you yet</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 py-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                          <span className="text-xs text-green-600 dark:text-green-400 font-medium">All done!</span>
+                        </div>
+                      )
                     ) : (
                       <>
                         {pendingTasks.slice(0, 3).map(task => {
