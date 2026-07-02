@@ -1,19 +1,44 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Clock, Calendar, Play } from 'lucide-react'
+import { X, Clock, Calendar, Play, Download, Loader2 } from 'lucide-react'
 import { PlatformIcon } from '@/components/content-planner/planner/PlatformIcon'
 import { StatusBadge } from '@/components/content-planner/planner/StatusBadge'
 import { ContentTypeChip } from '@/components/content-planner/planner/ContentTypeChip'
 import { entryMediaItems, to12h, type EntryWithCreator } from '@/components/content-planner/planner/types'
 
+async function downloadMedia(url: string, name: string) {
+  try {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = name
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(a.href)
+  } catch {
+    window.open(url, '_blank')
+  }
+}
+
 export function ShareContentModal({ entry, onClose }: { entry: EntryWithCreator | null; onClose: () => void }) {
   const [activeIdx, setActiveIdx] = useState(0)
+  const [downloading, setDownloading] = useState(false)
 
   if (!entry) return null
   const media = entryMediaItems(entry)
   const active = media[activeIdx]
   const dateLabel = new Date(entry.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+
+  async function handleDownload() {
+    if (!active) return
+    setDownloading(true)
+    const ext = active.type === 'video' ? 'mp4' : 'jpg'
+    await downloadMedia(active.url, `${entry!.date}-${entry!.content_type}-${activeIdx + 1}.${ext}`)
+    setDownloading(false)
+  }
 
   return (
     <div
@@ -24,12 +49,25 @@ export function ShareContentModal({ entry, onClose }: { entry: EntryWithCreator 
         className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-card rounded-2xl border border-border shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm flex items-center justify-center transition-colors"
-        >
-          <X className="w-4 h-4 text-white" />
-        </button>
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          {active && (
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              title="Download"
+              className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm flex items-center justify-center transition-colors disabled:opacity-60"
+            >
+              {downloading ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <Download className="w-4 h-4 text-white" />}
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            title="Close"
+            className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm flex items-center justify-center transition-colors"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
 
         {/* Media */}
         {active && (
