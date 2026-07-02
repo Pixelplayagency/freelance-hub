@@ -71,7 +71,7 @@ export default async function SharePage({
   if (nextM > 11) { nextM = 0; nextY++ }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 sm:py-10 space-y-5">
+    <div className="max-w-7xl mx-auto px-4 py-6 sm:py-10 space-y-5">
       {/* Client header */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
         <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, color-mix(in oklch, var(--primary), transparent 65%) 100%)' }} />

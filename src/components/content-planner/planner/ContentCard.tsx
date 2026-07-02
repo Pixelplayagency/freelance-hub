@@ -11,9 +11,10 @@ interface ContentCardProps {
   entry: EntryWithCreator
   active?: boolean
   onClick: () => void
+  readOnly?: boolean
 }
 
-export function ContentCard({ entry, active, onClick }: ContentCardProps) {
+export function ContentCard({ entry, active, onClick, readOnly }: ContentCardProps) {
   const media = entryMediaItems(entry)
   const creatorName = entry.creator?.full_name || entry.creator?.username || ''
   const initials = creatorName
@@ -24,6 +25,49 @@ export function ContentCard({ entry, active, onClick }: ContentCardProps) {
     .join('')
     .toUpperCase()
   const hasComments = !!entry.client_comments
+
+  if (readOnly) {
+    return (
+      <div className="group/card w-full rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-shadow duration-300">
+        {/* Media — zooms in gently on hover */}
+        <div className="w-full aspect-[4/5] overflow-hidden bg-muted">
+          <MediaThumb
+            items={media}
+            className="w-full h-full [&_img]:transition-transform [&_img]:duration-500 [&_img]:ease-out group-hover/card:[&_img]:scale-110 [&_video]:transition-transform [&_video]:duration-500 [&_video]:ease-out group-hover/card:[&_video]:scale-110"
+            rounded="rounded-none"
+          />
+        </div>
+
+        {/* Body */}
+        <div className="p-3 space-y-2">
+          <div className="flex items-center justify-between gap-1.5">
+            <ContentTypeChip type={entry.content_type} size="sm" />
+            <StatusBadge entry={entry} size="sm" />
+          </div>
+
+          {entry.caption && (
+            <p className="text-sm leading-relaxed text-foreground/90 line-clamp-3">
+              {entry.caption}
+            </p>
+          )}
+
+          <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-border/60">
+            <div className="flex items-center gap-1.5 min-w-0">
+              {entry.platforms?.slice(0, 3).map(p => (
+                <PlatformIcon key={p} platform={p} size={16} />
+              ))}
+            </div>
+            {entry.scheduled_time && (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-medium tabular-nums shrink-0">
+                <Clock className="w-3 h-3" />
+                {to12h(entry.scheduled_time)}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <button

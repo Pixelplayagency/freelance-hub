@@ -21,7 +21,7 @@ export function CalendarDay({ date, inMonth, isToday, entries, activeDate, onSel
 
   return (
     <div
-      className={`group/day relative flex flex-col min-h-[140px] rounded-xl border transition-colors ${
+      className={`group/day relative flex flex-col rounded-xl border transition-colors ${readOnly ? 'min-h-[120px]' : 'min-h-[140px]'} ${
         !inMonth
           ? 'bg-muted/10 border-border/40'
           : isToday
@@ -59,7 +59,7 @@ export function CalendarDay({ date, inMonth, isToday, entries, activeDate, onSel
       </div>
 
       {/* Entries */}
-      <div className="flex-1 px-1.5 pb-1.5 space-y-1.5 overflow-hidden">
+      <div className={`flex-1 px-1.5 pb-1.5 space-y-1.5 ${readOnly ? '' : 'overflow-hidden'}`}>
         {inMonth && entries.length === 0 && !readOnly && (
           <button
             onClick={() => onAddNew(ds)}
@@ -75,6 +75,7 @@ export function CalendarDay({ date, inMonth, isToday, entries, activeDate, onSel
             entry={entry}
             active={activeDate === ds}
             onClick={() => onSelectEntry(entry)}
+            readOnly={readOnly}
           />
         ))}
       </div>
