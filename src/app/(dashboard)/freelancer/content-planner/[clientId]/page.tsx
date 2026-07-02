@@ -6,7 +6,7 @@ import { ClientPlannerHeader } from '@/components/content-planner/ClientPlannerH
 import Link from 'next/link'
 import { ChevronLeft, CheckSquare } from 'lucide-react'
 import { createSupabaseServiceClient } from '@/lib/supabase/server'
-import type { ContentPlan, ScheduleEntry, Task, Project } from '@/lib/types/app.types'
+import type { ContentPlan, ScheduleEntry, Task, Project, ContentShareLink } from '@/lib/types/app.types'
 
 type TaskWithProject = Task & {
   project: Pick<Project, 'id' | 'name' | 'color' | 'avatar_url'> | null
@@ -29,7 +29,10 @@ export default async function FreelancerClientCalendarPage({
   if (profile?.job_role !== 'social_media_manager') redirect('/freelancer')
 
   const { clientId } = await params
-  const { data: client } = await supabase.from('content_clients').select('*').eq('id', clientId).single()
+  const [{ data: client }, { data: shareLinks }] = await Promise.all([
+    supabase.from('content_clients').select('*').eq('id', clientId).single(),
+    supabase.from('content_share_links').select('*').eq('client_id', clientId).is('revoked_at', null).order('created_at', { ascending: false }),
+  ])
   if (!client) notFound()
 
   const sp = await searchParams
@@ -103,8 +106,9 @@ export default async function FreelancerClientCalendarPage({
         storyCount={storyCount}
         pdfSignedUrl={pdfSignedUrl}
         canEditPdf={false}
+        canShare={true}
         secondaryView={{ id: 'task', label: 'Task', icon: CheckSquare }}
-        shareLinks={[]}
+        shareLinks={(shareLinks ?? []) as ContentShareLink[]}
       />
 
       {/* Content */}

@@ -95,6 +95,7 @@ export default async function AdminClientCalendarPage({
         storyCount={storyCount}
         pdfSignedUrl={pdfSignedUrl}
         canEditPdf={true}
+        canShare={true}
         secondaryView={{ id: 'list', label: 'List', icon: List }}
         shareLinks={(shareLinks ?? []) as ContentShareLink[]}
       />

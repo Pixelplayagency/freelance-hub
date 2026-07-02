@@ -29,6 +29,7 @@ interface ClientPlannerHeaderProps {
   storyCount: number
   pdfSignedUrl: string | null
   canEditPdf: boolean
+  canShare: boolean
   clientId: string
   secondaryView: SecondaryView
   shareLinks: ContentShareLink[]
@@ -36,7 +37,7 @@ interface ClientPlannerHeaderProps {
 
 export function ClientPlannerHeader({
   client, basePath, view, month, year, monthName,
-  postCount, reelCount, storyCount, pdfSignedUrl, canEditPdf, clientId, secondaryView, shareLinks,
+  postCount, reelCount, storyCount, pdfSignedUrl, canEditPdf, canShare, clientId, secondaryView, shareLinks,
 }: ClientPlannerHeaderProps) {
   const hasSocials = client.instagram_url || client.facebook_url || client.tiktok_url
   const SecondaryIcon = secondaryView.icon
@@ -134,6 +135,7 @@ export function ClientPlannerHeader({
           pdfUrl={pdfSignedUrl}
           hasPdf={!!client.content_plan_pdf_path}
           canEdit={canEditPdf}
+          canShare={canShare}
           shareLinks={shareLinks}
         />
       </div>

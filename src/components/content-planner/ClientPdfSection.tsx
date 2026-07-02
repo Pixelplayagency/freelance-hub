@@ -11,6 +11,7 @@ interface ClientDocsSectionProps {
   pdfUrl: string | null
   hasPdf: boolean
   canEdit: boolean
+  canShare: boolean
   shareLinks: ContentShareLink[]
 }
 
@@ -19,6 +20,7 @@ export function ClientPdfSection({
   pdfUrl,
   hasPdf,
   canEdit,
+  canShare,
   shareLinks,
 }: ClientDocsSectionProps) {
   const [pdfPending, startPdfTransition] = useTransition()
@@ -57,7 +59,7 @@ export function ClientPdfSection({
   }
 
   // Nothing to show for view-only users if nothing uploaded yet
-  if (!canEdit && !hasPdf) return null
+  if (!canEdit && !canShare && !hasPdf) return null
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -100,7 +102,7 @@ export function ClientPdfSection({
       ) : null}
 
       {/* ── Share ── */}
-      {canEdit && <ShareLinkManager clientId={clientId} initialLinks={shareLinks} />}
+      {canShare && <ShareLinkManager clientId={clientId} initialLinks={shareLinks} />}
     </div>
   )
 }

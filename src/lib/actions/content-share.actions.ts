@@ -9,7 +9,7 @@ function unlockCookieName(token: string) {
   return `cs_unlock_${token}`
 }
 
-// ── Admin: manage links ─────────────────────────────────────────────────────
+// ── Admin + social media manager: manage links ──────────────────────────────
 
 export async function createShareLink(clientId: string, password: string | null): Promise<ContentShareLink> {
   const supabase = await createSupabaseServerClient()
@@ -24,6 +24,7 @@ export async function createShareLink(clientId: string, password: string | null)
 
   if (error) throw new Error(error.message)
   revalidatePath(`/admin/content-planner/${clientId}`)
+  revalidatePath(`/freelancer/content-planner/${clientId}`)
   return data as ContentShareLink
 }
 
@@ -35,6 +36,7 @@ export async function revokeShareLink(id: string, clientId: string): Promise<voi
   const { error } = await supabase.from('content_share_links').update({ revoked_at: new Date().toISOString() }).eq('id', id)
   if (error) throw new Error(error.message)
   revalidatePath(`/admin/content-planner/${clientId}`)
+  revalidatePath(`/freelancer/content-planner/${clientId}`)
 }
 
 // ── Public: unlock + notes (no session — service client bypasses RLS) ──────
