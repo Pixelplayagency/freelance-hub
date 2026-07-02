@@ -6,7 +6,7 @@ import { ClientPlannerHeader } from '@/components/content-planner/ClientPlannerH
 import Link from 'next/link'
 import { ChevronLeft, List } from 'lucide-react'
 import { createSupabaseServiceClient } from '@/lib/supabase/server'
-import type { ContentPlan, ScheduleEntry } from '@/lib/types/app.types'
+import type { ContentPlan, ScheduleEntry, ContentShareLink } from '@/lib/types/app.types'
 
 export default async function AdminClientCalendarPage({
   params,
@@ -27,7 +27,10 @@ export default async function AdminClientCalendarPage({
   const { clientId } = await params
   const sp = await searchParams
 
-  const { data: client } = await supabase.from('content_clients').select('*').eq('id', clientId).single()
+  const [{ data: client }, { data: shareLinks }] = await Promise.all([
+    supabase.from('content_clients').select('*').eq('id', clientId).single(),
+    supabase.from('content_share_links').select('*').eq('client_id', clientId).is('revoked_at', null).order('created_at', { ascending: false }),
+  ])
   if (!client) notFound()
 
   const view = sp.view === 'calendar' ? 'calendar' : 'list'
@@ -93,6 +96,7 @@ export default async function AdminClientCalendarPage({
         pdfSignedUrl={pdfSignedUrl}
         canEditPdf={true}
         secondaryView={{ id: 'list', label: 'List', icon: List }}
+        shareLinks={(shareLinks ?? []) as ContentShareLink[]}
       />
 
       {/* Content */}

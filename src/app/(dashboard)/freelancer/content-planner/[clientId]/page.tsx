@@ -104,6 +104,7 @@ export default async function FreelancerClientCalendarPage({
         pdfSignedUrl={pdfSignedUrl}
         canEditPdf={false}
         secondaryView={{ id: 'task', label: 'Task', icon: CheckSquare }}
+        shareLinks={[]}
       />
 
       {/* Content */}

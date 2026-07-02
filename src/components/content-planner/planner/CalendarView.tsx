@@ -12,9 +12,10 @@ interface CalendarViewProps {
   activeDate: string | null
   onSelectEntry: (entry: EntryWithCreator) => void
   onAddNew: (ds: string) => void
+  readOnly?: boolean
 }
 
-export function CalendarView({ year, month, entryMap, activeDate, onSelectEntry, onAddNew }: CalendarViewProps) {
+export function CalendarView({ year, month, entryMap, activeDate, onSelectEntry, onAddNew, readOnly }: CalendarViewProps) {
   const weeks = getCalendarWeeks(year, month)
   const todayDS = toDateString(new Date())
 
@@ -47,6 +48,7 @@ export function CalendarView({ year, month, entryMap, activeDate, onSelectEntry,
                     activeDate={activeDate}
                     onSelectEntry={onSelectEntry}
                     onAddNew={onAddNew}
+                    readOnly={readOnly}
                   />
                 )
               })}

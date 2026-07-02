@@ -12,9 +12,10 @@ interface CalendarDayProps {
   activeDate: string | null
   onSelectEntry: (entry: EntryWithCreator) => void
   onAddNew: (ds: string) => void
+  readOnly?: boolean
 }
 
-export function CalendarDay({ date, inMonth, isToday, entries, activeDate, onSelectEntry, onAddNew }: CalendarDayProps) {
+export function CalendarDay({ date, inMonth, isToday, entries, activeDate, onSelectEntry, onAddNew, readOnly }: CalendarDayProps) {
   const ds = toDateString(date)
   const dayNum = date.getDate()
 
@@ -46,7 +47,7 @@ export function CalendarDay({ date, inMonth, isToday, entries, activeDate, onSel
             <span className="text-[9px] font-bold text-primary uppercase tracking-wide">Today</span>
           )}
         </div>
-        {inMonth && (
+        {inMonth && !readOnly && (
           <button
             onClick={() => onAddNew(ds)}
             className="w-5 h-5 rounded-md flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted opacity-0 group-hover/day:opacity-100 transition-opacity"
@@ -59,7 +60,7 @@ export function CalendarDay({ date, inMonth, isToday, entries, activeDate, onSel
 
       {/* Entries */}
       <div className="flex-1 px-1.5 pb-1.5 space-y-1.5 overflow-hidden">
-        {inMonth && entries.length === 0 && (
+        {inMonth && entries.length === 0 && !readOnly && (
           <button
             onClick={() => onAddNew(ds)}
             className="w-full h-full min-h-[80px] rounded-lg border border-dashed border-border/50 flex items-center justify-center text-muted-foreground/30 hover:text-primary hover:border-primary/40 hover:bg-primary/[0.02] transition-all"

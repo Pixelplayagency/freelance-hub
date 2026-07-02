@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Instagram, Facebook, CalendarDays, type LucideIcon } from 'lucide-react'
 import { ClientPdfSection } from './ClientPdfSection'
-import type { ContentClient } from '@/lib/types/app.types'
+import type { ContentClient, ContentShareLink } from '@/lib/types/app.types'
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -31,11 +31,12 @@ interface ClientPlannerHeaderProps {
   canEditPdf: boolean
   clientId: string
   secondaryView: SecondaryView
+  shareLinks: ContentShareLink[]
 }
 
 export function ClientPlannerHeader({
   client, basePath, view, month, year, monthName,
-  postCount, reelCount, storyCount, pdfSignedUrl, canEditPdf, clientId, secondaryView,
+  postCount, reelCount, storyCount, pdfSignedUrl, canEditPdf, clientId, secondaryView, shareLinks,
 }: ClientPlannerHeaderProps) {
   const hasSocials = client.instagram_url || client.facebook_url || client.tiktok_url
   const SecondaryIcon = secondaryView.icon
@@ -132,9 +133,8 @@ export function ClientPlannerHeader({
           clientId={clientId}
           pdfUrl={pdfSignedUrl}
           hasPdf={!!client.content_plan_pdf_path}
-          hasLink={!!client.content_plan_link}
-          linkUrl={client.content_plan_link}
           canEdit={canEditPdf}
+          shareLinks={shareLinks}
         />
       </div>
     </div>

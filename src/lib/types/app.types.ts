@@ -82,6 +82,24 @@ export interface MediaItem {
   type: 'image' | 'video'
 }
 
+export interface ContentShareLink {
+  id: string
+  client_id: string
+  token: string
+  password: string | null
+  created_by: string | null
+  revoked_at: string | null
+  created_at: string
+}
+
+export interface ContentShareNote {
+  id: string
+  share_link_id: string
+  author_name: string | null
+  message: string
+  created_at: string
+}
+
 export interface ContentPlan {
   id: string
   client_id: string | null

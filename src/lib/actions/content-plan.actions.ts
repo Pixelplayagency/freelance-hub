@@ -85,31 +85,6 @@ export async function deleteClientPdf(clientId: string): Promise<void> {
   revalidatePath(`/freelancer/content-planner/${clientId}`)
 }
 
-export async function saveClientLink(clientId: string, url: string): Promise<void> {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-  try { new URL(url) } catch { throw new Error('Invalid URL') }
-
-  const { error } = await supabase.from('content_clients').update({ content_plan_link: url }).eq('id', clientId)
-  if (error) throw new Error(error.message)
-
-  revalidatePath(`/admin/content-planner/${clientId}`)
-  revalidatePath(`/freelancer/content-planner/${clientId}`)
-}
-
-export async function deleteClientLink(clientId: string): Promise<void> {
-  const supabase = await createSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
-  const { error } = await supabase.from('content_clients').update({ content_plan_link: null }).eq('id', clientId)
-  if (error) throw new Error(error.message)
-
-  revalidatePath(`/admin/content-planner/${clientId}`)
-  revalidatePath(`/freelancer/content-planner/${clientId}`)
-}
-
 // ── Plans ──────────────────────────────────────────────────────────────────
 
 interface ContentPlanInput {
