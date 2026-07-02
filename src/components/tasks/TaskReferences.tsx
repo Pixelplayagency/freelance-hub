@@ -4,8 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ImageUpload } from './ImageUpload'
 import { LinksList } from './LinksList'
 import { VideoReferenceAdd } from './VideoReferenceAdd'
+import { FileList } from './FileList'
 import { TaskChat } from './TaskChat'
-import { Image, Link2, Video, MessageCircle } from 'lucide-react'
+import { Image, Link2, Video, MessageCircle, FileText } from 'lucide-react'
 import type { TaskReference } from '@/lib/types/app.types'
 
 interface TaskReferencesProps {
@@ -28,11 +29,12 @@ export function TaskReferences({
   const images = references.filter(r => r.type === 'image')
   const links  = references.filter(r => r.type === 'link')
   const videos = references.filter(r => r.type === 'video')
+  const files  = references.filter(r => r.type === 'file')
   const notes  = references.filter(r => r.type === 'note')
 
   return (
     <Tabs defaultValue="chat" className="w-full">
-      <TabsList className="grid w-full grid-cols-4 h-9">
+      <TabsList className="grid w-full grid-cols-5 h-9">
         <TabsTrigger value="images" className="text-xs gap-1.5">
           <Image className="w-3.5 h-3.5" />
           Images {images.length > 0 && <span className="text-[10px] opacity-60">({images.length})</span>}
@@ -44,6 +46,10 @@ export function TaskReferences({
         <TabsTrigger value="videos" className="text-xs gap-1.5">
           <Video className="w-3.5 h-3.5" />
           Video {videos.length > 0 && <span className="text-[10px] opacity-60">({videos.length})</span>}
+        </TabsTrigger>
+        <TabsTrigger value="files" className="text-xs gap-1.5">
+          <FileText className="w-3.5 h-3.5" />
+          Files {files.length > 0 && <span className="text-[10px] opacity-60">({files.length})</span>}
         </TabsTrigger>
         <TabsTrigger value="chat" className="text-xs gap-1.5">
           <MessageCircle className="w-3.5 h-3.5" />
@@ -61,6 +67,10 @@ export function TaskReferences({
 
       <TabsContent value="videos" className="mt-4">
         <VideoReferenceAdd taskId={taskId} references={videos} isAdmin={isAdmin} />
+      </TabsContent>
+
+      <TabsContent value="files" className="mt-4">
+        <FileList taskId={taskId} references={files} isAdmin={isAdmin} />
       </TabsContent>
 
       <TabsContent value="chat" className="mt-4">

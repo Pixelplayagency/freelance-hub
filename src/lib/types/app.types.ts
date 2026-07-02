@@ -26,7 +26,7 @@ export const PRIORITY_CONFIG: Record<Priority, { label: string; color: string; b
 
 export type ProjectStatus = 'active' | 'archived'
 
-export type ReferenceType = 'image' | 'link' | 'video' | 'note'
+export type ReferenceType = 'image' | 'link' | 'video' | 'note' | 'file'
 
 export type NotificationType = 'task_assigned' | 'task_updated' | 'task_due_soon'
 

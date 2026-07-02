@@ -10,7 +10,7 @@ import { createTask, updateTask } from '@/lib/actions/task.actions'
 import { getSignedUploadUrl, saveTaskReference } from '@/lib/actions/upload.actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, ExternalLink, ImagePlus, Link2, Loader2, Plus, Trash2, X } from 'lucide-react'
+import { ChevronDown, ExternalLink, FileText, ImagePlus, Link2, Loader2, Plus, Trash2, X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { DeadlinePicker } from './DeadlinePicker'
 import type { Priority, Profile, Task } from '@/lib/types/app.types'
@@ -59,6 +59,10 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Pending docs — PDFs, Word docs, logo SVGs/PNGs (creation only)
+  const [pendingDocs, setPendingDocs] = useState<File[]>([])
+  const docInputRef = useRef<HTMLInputElement>(null)
+
   function addPendingLink() {
     if (!linkUrl) return
     setPendingLinks(prev => [...prev, { url: linkUrl, label: linkLabel }])
@@ -80,6 +84,18 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
 
   function removePendingFile(index: number) {
     setPendingFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const DOC_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/svg+xml', 'image/png']
+  function handleDocs(files: FileList | null) {
+    if (!files) return
+    const valid = Array.from(files).filter(f => DOC_TYPES.includes(f.type))
+    if (valid.length < files.length) toast.error('Only PDF, DOC, SVG, and PNG files are supported')
+    setPendingDocs(prev => [...prev, ...valid])
+  }
+
+  function removePendingDoc(index: number) {
+    setPendingDocs(prev => prev.filter((_, i) => i !== index))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -130,6 +146,26 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
             if (!res.ok) throw new Error('Upload failed')
             await saveTaskReference(newTask.id, {
               type: file.type.startsWith('image/') ? 'image' : 'video',
+              storage_path: path,
+              title: file.name,
+            })
+          } catch {
+            toast.error(`Failed to upload ${file.name}`)
+          }
+        }
+
+        // Upload pending docs
+        for (const file of pendingDocs) {
+          try {
+            const { signedUrl, path } = await getSignedUploadUrl(newTask.id, file.name)
+            const res = await fetch(signedUrl, {
+              method: 'PUT',
+              body: file,
+              headers: { 'Content-Type': file.type },
+            })
+            if (!res.ok) throw new Error('Upload failed')
+            await saveTaskReference(newTask.id, {
+              type: 'file',
               storage_path: path,
               title: file.name,
             })
@@ -309,6 +345,53 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
           })}
         </div>
       </div>
+
+      {/* Files — docs, PDFs, logo SVGs/PNGs — only shown during task creation */}
+      {!task && (
+        <div className="space-y-2">
+          <Label className="flex items-center gap-1.5">
+            <FileText className="w-3.5 h-3.5" />
+            Files
+          </Label>
+
+          {pendingDocs.length > 0 && (
+            <div className="space-y-1.5">
+              {pendingDocs.map((file, i) => (
+                <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-muted text-sm">
+                  <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <span className="flex-1 truncate text-foreground">{file.name}</span>
+                  <button type="button" onClick={() => removePendingDoc(i)} className="text-muted-foreground hover:text-red-500 transition-colors">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <input
+            ref={docInputRef}
+            type="file"
+            accept=".pdf,.doc,.docx,.svg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/svg+xml,image/png"
+            multiple
+            className="hidden"
+            onChange={e => handleDocs(e.target.files)}
+          />
+          <button
+            type="button"
+            onClick={() => docInputRef.current?.click()}
+            className={cn(
+              'w-full border-2 border-dashed border-border rounded-lg py-5 text-center transition-colors',
+              'hover:border-primary/40 hover:bg-primary/5'
+            )}
+          >
+            <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
+              <FileText className="w-5 h-5" />
+              <span className="text-sm">Click to upload</span>
+              <span className="text-xs">PDF, DOC, SVG, PNG</span>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* Concept reference links — only shown during task creation */}
       {!task && (
