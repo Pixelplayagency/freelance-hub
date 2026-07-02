@@ -5,15 +5,16 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Pencil } from 'lucide-react'
 import { TaskForm } from './TaskForm'
-import type { Profile, Task } from '@/lib/types/app.types'
+import type { Profile, Task, TaskReference } from '@/lib/types/app.types'
 
 interface EditTaskButtonProps {
   task: Task
   freelancers: Pick<Profile, 'id' | 'full_name' | 'email'>[]
   projectId: string
+  references?: TaskReference[]
 }
 
-export function EditTaskButton({ task, freelancers, projectId }: EditTaskButtonProps) {
+export function EditTaskButton({ task, freelancers, projectId, references }: EditTaskButtonProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -32,6 +33,7 @@ export function EditTaskButton({ task, freelancers, projectId }: EditTaskButtonP
           projectId={projectId}
           freelancers={freelancers}
           task={task}
+          references={references}
           onSuccess={() => setOpen(false)}
           onCancel={() => setOpen(false)}
         />

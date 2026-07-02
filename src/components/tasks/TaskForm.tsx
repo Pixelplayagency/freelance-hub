@@ -8,18 +8,23 @@ import { Textarea } from '@/components/ui/textarea'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { createTask, updateTask } from '@/lib/actions/task.actions'
 import { getSignedUploadUrl, saveTaskReference } from '@/lib/actions/upload.actions'
+import { ImageUpload } from './ImageUpload'
+import { LinksList } from './LinksList'
+import { VideoReferenceAdd } from './VideoReferenceAdd'
+import { FileList } from './FileList'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { ChevronDown, ExternalLink, FileText, ImagePlus, Link2, Loader2, Plus, Trash2, X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { DeadlinePicker } from './DeadlinePicker'
-import type { Priority, Profile, Task } from '@/lib/types/app.types'
+import type { Priority, Profile, Task, TaskReference } from '@/lib/types/app.types'
 import { PRIORITY_CONFIG } from '@/lib/types/app.types'
 
 interface TaskFormProps {
   projectId: string
   freelancers: Pick<Profile, 'id' | 'full_name' | 'email'>[]
   task?: Task
+  references?: TaskReference[]
   onSuccess?: (newTask?: Task) => void
   onCancel?: () => void
 }
@@ -29,7 +34,7 @@ interface PendingLink {
   label: string
 }
 
-export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: TaskFormProps) {
+export function TaskForm({ projectId, freelancers, task, references = [], onSuccess, onCancel }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
   const [assignedTo, setAssignedTo] = useState<string[]>(task?.assigned_to ? [task.assigned_to] : [])
@@ -346,8 +351,16 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
         </div>
       </div>
 
-      {/* Files — docs, PDFs, logo SVGs/PNGs — only shown during task creation */}
-      {!task && (
+      {/* Files — docs, PDFs, logo SVGs/PNGs */}
+      {task ? (
+        <div className="space-y-2">
+          <Label className="flex items-center gap-1.5">
+            <FileText className="w-3.5 h-3.5" />
+            Files
+          </Label>
+          <FileList taskId={task.id} references={references.filter(r => r.type === 'file')} isAdmin={true} />
+        </div>
+      ) : (
         <div className="space-y-2">
           <Label className="flex items-center gap-1.5">
             <FileText className="w-3.5 h-3.5" />
@@ -393,8 +406,16 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
         </div>
       )}
 
-      {/* Concept reference links — only shown during task creation */}
-      {!task && (
+      {/* Concept reference links */}
+      {task ? (
+        <div className="space-y-2">
+          <Label className="flex items-center gap-1.5">
+            <Link2 className="w-3.5 h-3.5" />
+            Reference links
+          </Label>
+          <LinksList taskId={task.id} references={references.filter(r => r.type === 'link')} isAdmin={true} />
+        </div>
+      ) : (
         <div className="space-y-2">
           <Label className="flex items-center gap-1.5">
             <Link2 className="w-3.5 h-3.5" />
@@ -465,8 +486,25 @@ export function TaskForm({ projectId, freelancers, task, onSuccess, onCancel }: 
         </div>
       )}
 
-      {/* Upload images / videos — only shown during task creation */}
-      {!task && (
+      {/* Upload images / videos */}
+      {task ? (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <ImagePlus className="w-3.5 h-3.5" />
+              Images
+            </Label>
+            <ImageUpload taskId={task.id} references={references.filter(r => r.type === 'image')} isAdmin={true} />
+          </div>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <ImagePlus className="w-3.5 h-3.5" />
+              Videos
+            </Label>
+            <VideoReferenceAdd taskId={task.id} references={references.filter(r => r.type === 'video')} isAdmin={true} />
+          </div>
+        </div>
+      ) : (
         <div className="space-y-2">
           <Label className="flex items-center gap-1.5">
             <ImagePlus className="w-3.5 h-3.5" />

@@ -95,6 +95,7 @@ export default async function TaskDetailPage({
               task={task as Task}
               freelancers={(freelancers ?? []) as Pick<Profile, 'id' | 'full_name' | 'email'>[]}
               projectId={projectId}
+              references={(references ?? []) as TaskReference[]}
             />
             {canDeleteTask && <DeleteTaskButton taskId={taskId} projectId={projectId} />}
           </div>
