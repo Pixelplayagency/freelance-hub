@@ -1,6 +1,6 @@
 'use client'
 
-import { Clock, MessageSquare } from 'lucide-react'
+import { Clock, MessageSquare, Maximize2 } from 'lucide-react'
 import { PlatformIcon } from './PlatformIcon'
 import { StatusBadge } from './StatusBadge'
 import { ContentTypeChip } from './ContentTypeChip'
@@ -28,14 +28,22 @@ export function ContentCard({ entry, active, onClick, readOnly }: ContentCardPro
 
   if (readOnly) {
     return (
-      <div className="group/card w-full rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-shadow duration-300">
+      <button
+        onClick={onClick}
+        className="group/card w-full text-left rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-shadow duration-300"
+      >
         {/* Media — zooms in gently on hover */}
-        <div className="w-full aspect-[4/5] overflow-hidden bg-muted">
+        <div className="relative w-full aspect-[4/5] overflow-hidden bg-muted">
           <MediaThumb
             items={media}
             className="w-full h-full [&_img]:transition-transform [&_img]:duration-500 [&_img]:ease-out group-hover/card:[&_img]:scale-110 [&_video]:transition-transform [&_video]:duration-500 [&_video]:ease-out group-hover/card:[&_video]:scale-110"
             rounded="rounded-none"
           />
+          <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover/card:opacity-100 scale-90 group-hover/card:scale-100 transition-all duration-300">
+              <Maximize2 className="w-4 h-4 text-foreground" />
+            </div>
+          </div>
         </div>
 
         {/* Body */}
@@ -65,7 +73,7 @@ export function ContentCard({ entry, active, onClick, readOnly }: ContentCardPro
             )}
           </div>
         </div>
-      </div>
+      </button>
     )
   }
 
