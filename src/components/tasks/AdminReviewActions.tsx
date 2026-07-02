@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  CheckCircle2, Download, ExternalLink, Eye, FileVideo, Loader2, RotateCcw,
+  CheckCircle2, Download, ExternalLink, Eye, FileVideo, Loader2, RotateCcw, Send,
 } from 'lucide-react'
 import { setTaskStatus } from '@/lib/actions/task.actions'
-import { clearSubmittedFiles, getTaskSubmittedFiles } from '@/lib/actions/upload.actions'
+import { clearSubmittedFiles, getTaskSubmittedFiles, saveTaskReference } from '@/lib/actions/upload.actions'
 import { toast } from 'sonner'
 
 interface SubmittedFile {
@@ -47,6 +47,8 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
   const [loadState, setLoadState] = useState<'loading' | 'loaded' | 'error'>('loading')
   const [files, setFiles] = useState<SubmittedFile[]>([])
   const [downloading, setDownloading] = useState<string | null>(null)
+  const [showRevisionForm, setShowRevisionForm] = useState(false)
+  const [revisionNote, setRevisionNote] = useState('')
 
   useEffect(() => {
     getTaskSubmittedFiles(taskId)
@@ -72,11 +74,20 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
   }
 
   async function handleRevision() {
+    const note = revisionNote.trim()
+    if (!note) return
     setLoading('revision')
     try {
+      await saveTaskReference(taskId, {
+        type: 'note',
+        content: `Revision requested: ${note}`,
+        title: note.slice(0, 60),
+      })
       await clearSubmittedFiles(taskId)
       await setTaskStatus(taskId, 'in_progress')
       toast.success('Sent back for revision')
+      setShowRevisionForm(false)
+      setRevisionNote('')
       router.refresh()
     } catch {
       toast.error('Failed to request revision')
@@ -232,16 +243,53 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
         )}
       </div>
 
+      {/* Revision reason form */}
+      {showRevisionForm && (
+        <div className="mx-4 mt-3 p-3 rounded-lg border border-dashed border-amber-300 dark:border-amber-700 bg-card space-y-2">
+          <label className="text-xs font-semibold text-foreground">
+            What needs to change?
+          </label>
+          <textarea
+            value={revisionNote}
+            onChange={e => setRevisionNote(e.target.value)}
+            placeholder="e.g. Logo is cut off, please use the 1080x1920 size for stories…"
+            rows={3}
+            autoFocus
+            className="w-full text-sm text-foreground placeholder:text-muted-foreground bg-background border border-border rounded-lg px-3 py-2 resize-none focus:outline-none focus:border-primary transition-colors"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleRevision}
+              disabled={loading !== null || !revisionNote.trim()}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              style={{ backgroundColor: 'var(--primary)' }}
+            >
+              {loading === 'revision'
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <Send className="w-3.5 h-3.5" />}
+              Send revision
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowRevisionForm(false); setRevisionNote('') }}
+              disabled={loading !== null}
+              className="px-3.5 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Action buttons */}
       <div className="px-4 py-3 flex items-center gap-3 mt-1">
         <button
-          onClick={handleRevision}
-          disabled={loading !== null}
+          onClick={() => setShowRevisionForm(true)}
+          disabled={loading !== null || showRevisionForm}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:border-border hover:bg-secondary transition-colors disabled:opacity-50"
         >
-          {loading === 'revision'
-            ? <Loader2 className="w-4 h-4 animate-spin" />
-            : <RotateCcw className="w-4 h-4" />}
+          <RotateCcw className="w-4 h-4" />
           Needs revision
         </button>
         <button
