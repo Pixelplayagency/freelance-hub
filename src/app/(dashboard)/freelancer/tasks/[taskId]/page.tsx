@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { TaskReferences } from '@/components/tasks/TaskReferences'
+import { TaskDescription } from '@/components/tasks/TaskDescription'
 import { FreelancerStatusUpdate } from '@/components/tasks/FreelancerStatusUpdate'
 import { DeadlineProgress } from '@/components/tasks/DeadlineProgress'
 import { SubmitWorkSection } from '@/components/tasks/SubmitWorkSection'
@@ -87,9 +88,7 @@ export default async function FreelancerTaskDetailPage({
         </div>
 
         {/* Description */}
-        {task.description && (
-          <p className="text-sm text-muted-foreground leading-relaxed">{task.description}</p>
-        )}
+        {task.description && <TaskDescription text={task.description} />}
 
         {/* Deadline */}
         {deadlineParsed ? (

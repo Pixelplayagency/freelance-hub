@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { TaskStatusBadge } from '@/components/tasks/TaskStatusBadge'
 import { TaskReferences } from '@/components/tasks/TaskReferences'
+import { TaskDescription } from '@/components/tasks/TaskDescription'
 import { EditTaskButton } from '@/components/tasks/EditTaskButton'
 import { DeleteTaskButton } from '@/components/tasks/DeleteTaskButton'
 import { AdminReviewActions } from '@/components/tasks/AdminReviewActions'
@@ -100,9 +101,7 @@ export default async function TaskDetailPage({
         </div>
 
         {/* Description */}
-        {task.description && (
-          <p className="text-sm text-muted-foreground leading-relaxed">{task.description}</p>
-        )}
+        {task.description && <TaskDescription text={task.description} />}
 
         {/* Meta */}
         <div className="flex flex-wrap gap-3">
