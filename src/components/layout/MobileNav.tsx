@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Menu } from 'lucide-react'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Sidebar } from './Sidebar'
 import type { UserRole, FreelancerRole } from '@/lib/types/app.types'
 
@@ -17,6 +17,7 @@ export function MobileNav({ role, userName, avatarUrl, jobRole }: { role: UserRo
         </button>
       </SheetTrigger>
       <SheetContent side="left" className="p-0 w-60">
+        <SheetTitle className="sr-only">Navigation menu</SheetTitle>
         <Sidebar role={role} userName={userName} avatarUrl={avatarUrl} jobRole={jobRole} />
       </SheetContent>
     </Sheet>

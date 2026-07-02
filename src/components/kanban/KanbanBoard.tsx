@@ -127,20 +127,24 @@ export function KanbanBoard({ initialTasks, projectId, isAdmin, assigneeMap = {}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-16rem)]">
-        {COLUMNS.map(col => (
-          <KanbanColumn
-            key={col.id}
-            column={col}
-            tasks={tasksByStatus[col.id] ?? []}
-            projectId={projectId}
-            isAdmin={isAdmin}
-            assigneeMap={assigneeMap}
-            commentCounts={commentCounts}
-            subtaskCounts={subtaskCounts}
-            onAddTask={onAddTask}
-          />
-        ))}
+      <div className="relative">
+        <div className="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-16rem)]">
+          {COLUMNS.map(col => (
+            <KanbanColumn
+              key={col.id}
+              column={col}
+              tasks={tasksByStatus[col.id] ?? []}
+              projectId={projectId}
+              isAdmin={isAdmin}
+              assigneeMap={assigneeMap}
+              commentCounts={commentCounts}
+              subtaskCounts={subtaskCounts}
+              onAddTask={onAddTask}
+            />
+          ))}
+        </div>
+        {/* Hints that the board scrolls horizontally past the viewport edge */}
+        <div className="pointer-events-none absolute right-0 top-0 bottom-4 w-10 bg-gradient-to-l from-background to-transparent" />
       </div>
 
       <DragOverlay>

@@ -118,7 +118,7 @@ export function Sidebar({ role, userName, avatarUrl, jobRole }: { role: UserRole
       <nav className="flex-1 px-3 py-2 space-y-5 overflow-y-auto">
         {groups.map(group => (
           <div key={group.label} className="space-y-0.5">
-            <p className="text-[11px] font-semibold uppercase tracking-widest px-3 mb-2 text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-widest px-3 mb-2 text-muted-foreground">
               {group.label}
             </p>
             {group.items.map(item => {

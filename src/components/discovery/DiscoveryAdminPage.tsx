@@ -56,8 +56,13 @@ function SubmissionDetail({ s }: { s: DiscoverySubmission }) {
 
   return (
     <div className="rounded-xl border-2 overflow-hidden" style={{ borderColor: '#e5e0d8' }}>
-      <button className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
-        onClick={() => setOpen(o => !o)}>
+      <div
+        role="button"
+        tabIndex={0}
+        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors cursor-pointer"
+        onClick={() => setOpen(o => !o)}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(o => !o) } }}
+      >
         <div>
           <p className="text-sm font-bold" style={{ color: '#1a1714' }}>{s.first_name} {s.last_name}</p>
           <p className="text-xs mt-0.5" style={{ color: '#8c8278' }}>
@@ -81,7 +86,7 @@ function SubmissionDetail({ s }: { s: DiscoverySubmission }) {
           </button>
           {open ? <ChevronUp className="w-4 h-4" style={{ color: '#8c8278' }} /> : <ChevronDown className="w-4 h-4" style={{ color: '#8c8278' }} />}
         </div>
-      </button>
+      </div>
       {open && (
         <div className="px-5 pb-5 pt-1" style={{ backgroundColor: '#faf9f7' }}>
           <div className="divide-y" style={{ borderColor: '#f0ece6' }}>

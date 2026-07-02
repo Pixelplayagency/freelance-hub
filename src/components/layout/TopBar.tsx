@@ -47,7 +47,7 @@ export async function TopBar() {
       {/* User Avatar */}
       <div
         className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold text-primary-foreground select-none shrink-0 ml-1 bg-primary"
-        style={{ boxShadow: '0 0 0 2px oklch(0.585 0.233 13.3 / 0.25), 0 0 0 3px var(--color-background)' }}
+        style={{ boxShadow: '0 0 0 2px color-mix(in oklch, var(--color-primary) 25%, transparent), 0 0 0 3px var(--color-background)' }}
       >
         {profile?.avatar_url
           ? <img src={profile.avatar_url} alt={profile.full_name ?? ''} className="w-full h-full object-cover" />
