@@ -23,12 +23,13 @@ export default async function FreelancerTaskDetailPage({
   const user = session?.user ?? null
   if (!user) redirect('/login')
 
+  // Task may be visible to a co-assignee (task_assignments), not just the
+  // primary assigned_to — RLS is the real gate, don't over-restrict here.
   const [{ data: task }, { data: references }] = await Promise.all([
     supabase
       .from('tasks')
       .select('*, project:projects(id, name, color)')
       .eq('id', taskId)
-      .eq('assigned_to', user.id) // RLS + explicit filter
       .single(),
     supabase
       .from('task_references')
