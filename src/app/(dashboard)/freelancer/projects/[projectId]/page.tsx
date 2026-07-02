@@ -138,7 +138,7 @@ export default async function FreelancerProjectPage({
 
           <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-foreground leading-tight">{project.name}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground leading-tight">{project.name}</h1>
             </div>
             {hasSocials && (
               <div className="flex items-center gap-1.5 shrink-0 mt-1">
@@ -174,10 +174,10 @@ export default async function FreelancerProjectPage({
                 key={status}
                 className={`flex-1 py-3 px-2 flex flex-col items-center bg-muted/20 ${i > 0 ? 'border-l border-border' : ''}`}
               >
-                <span className="text-2xl font-bold tabular-nums leading-none" style={{ color: num }}>{counts[status]}</span>
+                <span className="text-2xl font-bold tabular-nums tracking-tight leading-none" style={{ color: num }}>{counts[status]}</span>
                 <div className="flex items-center gap-1 mt-1.5">
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: dot }} />
-                  <span className="text-[10px] text-muted-foreground">{label}</span>
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
                 </div>
               </div>
             ))}
