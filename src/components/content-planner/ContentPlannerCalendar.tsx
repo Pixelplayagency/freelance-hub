@@ -125,7 +125,9 @@ export function ContentPlannerCalendar({
         tbc: draft.tbc || null,
         caption: draft.caption || null,
         ...(isAdmin ? { client_comments: draft.client_comments || null } : {}),
-        media_items: draft.media_items,
+        // posterUrl is derived from thumbnail_url for display only — never persist it
+        // into the media_items JSONB, or a removed thumbnail would keep winning on reload.
+        media_items: draft.media_items.map(({ posterUrl: _posterUrl, ...item }) => item),
         media_url: draft.media_items[0]?.url ?? null,
         media_type: draft.media_items[0]?.type ?? null,
         thumbnail_url: draft.thumbnail_url,
