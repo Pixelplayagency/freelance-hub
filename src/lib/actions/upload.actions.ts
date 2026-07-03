@@ -131,34 +131,59 @@ export async function getTaskSubmittedFiles(taskId: string) {
   return result
 }
 
-export async function clearSubmittedFiles(taskId: string) {
+export async function rejectSubmittedFiles(taskId: string) {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
-  // Fetch all submitted file references
+  // Fetch the current submission so it can be relabeled
   const { data: refs } = await supabase
     .from('task_references')
-    .select('id, storage_path')
+    .select('id, title')
     .eq('task_id', taskId)
     .in('type', ['image', 'video', 'link'])
     .like('title', '[Final]%')
 
   if (!refs || refs.length === 0) return
 
-  // Delete from Supabase storage where applicable
-  const storagePaths = refs.map(r => r.storage_path).filter(Boolean) as string[]
-  if (storagePaths.length > 0) {
-    await supabase.storage.from('task-attachments').remove(storagePaths)
-  }
+  // Relabel instead of deleting, so the rejected submission stays visible
+  // in the task's "Rejected" history for comparison against the resubmission.
+  await Promise.all(refs.map(r =>
+    supabase
+      .from('task_references')
+      .update({ title: r.title!.replace('[Final]', '[Rejected]') })
+      .eq('id', r.id)
+  ))
+}
 
-  // Delete the DB rows (only freelancer-submitted files, not admin references)
-  await supabase
+export async function getRejectedFiles(taskId: string) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: refs, error } = await supabase
     .from('task_references')
-    .delete()
+    .select('*')
     .eq('task_id', taskId)
     .in('type', ['image', 'video', 'link'])
-    .like('title', '[Final]%')
+    .like('title', '[Rejected]%')
+    .order('created_at', { ascending: false })
+
+  if (error) throw new Error(error.message)
+  if (!refs || refs.length === 0) return []
+
+  const result: { ref: typeof refs[number]; signedUrl: string | null }[] = []
+  for (const ref of refs) {
+    let signedUrl: string | null = ref.url ?? null
+    if (!signedUrl && ref.storage_path) {
+      const { data } = await supabase.storage
+        .from('task-attachments')
+        .createSignedUrl(ref.storage_path, 3600)
+      signedUrl = data?.signedUrl ?? null
+    }
+    result.push({ ref, signedUrl })
+  }
+  return result
 }
 
 export async function getStoragePublicUrl(path: string) {

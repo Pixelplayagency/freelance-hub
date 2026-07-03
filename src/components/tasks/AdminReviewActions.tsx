@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, Loader2, RotateCcw, Send } from 'lucide-react'
 import { setTaskStatus } from '@/lib/actions/task.actions'
-import { clearSubmittedFiles, getTaskSubmittedFiles, saveTaskReference } from '@/lib/actions/upload.actions'
+import { rejectSubmittedFiles, getTaskSubmittedFiles, saveTaskReference } from '@/lib/actions/upload.actions'
 import { SubmittedFilesGrid, type SubmittedFile } from './SubmittedFilesGrid'
 import { toast } from 'sonner'
 
@@ -54,7 +54,7 @@ export function AdminReviewActions({ taskId, assigneeName }: AdminReviewActionsP
         content: `Revision requested: ${note}`,
         title: note.slice(0, 60),
       })
-      await clearSubmittedFiles(taskId)
+      await rejectSubmittedFiles(taskId)
       await setTaskStatus(taskId, 'in_progress')
       toast.success('Sent back for revision')
       setShowRevisionForm(false)

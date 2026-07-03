@@ -38,6 +38,7 @@ export default async function FreelancerTaskDetailPage({
       .select('*')
       .eq('task_id', taskId)
       .not('title', 'like', '[Final]%')
+      .not('title', 'like', '[Rejected]%')
       .order('created_at'),
   ])
 

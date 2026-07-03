@@ -37,6 +37,7 @@ export default async function TaskDetailPage({
       .select('*')
       .eq('task_id', taskId)
       .not('title', 'like', '[Final]%')
+      .not('title', 'like', '[Rejected]%')
       .order('created_at'),
     supabase
       .from('profiles')
