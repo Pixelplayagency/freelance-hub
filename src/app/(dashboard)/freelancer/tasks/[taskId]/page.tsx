@@ -5,6 +5,7 @@ import { TaskDescription } from '@/components/tasks/TaskDescription'
 import { FreelancerStatusUpdate } from '@/components/tasks/FreelancerStatusUpdate'
 import { DeadlineProgress } from '@/components/tasks/DeadlineProgress'
 import { SubmitWorkSection } from '@/components/tasks/SubmitWorkSection'
+import { DeliveredWork } from '@/components/tasks/DeliveredWork'
 import { Calendar, ChevronLeft, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { format, parseISO, isPast, isToday, isTomorrow } from 'date-fns'
@@ -145,6 +146,9 @@ export default async function FreelancerTaskDetailPage({
               <MarkCompleteButton taskId={taskId} />
             )
         }
+
+        {/* Approved deliverables stay visible and downloadable after completion */}
+        {task.status === 'completed' && <DeliveredWork taskId={taskId} />}
 
         <hr className="border-border" />
 

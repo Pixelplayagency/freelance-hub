@@ -6,6 +6,7 @@ import { TaskDescription } from '@/components/tasks/TaskDescription'
 import { EditTaskButton } from '@/components/tasks/EditTaskButton'
 import { DeleteTaskButton } from '@/components/tasks/DeleteTaskButton'
 import { AdminReviewActions } from '@/components/tasks/AdminReviewActions'
+import { DeliveredWork } from '@/components/tasks/DeliveredWork'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ChevronLeft, Calendar, Clock, User } from 'lucide-react'
 import Link from 'next/link'
@@ -179,6 +180,9 @@ export default async function TaskDetailPage({
             assigneeName={assignee?.full_name ?? assignee?.email ?? null}
           />
         )}
+
+        {/* Approved deliverables stay visible and downloadable after completion */}
+        {task.status === 'completed' && <DeliveredWork taskId={taskId} />}
 
         {/* Separator */}
         <hr className="border-border" />
