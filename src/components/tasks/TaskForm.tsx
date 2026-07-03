@@ -91,11 +91,11 @@ export function TaskForm({ projectId, freelancers, task, references = [], onSucc
     setPendingFiles(prev => prev.filter((_, i) => i !== index))
   }
 
-  const DOC_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/svg+xml', 'image/png']
+  const DOC_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/svg+xml', 'image/png', 'image/jpeg', 'application/zip', 'application/x-zip-compressed', 'application/x-rar-compressed', 'application/vnd.rar']
   function handleDocs(files: FileList | null) {
     if (!files) return
     const valid = Array.from(files).filter(f => DOC_TYPES.includes(f.type))
-    if (valid.length < files.length) toast.error('Only PDF, DOC, SVG, and PNG files are supported')
+    if (valid.length < files.length) toast.error('Only PDF, DOC, SVG, PNG, JPG, ZIP, and RAR files are supported')
     setPendingDocs(prev => [...prev, ...valid])
   }
 
@@ -384,7 +384,7 @@ export function TaskForm({ projectId, freelancers, task, references = [], onSucc
           <input
             ref={docInputRef}
             type="file"
-            accept=".pdf,.doc,.docx,.svg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/svg+xml,image/png"
+            accept=".pdf,.doc,.docx,.svg,.png,.jpg,.jpeg,.zip,.rar,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/svg+xml,image/png,image/jpeg,application/zip,application/x-zip-compressed,application/x-rar-compressed,application/vnd.rar"
             multiple
             className="hidden"
             onChange={e => handleDocs(e.target.files)}
@@ -400,7 +400,7 @@ export function TaskForm({ projectId, freelancers, task, references = [], onSucc
             <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
               <FileText className="w-5 h-5" />
               <span className="text-sm">Click to upload</span>
-              <span className="text-xs">PDF, DOC, SVG, PNG</span>
+              <span className="text-xs">PDF, DOC, SVG, PNG, JPG, ZIP, RAR</span>
             </div>
           </button>
         </div>

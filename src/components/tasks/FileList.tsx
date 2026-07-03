@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
 import type { TaskReference } from '@/lib/types/app.types'
 
-const ACCEPT = '.pdf,.doc,.docx,.svg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/svg+xml,image/png'
+const ACCEPT = '.pdf,.doc,.docx,.svg,.png,.jpg,.jpeg,.zip,.rar,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/svg+xml,image/png,image/jpeg,application/zip,application/x-zip-compressed,application/x-rar-compressed,application/vnd.rar'
 
 interface FileListProps {
   taskId: string
@@ -127,7 +127,7 @@ export function FileList({ taskId, references, isAdmin }: FileListProps) {
               <div className="flex flex-col items-center gap-2 text-muted-foreground">
                 <Upload className="w-5 h-5" />
                 <span className="text-sm">Click to upload file</span>
-                <span className="text-xs">PDF, DOC, SVG, PNG</span>
+                <span className="text-xs">PDF, DOC, SVG, PNG, JPG, ZIP, RAR</span>
               </div>
             )}
           </button>
