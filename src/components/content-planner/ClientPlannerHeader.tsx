@@ -143,7 +143,7 @@ export function ClientPlannerHeader({
   )
 }
 
-function Stat({ value, label }: { value: number; label: string }) {
+export function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div className="px-4 py-2 text-center">
       <p className="text-xl font-bold text-foreground tabular-nums tracking-tight leading-none">{value}</p>

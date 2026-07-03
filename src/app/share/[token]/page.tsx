@@ -6,6 +6,7 @@ import { isShareLinkUnlocked } from '@/lib/actions/content-share.actions'
 import { SharePasswordGate } from '@/components/share/SharePasswordGate'
 import { ShareNotes } from '@/components/share/ShareNotes'
 import { ShareCalendar } from '@/components/share/ShareCalendar'
+import { Stat } from '@/components/content-planner/ClientPlannerHeader'
 import type { EntryWithCreator } from '@/components/content-planner/planner/types'
 import type { ContentShareNote } from '@/lib/types/app.types'
 
@@ -63,6 +64,10 @@ export default async function SharePage({
     entryMap[e.date].push(e)
   }
 
+  const postCount = (entries ?? []).filter(e => e.content_type === 'post').length
+  const reelCount = (entries ?? []).filter(e => e.content_type === 'reel').length
+  const storyCount = (entries ?? []).filter(e => e.content_type === 'story').length
+
   const hasSocials = client.instagram_url || client.facebook_url || client.tiktok_url
 
   let prevM = month - 1, prevY = year
@@ -75,37 +80,51 @@ export default async function SharePage({
       {/* Client header */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
         <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, color-mix(in oklch, var(--primary), transparent 65%) 100%)' }} />
-        <div className="flex items-center gap-3 px-4 sm:px-5 py-4 flex-wrap">
-          {client.avatar_url ? (
-            <img src={client.avatar_url} alt="" className="w-11 h-11 rounded-xl object-cover border border-border shrink-0" />
-          ) : (
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-base shrink-0" style={{ background: client.color }}>
-              {client.name.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div className="min-w-0">
-            <h1 className="text-lg font-bold tracking-tight text-foreground leading-tight truncate">{client.name}</h1>
-            {hasSocials && (
-              <div className="flex items-center gap-1 mt-1">
-                {client.instagram_url && (
-                  <a href={client.instagram_url} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
-                    <Instagram className="w-3.5 h-3.5" />
-                  </a>
-                )}
-                {client.facebook_url && (
-                  <a href={client.facebook_url} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
-                    <Facebook className="w-3.5 h-3.5" />
-                  </a>
-                )}
-                {client.tiktok_url && (
-                  <a href={client.tiktok_url} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
-                    <TikTokIcon className="w-3.5 h-3.5" />
-                  </a>
-                )}
+        <div className="flex items-center justify-between gap-4 px-4 sm:px-5 py-4 flex-wrap">
+          <div className="flex items-center gap-3 min-w-0">
+            {client.avatar_url ? (
+              <img src={client.avatar_url} alt="" className="w-11 h-11 rounded-xl object-cover border border-border shrink-0" />
+            ) : (
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-base shrink-0" style={{ background: client.color }}>
+                {client.name.charAt(0).toUpperCase()}
               </div>
             )}
+            <div className="min-w-0">
+              <h1 className="text-lg font-bold tracking-tight text-foreground leading-tight truncate">{client.name}</h1>
+              {hasSocials && (
+                <div className="flex items-center gap-1 mt-1">
+                  {client.instagram_url && (
+                    <a href={client.instagram_url} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
+                      <Instagram className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {client.facebook_url && (
+                    <a href={client.facebook_url} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
+                      <Facebook className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {client.tiktok_url && (
+                    <a href={client.tiktok_url} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
+                      <TikTokIcon className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-          <span className="ml-auto text-xs text-muted-foreground shrink-0">View-only content calendar</span>
+
+          {/* Stats — single divided pill, same treatment as the admin/freelancer header */}
+          <div className="flex items-center gap-px bg-background border border-border rounded-lg overflow-hidden shrink-0">
+            <Stat value={postCount} label="Posts" />
+            <div className="w-px h-8 bg-border" />
+            <Stat value={reelCount} label="Reels" />
+            <div className="w-px h-8 bg-border" />
+            <Stat value={storyCount} label="Stories" />
+          </div>
+        </div>
+
+        <div className="border-t border-border px-4 sm:px-5 py-2.5 bg-muted/20">
+          <p className="text-xs text-muted-foreground font-medium">View-only content calendar</p>
         </div>
       </div>
 
