@@ -80,6 +80,7 @@ export interface ContentClient {
 export interface MediaItem {
   url: string
   type: 'image' | 'video'
+  posterUrl?: string
 }
 
 export interface ContentShareLink {
@@ -113,6 +114,7 @@ export interface ContentPlan {
   media_url: string | null
   media_type: 'image' | 'video' | null
   media_items: MediaItem[]
+  thumbnail_url: string | null
   caption_approved: boolean
   post_approved: boolean
   caption_rejected: boolean

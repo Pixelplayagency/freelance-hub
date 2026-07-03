@@ -3,12 +3,12 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useRef, useState, useEffect } from 'react'
 import {
-  X, Upload, Loader2, Eye, Trash2, Send, Check, CheckCircle2, Smile,
-  Calendar as CalendarIcon, Clock, ImageIcon, Film, Crop, Square, RectangleVertical, Smartphone,
+  X, Upload, Loader2, Maximize2, Trash2, Send, Check, CheckCircle2, Smile,
+  Calendar as CalendarIcon, Clock, ImageIcon, Film, Crop, Square, RectangleVertical, Smartphone, ImagePlus,
 } from 'lucide-react'
 import type { ContentType, MediaItem } from '@/lib/types/app.types'
 import { PlatformIcon } from './PlatformIcon'
-import { thumbUrl, to12h, PLATFORMS, CONTENT_TYPE_META, STATUS_CFG, type PanelDraft } from './types'
+import { thumbUrl, to12h, videoFrameUrl, PLATFORMS, CONTENT_TYPE_META, STATUS_CFG, type PanelDraft } from './types'
 
 const EMOJIS = [
   '😀','😂','😍','🥰','😎','🤩','😜','🥺','😭','🤔','🙄','🥳','🤗','😴','🫠','🥹',
@@ -44,6 +44,7 @@ interface ContentSidePanelProps {
   onSave: () => void
   onDelete: () => void
   onUploadMedia: (files: File[]) => Promise<void>
+  onUploadThumbnail: (file: File) => Promise<void>
   onSubmitForApproval: () => void
   onApproveCaption: () => void
   onApprovePost: () => void
@@ -52,9 +53,10 @@ interface ContentSidePanelProps {
 
 export function ContentSidePanel({
   open, onOpenChange, draft, onDraftChange, isAdmin, isSaving, saveError,
-  onSave, onDelete, onUploadMedia, onSubmitForApproval, onApproveCaption, onApprovePost, onViewMedia,
+  onSave, onDelete, onUploadMedia, onUploadThumbnail, onSubmitForApproval, onApproveCaption, onApprovePost, onViewMedia,
 }: ContentSidePanelProps) {
   const fileRef = useRef<HTMLInputElement>(null)
+  const thumbFileRef = useRef<HTMLInputElement>(null)
   const captionRef = useRef<HTMLTextAreaElement>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [activeRatio, setActiveRatio] = useState<string>('free')
@@ -96,6 +98,13 @@ export function ContentSidePanel({
     e.target.value = ''
   }
 
+  async function handleThumbnailSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !file.type.startsWith('image/')) return
+    await onUploadThumbnail(file)
+  }
+
   const hasMedia = draft.media_items.length > 0
   const currentMedia = draft.media_items[previewIdx] ?? draft.media_items[0]
   const currentRatio = ASPECT_RATIOS.find(r => r.id === activeRatio)?.ratio ?? null
@@ -121,6 +130,7 @@ export function ContentSidePanel({
           style={{ transform: 'translate3d(0,0,0)' }}
         >
           <input ref={fileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFileSelect} />
+          <input ref={thumbFileRef} type="file" accept="image/*" className="hidden" onChange={handleThumbnailSelect} />
 
           {/* ── Header ── */}
           <div className="flex items-center justify-between px-5 h-14 border-b border-border shrink-0 bg-card">
@@ -145,15 +155,15 @@ export function ContentSidePanel({
                   {/* Big preview */}
                   <div className="relative bg-muted/60 flex items-center justify-center" style={{ minHeight: 220 }}>
                     {currentMedia?.type === 'video' ? (
-                      <video src={currentMedia.url} className="max-h-[280px] w-full object-contain" muted playsInline />
+                      <video src={currentMedia.url} poster={draft.thumbnail_url ?? undefined} className="max-h-[280px] w-full object-contain" muted playsInline />
                     ) : currentMedia ? (
                       <img src={cropUrl(currentMedia.url, currentRatio)} alt="" className="max-h-[280px] w-full object-contain" />
                     ) : null}
                     {/* Overlay controls */}
                     <div className="absolute top-2 right-2 flex gap-1">
-                      <button type="button" onClick={() => currentMedia && onViewMedia(currentMedia)}
+                      <button type="button" onClick={() => currentMedia && onViewMedia(currentMedia)} title="View full screen"
                         className="w-7 h-7 rounded-lg bg-black/50 backdrop-blur text-white flex items-center justify-center hover:bg-black/70 transition-colors">
-                        <Eye className="w-3.5 h-3.5" />
+                        <Maximize2 className="w-3.5 h-3.5" />
                       </button>
                       <button type="button" onClick={() => {
                         patch('media_items', draft.media_items.filter((_, j) => j !== previewIdx))
@@ -199,7 +209,7 @@ export function ContentSidePanel({
                           i === previewIdx ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
                         }`}>
                         {item.type === 'video'
-                          ? <video src={item.url} className="w-full h-full object-cover" muted />
+                          ? <video src={item.url} poster={i === 0 ? draft.thumbnail_url ?? undefined : undefined} className="w-full h-full object-cover" muted />
                           : <img src={thumbUrl(item.url)} alt="" className="w-full h-full object-cover" />}
                       </button>
                     ))}
@@ -208,6 +218,42 @@ export function ContentSidePanel({
                       {draft.uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                     </button>
                   </div>
+
+                  {/* Reel thumbnail — separate cover image shown instead of the video's raw first frame */}
+                  {draft.content_type === 'reel' && currentMedia?.type === 'video' && (
+                    <div className="flex items-center gap-3 px-3 py-3 border-t border-border/50 bg-muted/20">
+                      <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-border bg-muted flex items-center justify-center">
+                        {draft.thumbnail_url ? (
+                          <img src={thumbUrl(draft.thumbnail_url)} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <ImageIcon className="w-4 h-4 text-muted-foreground/40" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-foreground">Cover thumbnail</p>
+                        <p className="text-[10px] text-muted-foreground">Shown in the calendar instead of the video's raw first frame</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onClick={() => patch('thumbnail_url', videoFrameUrl(currentMedia.url))}
+                          title="Grab a frame from the video"
+                          className="w-7 h-7 rounded-lg border border-border text-muted-foreground hover:text-primary hover:border-primary/50 transition-all flex items-center justify-center">
+                          <Film className="w-3.5 h-3.5" />
+                        </button>
+                        <button type="button" onClick={() => thumbFileRef.current?.click()} disabled={draft.uploading}
+                          title="Upload a custom thumbnail"
+                          className="w-7 h-7 rounded-lg border border-border text-muted-foreground hover:text-primary hover:border-primary/50 transition-all flex items-center justify-center disabled:opacity-50">
+                          <ImagePlus className="w-3.5 h-3.5" />
+                        </button>
+                        {draft.thumbnail_url && (
+                          <button type="button" onClick={() => patch('thumbnail_url', null)}
+                            title="Remove thumbnail"
+                            className="w-7 h-7 rounded-lg border border-border text-muted-foreground hover:text-red-600 hover:border-red-300 transition-all flex items-center justify-center">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 /* Empty upload zone */

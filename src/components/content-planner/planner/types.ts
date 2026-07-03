@@ -27,6 +27,7 @@ export interface PanelDraft {
   media_items: MediaItem[]
   status: ContentPlanStatus
   uploading: boolean
+  thumbnail_url: string | null
 }
 
 export const PLATFORMS = [
@@ -74,9 +75,18 @@ export function getDisplayStatus(entry: ContentPlan): { label: string; color: st
 
 export function entryMediaItems(entry: ContentPlan | null): MediaItem[] {
   if (!entry) return []
-  if (entry.media_items?.length) return entry.media_items
-  if (entry.media_url) return [{ url: entry.media_url, type: entry.media_type ?? 'image' }]
-  return []
+  const items = entry.media_items?.length
+    ? entry.media_items
+    : entry.media_url ? [{ url: entry.media_url, type: entry.media_type ?? 'image' as const }] : []
+  if (!entry.thumbnail_url) return items
+  // Custom thumbnail only ever applies to the first (primary) video item.
+  return items.map((item, i) => (i === 0 && item.type === 'video') ? { ...item, posterUrl: entry.thumbnail_url! } : item)
+}
+
+// Cloudinary can derive a still frame from an uploaded video without a
+// separate upload — swap the resource path for an image request at offset 0.
+export function videoFrameUrl(videoUrl: string): string {
+  return videoUrl.replace('/upload/', '/upload/so_0/').replace(/\.\w+($|\?)/, '.jpg$1')
 }
 
 export function makeDraft(date: string, entry: EntryWithCreator | null): PanelDraft {
@@ -92,6 +102,7 @@ export function makeDraft(date: string, entry: EntryWithCreator | null): PanelDr
     media_items: entryMediaItems(entry),
     status: entry?.status ?? 'scheduled',
     uploading: false,
+    thumbnail_url: entry?.thumbnail_url ?? null,
   }
 }
 

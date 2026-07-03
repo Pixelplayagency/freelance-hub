@@ -97,6 +97,7 @@ interface ContentPlanInput {
   caption?: string | null
   media_url?: string | null
   media_type?: 'image' | 'video' | null
+  thumbnail_url?: string | null
   media_items?: MediaItem[]
   status?: ContentPlanStatus
   client_comments?: string | null

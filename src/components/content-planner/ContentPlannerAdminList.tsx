@@ -207,7 +207,7 @@ export function ContentPlannerAdminList({ entries: initialEntries }: { entries: 
                   {entry.media_url ? (
                     <>
                       {entry.media_type === 'video'
-                        ? <video src={entry.media_url} className="w-full h-full object-cover" muted />
+                        ? <video src={entry.media_url} poster={entry.thumbnail_url ?? undefined} className="w-full h-full object-cover" muted />
                         : <img src={thumbUrl(entry.media_url)} alt="" className="w-full h-full object-cover" />}
                       <button
                         onClick={() => setLightbox({ url: entry.media_url!, type: entry.media_type! })}

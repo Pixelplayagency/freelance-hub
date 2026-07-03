@@ -73,7 +73,7 @@ export function ShareContentModal({ entry, onClose }: { entry: EntryWithCreator 
         {active && (
           <div className="w-full aspect-square sm:aspect-video bg-black flex items-center justify-center overflow-hidden rounded-t-2xl">
             {active.type === 'video' ? (
-              <video src={active.url} className="w-full h-full object-contain" controls autoPlay />
+              <video src={active.url} poster={active.posterUrl} className="w-full h-full object-contain" controls autoPlay />
             ) : (
               <img src={active.url} alt="" className="w-full h-full object-contain" />
             )}

@@ -74,7 +74,7 @@ function FeedTile({ entry, active, onClick }: { entry: EntryWithCreator; active:
       {first ? (
         first.type === 'video' ? (
           <>
-            <video src={first.url} className="w-full h-full object-cover" muted playsInline />
+            <video src={first.url} poster={entry.thumbnail_url ?? undefined} className="w-full h-full object-cover" muted playsInline />
             <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
               <Play className="w-4 h-4 text-white fill-white drop-shadow" />
             </div>

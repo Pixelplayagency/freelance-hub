@@ -128,6 +128,7 @@ export function ContentPlannerCalendar({
         media_items: draft.media_items,
         media_url: draft.media_items[0]?.url ?? null,
         media_type: draft.media_items[0]?.type ?? null,
+        thumbnail_url: draft.thumbnail_url,
         status: draft.status,
       }
       try {
@@ -195,6 +196,25 @@ export function ContentPlannerCalendar({
     } catch {
       setDraft(s => s ? { ...s, uploading: false } : s)
       setSaveError('Media upload failed')
+      setTimeout(() => setSaveError(null), 5000)
+    }
+  }
+
+  async function handleUploadThumbnail(file: File) {
+    if (!draft) return
+    setDraft(s => s ? { ...s, uploading: true } : s)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('upload_preset', UPLOAD_PRESET)
+      fd.append('quality', 'auto')
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd })
+      const data = await res.json()
+      if (data.secure_url) setDraft(s => s ? { ...s, thumbnail_url: data.secure_url, uploading: false } : s)
+      else setDraft(s => s ? { ...s, uploading: false } : s)
+    } catch {
+      setDraft(s => s ? { ...s, uploading: false } : s)
+      setSaveError('Thumbnail upload failed')
       setTimeout(() => setSaveError(null), 5000)
     }
   }
@@ -296,6 +316,7 @@ export function ContentPlannerCalendar({
         onSave={handleSave}
         onDelete={handleDelete}
         onUploadMedia={handleUploadMedia}
+        onUploadThumbnail={handleUploadThumbnail}
         onSubmitForApproval={handleSubmitForApproval}
         onApproveCaption={handleApproveCaption}
         onApprovePost={handleApprovePost}
